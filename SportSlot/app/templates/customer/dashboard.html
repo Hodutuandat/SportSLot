@@ -1,0 +1,10 @@
+{% extends 'layout.html' %}
+{% block title %}Customer Dashboard{% endblock %}
+{% block content %}
+<h2>Welcome, {{ user.username }}</h2>
+<p>This is your dashboard.</p>
+<ul>
+  <li><a href="#">Booking History</a></li>
+  <li><a href="#">Profile</a></li>
+</ul>
+{% endblock %}
