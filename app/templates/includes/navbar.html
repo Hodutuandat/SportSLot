@@ -1,1 +1,25 @@
-<!-- Main navbar include -->
+<nav class="navbar">
+    <div class="navbar-container">
+        <div class="navbar-left">
+            <a href="/" class="navbar-logo">
+                <span class="logo-text">Sport Slot</span>
+            </a>
+        </div>
+        <div class="navbar-center">
+            <ul class="navbar-menu">
+                <li><a href="/">Home</a></li>
+                <li><a href="/courts">Court List</a></li>
+                <li><a href="/service">Service</a></li>
+                <li><a href="/contact">Contact</a></li>
+            </ul>
+        </div>
+        <div class="navbar-right">
+            {% if current_user is defined and current_user.is_authenticated %}
+                <a href="/profile" class="navbar-user">{{ current_user.name }}</a>
+                <a href="/logout" class="navbar-btn">Logout</a>
+            {% else %}
+                <a href="/login" class="navbar-btn">Login</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>

@@ -1,1 +1,35 @@
-<!-- Đăng nhập tài khoản -->
+
+{% extends 'base.html' %}
+{% block content %}
+<div class="auth-container">
+    <div class="auth-modal">
+        <h2 class="auth-title">Login</h2>
+        <form method="POST" action="/login" class="auth-form">
+            <div class="auth-group">
+                <label for="email">Email</label>
+                <div class="auth-input-wrap">
+                    <input type="email" id="email" name="email" required>
+                    <span class="auth-icon"><i class="fa fa-envelope"></i></span>
+                </div>
+            </div>
+            <div class="auth-group">
+                <label for="password">Password</label>
+                <div class="auth-input-wrap">
+                    <input type="password" id="password" name="password" required>
+                    <span class="auth-icon"><i class="fa fa-lock"></i></span>
+                </div>
+            </div>
+            <div class="auth-row">
+                <label class="auth-remember">
+                    <input type="checkbox" name="remember"> Remember me
+                </label>
+                <a href="/forgot-password" class="auth-link">Forgot Password?</a>
+            </div>
+            <button type="submit" class="auth-btn">Login</button>
+        </form>
+        <div class="auth-bottom">
+            Don't have an account? <a href="/register" class="auth-link"><b>Register</b></a>
+        </div>
+    </div>
+</div>
+{% endblock %}

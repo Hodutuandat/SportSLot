@@ -1,1 +1,52 @@
-<!-- Đăng ký tài khoản (chọn vai trò) -->
+
+{% extends 'base.html' %}
+{% block content %}
+<div class="auth-container">
+    <div class="auth-modal auth-modal-register">
+        <h2 class="auth-title">Registration</h2>
+        <form method="POST" action="/register" class="auth-form auth-form-register">
+            <div class="auth-register-left">
+                <div class="auth-group">
+                    <label for="username">Tài khoản</label>
+                    <input type="text" id="username" name="username" placeholder="Tên tài khoản" required>
+                </div>
+                <div class="auth-group">
+                    <label for="password">Mật khẩu</label>
+                    <input type="password" id="password" name="password" placeholder="Mật khẩu" required>
+                </div>
+                <div class="auth-group">
+                    <label for="phone">Số điện thoại</label>
+                    <input type="text" id="phone" name="phone" placeholder="Số điện thoại" required>
+                </div>
+                <div class="auth-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Địa chỉ Email" required>
+                </div>
+                <div class="auth-group">
+                    <label class="auth-remember">
+                        <input type="checkbox" name="agree" required> Tôi đồng ý với các điều khoản
+                    </label>
+                </div>
+            </div>
+            <div class="auth-register-divider"></div>
+            <div class="auth-register-right">
+                <div class="auth-group auth-group-image">
+                    <img src="{{ url_for('static', filename='images/role.png') }}" alt="Chọn loại tài khoản" style="width:100%;max-width:220px;background:#f5f5f5;border-radius:1rem;">
+                </div>
+                <div class="auth-group">
+                    <label>Loại tài khoản</label>
+                    <div class="auth-role-select">
+                        <button type="button" class="auth-role-btn" onclick="selectRole('customer')" id="role-customer">Khách hàng</button>
+                        <button type="button" class="auth-role-btn" onclick="selectRole('owner')" id="role-owner">Chủ sân</button>
+                    </div>
+                    <input type="hidden" name="role" id="role-input" value="customer">
+                </div>
+                <button type="submit" class="auth-btn">Đăng ký</button>
+            </div>
+        </form>
+        <div class="auth-bottom">
+            Đã có tài khoản? <a href="/login" class="auth-link"><b>Đăng nhập</b></a>
+        </div>
+    </div>
+</div>
+{% endblock %}

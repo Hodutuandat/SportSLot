@@ -1,1 +1,8 @@
-<!-- Lỗi hệ thống server (Internal Server Error) -->
+{% extends 'base.html' %}
+{% block content %}
+    <div class="error-page">
+        <h1>500</h1>
+        <p>Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau.</p>
+        <a href="/" class="navbar-btn">Quay về trang chủ</a>
+    </div>
+{% endblock %}

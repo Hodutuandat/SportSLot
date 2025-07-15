@@ -9,4 +9,8 @@ def create_app():
     jwt.init_app(app)
     mail.init_app(app)
     # Register blueprints here
+    from .routes.test import test_bp
+    from .routes.auth import auth_bp
+    app.register_blueprint(test_bp)
+    app.register_blueprint(auth_bp)
     return app

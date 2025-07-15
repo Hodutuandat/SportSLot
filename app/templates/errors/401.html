@@ -1,1 +1,8 @@
-<!-- Không có quyền truy cập (Unauthorized) -->
+{% extends 'base.html' %}
+{% block content %}
+    <div class="error-page">
+        <h1>401</h1>
+        <p>Bạn chưa đăng nhập hoặc không có quyền truy cập.</p>
+        <a href="/login" class="navbar-btn">Đăng nhập</a>
+    </div>
+{% endblock %}
