@@ -1,0 +1,14 @@
+Flask>=2.2
+Flask-PyMongo>=2.3
+Flask-Login>=0.6
+Flask-Bcrypt>=1.0
+Flask-Mail>=0.9
+Flask-WTF>=1.1
+pymongo>=4.0
+python-dotenv>=1.0
+email-validator>=2.0
+# Nếu muốn CORS cho API/mobile app:
+Flask-Cors>=4.0
+
+# Chạy code JavaScript (nếu muốn check hoặc automation)
+# nodejs (cài riêng, không cần ghi ở requirements.txt)

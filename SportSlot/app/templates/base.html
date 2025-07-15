@@ -1,21 +1,36 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="utf-8">
-    <title>{% block title %}SportSlot{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <!-- Thêm Bootstrap/Tailwind nếu muốn -->
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sport Slot{% endblock %}</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- CSS nền tảng + Navbar (thứ tự quan trọng) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
     {% block head %}{% endblock %}
 </head>
 <body>
+    <!-- Navbar dùng chung -->
     {% include "includes/navbar.html" %}
-    <main>
+
+    <!-- Main content -->
+    <main class="main-content">
         {% block content %}{% endblock %}
     </main>
+
+    <!-- Footer (có thể để trống hoặc thêm nội dung tại includes/footer.html) -->
     {% include "includes/footer.html" %}
-    {% block scripts %}
-        <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    {% endblock %}
+
+    <!-- Toast / Thông báo hệ thống, nếu có -->
+    {% block toast %}{% endblock %}
+
+    <!-- JS chung toàn dự án -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
 </body>
 </html>
