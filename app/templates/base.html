@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}SportSlot{% endblock %}</title>
+
+  <!-- Favicon (tùy chọn) -->
+  <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/png">
+
+  <!-- Base CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
+
+  <!-- Trang cụ thể -->
+  {% block extra_css %}{% endblock %}
+
+  <!-- Main JS -->
+  <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+
+  <!-- JS trang cụ thể -->
+  {% block extra_js %}{% endblock %}
+</head>
+
+<body>
+  <!-- Navbar -->
+  {% include "includes/navbar.html" %}
+
+  <!-- Nội dung chính -->
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+  <!-- Footer -->
+  {% include "includes/footer.html" %}
+</body>
+</html>
