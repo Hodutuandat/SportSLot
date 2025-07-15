@@ -12,13 +12,41 @@ body {
     border-bottom: 1px solid #eee;
     padding: 0.5rem 0;
 }
+/* Đảm bảo navbar flex đúng chuẩn */
 .navbar-container {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 2rem;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+}
+.navbar-left {
+    flex: 0 0 auto;
+    margin-right: auto !important;
+    padding-left: 2rem;
+}
+.navbar-center {
+    flex: 1 1 0%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+}
+.navbar-right {
+    flex: 0 0 auto;
+    margin-left: auto !important;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-right: 2rem;
+}
+.navbar-logo {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    margin: 0;
 }
 .navbar-left .logo-text {
     font-size: 2rem;
@@ -42,11 +70,6 @@ body {
 }
 .navbar-center .navbar-menu li a:hover {
     color: #007bff;
-}
-.navbar-right {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
 }
 .navbar-btn {
     border: 2px solid #212733;

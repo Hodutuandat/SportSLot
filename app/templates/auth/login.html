@@ -1,12 +1,9 @@
 
 {% extends 'base.html' %}
 {% block content %}
-
-
-<div class="auth-container">
-    <div class="auth-modal">
-        <h2 class="auth-title">Login</h2>
-        <form method="POST" action="/login" class="auth-form">
+    <div class="login-fullscreen-wrapper">
+        <form method="POST" action="/login" class="login-fullscreen-form">
+            <h2 class="auth-title">Login</h2>
             <div class="auth-group">
                 <label for="email">Email</label>
                 <div class="auth-input-wrap">
@@ -28,10 +25,9 @@
                 <a href="/forgot-password" class="auth-link">Forgot password?</a>
             </div>
             <button type="submit" class="auth-btn">Login</button>
+            <div class="auth-bottom">
+                Don't have an account? <a href="/register" class="auth-link"><b>Register</b></a>
+            </div>
         </form>
-        <div class="auth-bottom">
-            Don't have an account? <a href="/register" class="auth-link"><b>Register</b></a>
-        </div>
     </div>
-</div>
 {% endblock %}

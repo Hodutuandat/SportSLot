@@ -1,32 +1,7 @@
-/* CSS cho popup login */
-.auth-container {
-    max-width: 420px;
-    margin: 48px auto;
-    padding: 2.5rem 2rem 2rem 2rem;
-}
-.auth-modal {
-    background: #fff;
-    border-radius: 2rem;
-    box-shadow: 0 2px 24px rgba(0,0,0,0.12);
-    width: 100%;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-.auth-modal {
-    background: #fff;
-    border-radius: 2rem;
-    box-shadow: 0 2px 24px rgba(0,0,0,0.12);
-    padding: 2.5rem 2rem 2rem 2rem;
-    min-width: 350px;
-    max-width: 420px;
-    width: 100%;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
+/* XÓA các phần liên quan đến modal, overlay, popup */
+/* ĐÃ CÓ layout login toàn màn hình ở phía dưới */
+
+/* Giữ lại các class cho form và input */
 .auth-title {
     text-align: center;
     font-size: 2.2rem;
@@ -34,11 +9,15 @@
     margin-bottom: 2rem;
     color: #212733;
 }
-.auth-form {
+.auth-form, .login-fullscreen-form {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
     width: 100%;
+}
+.auth-group {
+    width: 100%;
+    margin-bottom: 1.2rem;
 }
 .auth-group label {
     font-weight: 500;
@@ -48,6 +27,7 @@
 }
 .auth-input-wrap {
     position: relative;
+    width: 90%;
 }
 .auth-input-wrap input {
     width: 100%;
@@ -57,6 +37,10 @@
     font-size: 1.1rem;
     outline: none;
     background: transparent;
+    transition: border-color 0.2s;
+}
+.auth-input-wrap input:focus {
+    border-bottom: 2px solid #007bff;
 }
 .auth-icon {
     position: absolute;
@@ -65,6 +49,7 @@
     transform: translateY(-50%);
     color: #212733;
     font-size: 1.2rem;
+    pointer-events: none;
 }
 .auth-row {
     display: flex;
@@ -76,10 +61,14 @@
     margin-right: 0.5rem;
 }
 .auth-link {
-    color: #212733;
+    color: #007bff;
     text-decoration: underline;
     font-weight: 500;
     cursor: pointer;
+    transition: color 0.2s;
+}
+.auth-link:hover {
+    color: #0056b3;
 }
 .auth-btn {
     background: #212733;
@@ -102,23 +91,37 @@
     margin-top: 2rem;
     font-size: 1.1rem;
 }
-.auth-close {
-    position: absolute;
-    top: 0;
-    right: 0;
-    background: #212733;
-    color: #fff;
-    border: none;
-    border-radius: 0 2rem 0 0;
-    font-size: 2rem;
-    width: 48px;
-    height: 48px;
-    cursor: pointer;
+
+/* Layout login mở rộng toàn màn hình */
+.login-fullscreen-wrapper {
+    min-height: 100vh;
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f7f7fa;
+    position: relative;
+    padding: 0;
 }
-@media (max-width: 600px) {
-    .auth-modal {
-        min-width: 90vw;
+
+.login-fullscreen-form {
+    background: #fff;
+    border-radius: 2.5rem;
+    box-shadow: 0 2px 24px rgba(0,0,0,0.10);
+    width: 100%;
+    max-width: 540px;
+    min-width: 320px;
+    padding: 3rem 2.5rem 2.5rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+@media (max-width: 700px) {
+    .login-fullscreen-form {
         max-width: 98vw;
-        padding: 1.5rem 0.5rem;
+        min-width: unset;
+        padding: 2rem 0.5rem;
+        border-radius: 1.2rem;
     }
 }
