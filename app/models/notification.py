@@ -1,1 +1,0 @@
-# Notification model for MongoDB

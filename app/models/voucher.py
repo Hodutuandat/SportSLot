@@ -1,1 +1,0 @@
-# Voucher model for MongoDB
