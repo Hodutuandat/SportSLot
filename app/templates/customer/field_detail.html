@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}{{ field.name }} | SportSlot{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/customer/field_detail.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="field-detail-page">
+    <h1 class="field-detail-title">{{ field.name }}</h1>
+    <div class="field-detail-sport">Môn thể thao: {{ field.sport }}</div>
+    <div class="field-detail-main">
+        <div class="field-detail-imgbox">
+            <img src="{{ field.image or url_for('static', filename='images/field-placeholder.png') }}" alt="{{ field.name }}">
+        </div>
+        <div class="field-detail-info">
+            <div class="field-detail-row">
+                <div><b>Địa chỉ:</b><br>{{ field.address }}</div>
+                <div><b>Giá sân:</b><br>{{ field.price }} VNĐ/giờ</div>
+            </div>
+            <div class="field-detail-row">
+                <div><b>Chủ sân:</b><br>{{ field.owner }}</div>
+                <div><b>Kiểu sân:</b><br>{{ field.type }}</div>
+            </div>
+            <div class="field-detail-desc">
+                <b>Mô tả:</b><br>{{ field.description }}
+            </div>
+            <div class="field-detail-actions">
+                <a href="#" class="voucher-btn">Phiếu giảm giá</a>
+                <a href="#" class="book-btn">Đặt Sân</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %} 

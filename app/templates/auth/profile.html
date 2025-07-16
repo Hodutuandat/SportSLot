@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Hồ Sơ | SportSlot{% endblock %}
+
+{% block content %}
+<section class="profile-page">
+    <h2>Xin chào, {{ user.username }}!</h2>
+    <p>Đây là trang hồ sơ của bạn.</p>
+    <a href="/logout" class="profile-logout-btn">Đăng xuất</a>
+</section>
+{% endblock %} 

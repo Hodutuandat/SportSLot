@@ -1,0 +1,120 @@
+/* Navbar container */
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 40px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    font-family: 'Montserrat', Arial, sans-serif;
+}
+
+/* Logo */
+.navbar__logo a {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #232a34;
+    text-decoration: none;
+    letter-spacing: 1px;
+}
+
+/* Menu */
+.navbar__menu {
+    display: flex;
+    align-items: center;
+    gap: 48px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar__menu li a {
+    position: relative;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #232a34;
+    text-decoration: none;
+    transition: color 0.2s;
+    padding: 6px 0;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+/* Underline effect for menu options except login/register */
+.navbar__menu li a:not(.navbar__login-btn):not(.navbar__register-btn)::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 0;
+    height: 2px;
+    background: #1e90ff;
+    transition: width 0.3s cubic-bezier(.4,0,.2,1), left 0.3s cubic-bezier(.4,0,.2,1);
+    border-radius: 2px;
+    transform: translateX(-50%);
+}
+
+.navbar__menu li a:not(.navbar__login-btn):not(.navbar__register-btn):hover::after {
+    width: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.navbar__menu li a:not(.navbar__login-btn):not(.navbar__register-btn):hover {
+    color: #1e90ff;
+}
+
+/* Login button */
+.navbar__login-btn {
+    border: 2px solid #232a34;
+    padding: 6px 32px;
+    border-radius: 10px;
+    font-weight: 600;
+    background: transparent;
+    color: #232a34;
+    min-width: 140px;
+    text-align: center;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    display: inline-block;
+}
+
+.navbar__login-btn:hover {
+    background: #6d7074;
+    color: #fff;
+    border-color: #232a34;
+}
+
+.navbar__register-btn {
+    border: 2px solid #232a34;
+    padding: 6px 32px;
+    border-radius: 10px;
+    font-weight: 600;
+    background: #fff;
+    color: #232a34;
+    margin-right: 12px;
+    min-width: 140px;
+    text-align: center;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    display: inline-block;
+}
+
+.navbar__register-btn:hover {
+    background: #6d7074;
+    color: #fff;
+    border-color: #232a34;
+}
+
+@media (max-width: 900px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 16px 12px;
+    }
+    .navbar__menu {
+        gap: 24px;
+    }
+    .navbar__logo a {
+        font-size: 1.5rem;
+    }
+} 

@@ -1,0 +1,117 @@
+.footer {
+    background: #f8f9fb;
+    color: #232a34;
+    padding-top: 36px;
+    border-radius: 12px 12px 0 0;
+    margin-top: 48px;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.03);
+    font-family: 'Montserrat', Arial, sans-serif;
+}
+
+.footer__container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px 24px 40px;
+}
+
+.footer__brand {
+    flex: 1 1 260px;
+    min-width: 220px;
+    margin-bottom: 24px;
+}
+
+.footer__logo {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #232a34;
+    text-decoration: none;
+    letter-spacing: 1px;
+}
+
+.footer__desc {
+    margin-top: 10px;
+    font-size: 1rem;
+    color: #4a4a4a;
+    line-height: 1.5;
+}
+
+.footer__links {
+    display: flex;
+    flex: 3 1 600px;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 32px;
+}
+
+.footer__col {
+    min-width: 140px;
+}
+
+.footer__col h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: #232a34;
+}
+
+.footer__col ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer__col ul li {
+    margin-bottom: 8px;
+}
+
+.footer__col ul li a {
+    color: #4a4a4a;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: color 0.2s;
+}
+
+.footer__col ul li a:hover {
+    color: #1e90ff;
+}
+
+.footer__bottom {
+    text-align: center;
+    padding: 18px 0 8px 0;
+    font-size: 1rem;
+    color: #888;
+    border-top: 1px solid #e0e0e0;
+    margin-top: 12px;
+}
+
+.divider {
+    border: none;
+    border-top: 1.5px solid #e0e0e0;
+    margin: 0 0 24px 0;
+    width: 100%;
+}
+.divider--nav {
+    margin-bottom: 0;
+    margin-top: 0;
+}
+.divider--footer {
+    margin-top: 36px;
+    margin-bottom: 0;
+}
+
+@media (max-width: 900px) {
+    .footer__container {
+        flex-direction: column;
+        padding: 0 16px 16px 16px;
+    }
+    .footer__links {
+        flex-direction: column;
+        gap: 16px;
+    }
+    .footer__brand {
+        margin-bottom: 16px;
+    }
+} 

@@ -1,0 +1,17 @@
+<nav class="navbar">
+    <div class="navbar__logo">
+        <a href="/">Sport Slot</a>
+    </div>
+    <ul class="navbar__menu">
+        <li><a href="/">Trang chủ</a></li>
+        <li><a href="/fields">Danh Sách Sân</a></li>
+        <li><a href="/contact">Liên hệ</a></li>
+        {% if current_user.is_authenticated %}
+            <li><a href="/profile" class="navbar__profile-btn">Hồ Sơ</a></li>
+            <li><a href="/logout" class="navbar__login-btn">Đăng Xuất</a></li>
+        {% else %}
+            <li><a href="/register" class="navbar__register-btn">Đăng Ký</a></li>
+            <li><a href="/login" class="navbar__login-btn">Đăng Nhập</a></li>
+        {% endif %}
+    </ul>
+</nav> 

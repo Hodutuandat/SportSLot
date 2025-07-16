@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SportSlot{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shared/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shared/navbar.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% include 'shared/navbar.html' %}
+    <hr class="divider divider--nav">
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    <hr class="divider divider--footer">
+    {% include 'shared/footer.html' %}
+    <script src="{{ url_for('static', filename='js/shared/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/shared/navbar.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 

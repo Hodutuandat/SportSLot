@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Đăng nhập | SportSlot{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth/login.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="login-page">
+    <h2 class="login-title">Đăng Nhập</h2>
+    <form class="login-form">
+        <div class="login-field">
+            <label for="login_input">Tên đăng nhập hoặc Email</label>
+            <div class="login-input-wrap">
+                <input type="text" id="login_input" name="username" placeholder="Tên đăng nhập hoặc Email" required>
+                <span class="login-icon"></span>
+            </div>
+        </div>
+        <div class="login-field">
+            <label for="password">Mật khẩu</label>
+            <div class="login-input-wrap">
+                <input type="password" id="password" name="password" placeholder="Mật khẩu" required>
+                <span class="login-icon"></span>
+            </div>
+        </div>
+        <div class="login-options">
+            <label class="login-remember">
+                <input type="checkbox" name="remember"> Remember me
+            </label>
+            <a href="#" class="login-forgot">Quên mật khẩu?</a>
+        </div>
+        <button type="submit" class="login-btn">Đăng nhập</button>
+    </form>
+    <div class="login-register">
+        Don't have an account? <a href="/register"><b>Đăng Ký Tài Khoản</b></a>
+    </div>
+</section>
+{% endblock %} 

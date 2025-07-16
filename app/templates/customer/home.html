@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Trang chủ | SportSlot{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/customer/home.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero__content">
+        <h1>Đặt sân thể thao dễ dàng, nhanh chóng, minh bạch</h1>
+        <p>SportSlot giúp bạn tìm kiếm, đặt sân, thanh toán và quản lý lịch chơi thể thao mọi lúc, mọi nơi.</p>
+        <a href="/register" class="hero__cta">Đăng ký miễn phí</a>
+    </div>
+    <div class="hero__image">
+        <img src="{{ url_for('static', filename='images/hero-demo.png') }}" alt="SportSlot App Demo">
+    </div>
+</section>
+
+<section class="features">
+    <div class="feature">
+        <img src="{{ url_for('static', filename='images/feature-search.png') }}" alt="Tìm kiếm sân">
+        <h3>Tìm kiếm & Đặt sân</h3>
+        <p>Dễ dàng tìm kiếm, lọc và đặt sân phù hợp với nhu cầu của bạn.</p>
+    </div>
+    <div class="feature">
+        <img src="{{ url_for('static', filename='images/feature-voucher.png') }}" alt="Ưu đãi">
+        <h3>Ưu đãi & Voucher</h3>
+        <p>Nhận nhiều ưu đãi hấp dẫn, áp dụng voucher khi thanh toán.</p>
+    </div>
+    <div class="feature">
+        <img src="{{ url_for('static', filename='images/feature-payment.png') }}" alt="Thanh toán">
+        <h3>Thanh toán tiện lợi</h3>
+        <p>Thanh toán online an toàn, hỗ trợ nhiều phương thức.</p>
+    </div>
+    <div class="feature">
+        <img src="{{ url_for('static', filename='images/feature-manage.png') }}" alt="Quản lý lịch">
+        <h3>Quản lý lịch đặt sân</h3>
+        <p>Xem, chỉnh sửa, hủy lịch đặt sân dễ dàng trên mọi thiết bị.</p>
+    </div>
+</section>
+
+<section class="how-it-works">
+    <h2>Quy trình đặt sân với SportSlot</h2>
+    <div class="steps">
+        <div class="step">
+            <span>1</span>
+            <p>Đăng ký tài khoản</p>
+        </div>
+        <div class="step">
+            <span>2</span>
+            <p>Tìm kiếm & chọn sân phù hợp</p>
+        </div>
+        <div class="step">
+            <span>3</span>
+            <p>Đặt sân & thanh toán</p>
+        </div>
+        <div class="step">
+            <span>4</span>
+            <p>Quản lý lịch & nhận ưu đãi</p>
+        </div>
+    </div>
+</section>
+
+<section class="faq">
+    <h2>Câu hỏi thường gặp</h2>
+    <div class="faq__item">
+        <button class="faq__question">SportSlot có miễn phí không?</button>
+        <div class="faq__answer">Khách hàng đặt sân hoàn toàn miễn phí, chỉ thanh toán khi sử dụng dịch vụ.</div>
+    </div>
+    <div class="faq__item">
+        <button class="faq__question">Tôi có thể hủy lịch đặt sân không?</button>
+        <div class="faq__answer">Bạn có thể hủy lịch đặt sân trước giờ bắt đầu theo chính sách của chủ sân.</div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/customer/home.js') }}"></script>
+{% endblock %} 

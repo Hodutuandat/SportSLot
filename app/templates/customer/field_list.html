@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Danh Sách Sân | SportSlot{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/customer/field_list.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="field-list-page">
+    <div class="field-list-filters">
+        <select class="filter-select">
+            <option>Chọn môn thể thao</option>
+            <option>Bóng đá</option>
+            <option>Bóng chuyền</option>
+            <option>Bóng rổ</option>
+        </select>
+        <input type="date" class="filter-date">
+        <select class="filter-select">
+            <option>Giờ đặt</option>
+            <option>06:00 - 08:00</option>
+            <option>08:00 - 10:00</option>
+            <option>10:00 - 12:00</option>
+        </select>
+        <button class="filter-btn">Lọc</button>
+    </div>
+    <h2 class="field-list-title">Danh sách sân trống</h2>
+    <div class="field-list-cards">
+        {% for field in fields %}
+        <div class="field-card">
+            <img src="{{ field.image or url_for('static', filename='images/field-placeholder.png') }}" alt="{{ field.name }}">
+            <div class="field-card-body">
+                <h3>{{ field.name }}</h3>
+                <div class="field-info">
+                    <span>{{ field.phone }}</span><br>
+                    <span>{{ field.address }}</span>
+                </div>
+                <a href="/fields/{{ field.id }}" class="field-detail-btn">Chi tiết</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %} 

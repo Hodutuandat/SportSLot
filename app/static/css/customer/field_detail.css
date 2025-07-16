@@ -1,0 +1,113 @@
+.field-detail-page {
+    max-width: 900px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(30,30,60,0.10);
+    padding: 36px 32px 32px 32px;
+}
+
+.field-detail-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.field-detail-sport {
+    text-align: center;
+    font-size: 1.1rem;
+    color: #444;
+    margin-bottom: 24px;
+}
+
+.field-detail-main {
+    display: flex;
+    gap: 32px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.field-detail-imgbox {
+    flex: 1 1 320px;
+    min-width: 260px;
+    max-width: 380px;
+    background: #f6f8fa;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18px;
+}
+.field-detail-imgbox img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+.field-detail-info {
+    flex: 2 1 340px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.field-detail-row {
+    display: flex;
+    gap: 48px;
+    margin-bottom: 4px;
+}
+.field-detail-row > div {
+    flex: 1 1 50%;
+    font-size: 1.05rem;
+    color: #232a34;
+}
+
+.field-detail-desc {
+    font-size: 1.05rem;
+    color: #444;
+    margin-bottom: 8px;
+}
+
+.field-detail-actions {
+    display: flex;
+    gap: 18px;
+    margin-top: 18px;
+}
+.voucher-btn {
+    background: #6d8cff;
+    color: #fff;
+    padding: 10px 32px;
+    border-radius: 8px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+.voucher-btn:hover {
+    background: #1e90ff;
+}
+.book-btn {
+    background: #6dbf4b;
+    color: #fff;
+    padding: 10px 32px;
+    border-radius: 8px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+.book-btn:hover {
+    background: #4e9c2e;
+}
+
+@media (max-width: 900px) {
+    .field-detail-main {
+        flex-direction: column;
+        gap: 18px;
+        align-items: center;
+    }
+    .field-detail-imgbox {
+        max-width: 100%;
+    }
+} 
