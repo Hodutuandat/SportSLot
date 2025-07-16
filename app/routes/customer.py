@@ -1,1 +1,0 @@
-# Blueprint for customer routes
