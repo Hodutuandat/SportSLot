@@ -1,126 +1,549 @@
+/* Dark Gray Sports Theme - Field List */
+:root {
+    --primary-dark: #1F2937;
+    --primary-dark-light: #374151;
+    --primary-dark-darker: #111827;
+    --gradient-primary: linear-gradient(135deg, #1F2937 0%, #111827 100%);
+    --gradient-secondary: linear-gradient(135deg, #374151 0%, #1F2937 100%);
+    --gradient-success: linear-gradient(135deg, #1F2937 0%, #0F172A 100%);
+    --text-primary: #1E293B;
+    --text-secondary: #64748B;
+    --text-light: #94A3B8;
+    --bg-primary: #F8FAFC;
+    --bg-secondary: #FFFFFF;
+    --shadow-primary: 0 10px 25px rgba(31, 41, 55, 0.15);
+    --shadow-secondary: 0 4px 15px rgba(0, 0, 0, 0.1);
+    --shadow-hover: 0 15px 35px rgba(31, 41, 55, 0.2);
+}
+
+/* Global Animations */
+@keyframes slideInUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes cardFloat {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+@keyframes bounce {
+    0%, 20%, 53%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40%, 43% {
+        transform: translateY(-8px);
+    }
+    70% {
+        transform: translateY(-4px);
+    }
+    90% {
+        transform: translateY(-2px);
+    }
+}
+
+@keyframes filterPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(31, 41, 55, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(31, 41, 55, 0);
+    }
+}
+
+/* Main Container */
 .field-list-page {
     max-width: 1200px;
     margin: 32px auto;
-    padding: 0 16px;
+    padding: 0 20px;
+    animation: slideInUp 0.8s ease-out;
 }
 
-.field-list-filters {
-    display: flex;
-    gap: 18px;
-    margin-bottom: 24px;
-    align-items: center;
-    flex-wrap: wrap;
-    justify-content: center;
-    max-width: 700px;
-    margin-left: auto;
-    margin-right: auto;
+/* Header Section */
+.field-list-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 30px 20px;
+    background: var(--gradient-primary);
+    border-radius: 20px;
+    color: white;
+    position: relative;
+    overflow: hidden;
 }
 
-.filter-select, .filter-date {
-    padding: 10px 16px;
-    border-radius: 8px;
-    border: 1.5px solid #e0e0e0;
-    font-size: 1rem;
-    background: #f6f8fa;
-    min-width: 160px;
-    max-width: 220px;
-}
-
-.filter-btn {
-    padding: 10px 28px;
-    border-radius: 8px;
-    background: #232a34;
-    color: #fff;
-    font-weight: 700;
-    border: none;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-.filter-btn:hover {
-    background: #1e90ff;
+.field-list-header::before {
+    content: '🏟️';
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    font-size: 2rem;
+    opacity: 0.3;
+    animation: cardFloat 3s ease-in-out infinite;
 }
 
 .field-list-title {
-    font-size: 1.4rem;
+    font-size: 2.2rem;
     font-weight: 800;
-    margin-bottom: 18px;
-    text-align: center;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.field-list-cards {
+.field-list-subtitle {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+}
+
+/* Filters Section */
+.field-list-filters {
     display: flex;
-    gap: 24px;
+    gap: 20px;
+    margin-bottom: 40px;
+    align-items: center;
     flex-wrap: wrap;
     justify-content: center;
+    padding: 25px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: var(--shadow-secondary);
+    position: relative;
 }
 
+.field-list-filters::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+    border-radius: 20px 20px 0 0;
+}
+
+.filter-select, 
+.filter-date,
+.filter-input {
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 2px solid #E2E8F0;
+    font-size: 1rem;
+    background: var(--bg-secondary);
+    min-width: 160px;
+    max-width: 220px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    color: var(--text-primary);
+    position: relative;
+}
+
+.filter-select:focus,
+.filter-date:focus,
+.filter-input:focus {
+    outline: none;
+    border-color: var(--primary-dark);
+    box-shadow: 0 0 0 4px rgba(31, 41, 55, 0.1);
+    transform: translateY(-2px);
+}
+
+.filter-btn {
+    padding: 12px 30px;
+    border-radius: 25px;
+    background: var(--gradient-primary);
+    color: white;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.95rem;
+    box-shadow: var(--shadow-secondary);
+    position: relative;
+    overflow: hidden;
+}
+
+.filter-btn::before {
+    content: '🔍';
+    margin-right: 8px;
+    font-size: 1rem;
+}
+
+.filter-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: var(--shadow-hover);
+    animation: filterPulse 0.6s ease-in-out;
+}
+
+.filter-btn:active {
+    transform: translateY(-1px) scale(1.02);
+}
+
+/* Field Cards Grid */
+.field-list-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+/* Individual Field Card */
 .field-card {
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 2px 12px rgba(30,144,255,0.07);
-    width: 320px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: var(--shadow-secondary);
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    margin-bottom: 18px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid transparent;
+    position: relative;
+    cursor: pointer;
 }
 
+.field-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+    z-index: 1;
+}
+
+.field-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--primary-dark);
+}
+
+.field-card:hover::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(31, 41, 55, 0.05) 0%, rgba(31, 41, 55, 0.1) 100%);
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* Field Image */
 .field-card img {
     width: 100%;
-    height: 160px;
+    height: 180px;
     object-fit: cover;
-    background: #f6f8fa;
+    background: var(--bg-primary);
+    transition: transform 0.4s ease;
+    position: relative;
 }
 
+.field-card:hover img {
+    transform: scale(1.05);
+}
+
+/* No Image Placeholder */
+.field-card .no-image {
+    width: 100%;
+    height: 180px;
+    background: var(--gradient-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: white;
+    position: relative;
+}
+
+.field-card .no-image::before {
+    content: '🏟️';
+    animation: cardFloat 3s ease-in-out infinite;
+}
+
+/* Card Body */
 .field-card-body {
-    padding: 18px 16px 16px 16px;
+    padding: 25px 20px 20px 20px;
     flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    position: relative;
+    z-index: 3;
 }
 
 .field-card-body h3 {
-    font-size: 1.15rem;
+    font-size: 1.3rem;
     font-weight: 700;
-    margin-bottom: 8px;
+    margin-bottom: 15px;
+    color: var(--text-primary);
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.3;
 }
 
+/* Field Info */
 .field-info {
     font-size: 1rem;
-    color: #4a4a4a;
-    margin-bottom: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    line-height: 1.6;
+    font-weight: 500;
 }
 
+.field-info span {
+    display: block;
+    margin-bottom: 5px;
+    position: relative;
+    padding-left: 20px;
+}
+
+.field-info span:nth-child(1)::before {
+    content: '📞';
+    position: absolute;
+    left: 0;
+    font-size: 14px;
+}
+
+.field-info span:nth-child(2)::before {
+    content: '📍';
+    position: absolute;
+    left: 0;
+    font-size: 14px;
+}
+
+/* Detail Button */
 .field-detail-btn {
     display: block;
     width: 100%;
-    background: #232a34;
-    color: #fff;
+    background: var(--gradient-primary);
+    color: white;
     text-align: center;
-    padding: 10px 0;
-    border-radius: 8px;
+    padding: 14px 0;
+    border-radius: 25px;
     font-weight: 700;
     text-decoration: none;
-    transition: background 0.2s;
-}
-.field-detail-btn:hover {
-    background: #1e90ff;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 15px rgba(31, 41, 55, 0.3);
+    position: relative;
+    overflow: hidden;
 }
 
-@media (max-width: 900px) {
-    .field-list-cards {
-        flex-direction: column;
-        gap: 16px;
-        align-items: center;
+.field-detail-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.field-detail-btn::after {
+    content: '👁️';
+    margin-left: 8px;
+    font-size: 1rem;
+}
+
+.field-detail-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(31, 41, 55, 0.4);
+    animation: bounce 0.6s ease-in-out;
+}
+
+.field-detail-btn:hover::before {
+    left: 100%;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: var(--shadow-secondary);
+    margin: 40px 0;
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    animation: cardFloat 3s ease-in-out infinite;
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+/* Loading State */
+.loading-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+.loading-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: var(--shadow-secondary);
+    overflow: hidden;
+    height: 350px;
+    position: relative;
+}
+
+.loading-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        left: -100%;
     }
-    .field-card {
-        width: 100%;
-        max-width: 400px;
+    100% {
+        left: 100%;
     }
+}
+
+/* Statistics Bar */
+.field-stats {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin: 40px 0;
+    padding: 25px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: var(--shadow-secondary);
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 15px;
+    border-radius: 12px;
+    background: var(--bg-primary);
+    min-width: 120px;
+    transition: transform 0.3s ease;
+}
+
+.stat-item:hover {
+    transform: translateY(-3px);
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary-dark);
+    display: block;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .field-list-page {
+        padding: 0 15px;
+        margin: 20px auto;
+    }
+    
+    .field-list-header {
+        padding: 25px 15px;
+        margin-bottom: 30px;
+    }
+    
+    .field-list-title {
+        font-size: 1.8rem;
+    }
+    
     .field-list-filters {
         flex-direction: column;
-        gap: 12px;
-        max-width: 98vw;
+        gap: 15px;
+        padding: 20px;
+    }
+    
+    .filter-select,
+    .filter-date,
+    .filter-input {
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    .field-list-cards {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .field-card {
+        max-width: 100%;
+    }
+    
+    .field-stats {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .stat-item {
+        min-width: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .field-list-header::before {
+        display: none;
+    }
+    
+    .field-list-title {
+        font-size: 1.6rem;
+    }
+    
+    .field-list-subtitle {
+        font-size: 1rem;
+    }
+    
+    .field-card-body {
+        padding: 20px 15px 15px 15px;
+    }
+    
+    .field-card-body h3 {
+        font-size: 1.2rem;
     }
 } 

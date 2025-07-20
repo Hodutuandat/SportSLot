@@ -21,4 +21,7 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(customer_bp)
     login_manager.init_app(app)
+    login_manager.login_view = 'auth.login'
+    login_manager.login_message = 'Vui lòng đăng nhập để truy cập trang này.'
+    login_manager.login_message_category = 'info'
     return app 

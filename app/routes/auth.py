@@ -21,7 +21,7 @@ def login():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('common.home'))
+    return redirect(url_for('auth.login'))
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
@@ -31,4 +31,4 @@ def register():
 @auth_bp.route('/profile')
 @login_required
 def profile():
-    return render_template('auth/profile.html', user=current_user) 
+    return render_template('customer/profile.html', user=current_user) 

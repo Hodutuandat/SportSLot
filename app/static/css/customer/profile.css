@@ -1,1 +1,843 @@
- 
+/* Dark Gray Theme Profile - Professional & Modern */
+:root {
+    --primary-dark: #1F2937;
+    --primary-dark-light: #374151;
+    --primary-dark-darker: #111827;
+    --gradient-primary: linear-gradient(135deg, #1F2937 0%, #111827 100%);
+    --gradient-secondary: linear-gradient(135deg, #374151 0%, #1F2937 100%);
+    --gradient-success: linear-gradient(135deg, #1F2937 0%, #0F172A 100%);
+    --gradient-warning: linear-gradient(135deg, #374151 0%, #1F2937 100%);
+    --gradient-danger: linear-gradient(135deg, #374151 0%, #1F2937 100%);
+    --dark-bg: #0F172A;
+    --card-bg: #FFFFFF;
+    --sidebar-bg: linear-gradient(180deg, #111827 0%, #1F2937 100%);
+    --text-primary: #1E293B;
+    --text-secondary: #64748B;
+    --text-light: #94A3B8;
+    --border-color: #E2E8F0;
+    --shadow-primary: 0 10px 25px rgba(31, 41, 55, 0.15);
+    --shadow-secondary: 0 4px 15px rgba(0, 0, 0, 0.1);
+    --shadow-hover: 0 15px 35px rgba(31, 41, 55, 0.2);
+}
+
+/* Global Animations */
+@keyframes slideInUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+@keyframes bounce {
+    0%, 20%, 53%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40%, 43% {
+        transform: translateY(-8px);
+    }
+    70% {
+        transform: translateY(-4px);
+    }
+    90% {
+        transform: translateY(-2px);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200px 0;
+    }
+    100% {
+        background-position: calc(200px + 100%) 0;
+    }
+}
+
+/* Profile Container */
+.profile-container {
+    display: flex;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%);
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    position: relative;
+}
+
+.profile-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 200px;
+    background: var(--gradient-primary);
+    opacity: 0.1;
+    z-index: 0;
+}
+
+/* Sports-themed Sidebar */
+.profile-sidebar {
+    width: 280px;
+    background: var(--sidebar-bg);
+    border-right: none;
+    padding: 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+.profile-nav {
+    padding: 30px 0 20px 0;
+}
+
+.profile-nav-item {
+    padding: 18px 30px;
+    cursor: pointer;
+    color: #CBD5E1;
+    font-weight: 600;
+    font-size: 15px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-nav-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--gradient-primary);
+    transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: -1;
+}
+
+.profile-nav-item:hover {
+    color: #FFFFFF;
+    transform: translateX(8px);
+}
+
+.profile-nav-item:hover::before {
+    left: 0;
+}
+
+.profile-nav-item.active {
+    background: var(--gradient-primary);
+    color: #FFFFFF;
+    border-left: 5px solid var(--primary-orange);
+    box-shadow: 0 8px 25px rgba(0, 191, 99, 0.3);
+}
+
+.profile-nav-item.active::before {
+    left: 0;
+}
+
+/* Main Content with Sports Energy */
+.profile-main {
+    flex: 1;
+    padding: 40px;
+    max-width: calc(100% - 280px);
+    position: relative;
+    z-index: 5;
+}
+
+/* Tab Content with Staggered Animation */
+.profile-tab-content {
+    display: none;
+    animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.profile-tab-content.active {
+    display: block;
+}
+
+/* Sports Card Design */
+.profile-section {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 35px;
+    margin-bottom: 30px;
+    box-shadow: var(--shadow-secondary);
+    border: 1px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.profile-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+}
+
+.profile-section:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+}
+
+/* Dynamic Section Headers */
+.profile-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 35px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #F1F5F9;
+    position: relative;
+}
+
+.profile-section-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    position: relative;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Energetic Member Type Button */
+.member-type-btn {
+    background: var(--gradient-secondary);
+    color: white;
+    border: none;
+    padding: 15px 25px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.member-type-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+    animation: pulse 0.6s ease-in-out;
+}
+
+/* Enhanced Profile Form */
+.profile-form-container {
+    max-width: 900px;
+    background: linear-gradient(135deg, #F8FAFC 0%, #FFFFFF 100%);
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: var(--shadow-secondary);
+}
+
+.profile-form-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px 0;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.profile-form-row:hover {
+    background: rgba(0, 191, 99, 0.02);
+    transform: translateX(5px);
+}
+
+.profile-label {
+    min-width: 180px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-right: 25px;
+    font-size: 16px;
+}
+
+.profile-input-container {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.profile-value {
+    font-weight: 600;
+    color: var(--primary-dark);
+    margin-right: 20px;
+    font-size: 16px;
+}
+
+.profile-dots {
+    flex: 1;
+    height: 2px;
+    background: repeating-linear-gradient(
+        to right,
+        var(--primary-dark) 0px,
+        var(--primary-dark) 6px,
+        transparent 6px,
+        transparent 12px
+    );
+    margin-left: 15px;
+    opacity: 0.6;
+}
+
+/* Sports-themed Points Table */
+.points-table-container {
+    overflow-x: auto;
+    margin-top: 25px;
+    border-radius: 16px;
+    box-shadow: var(--shadow-secondary);
+}
+
+.points-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.points-table th,
+.points-table td {
+    padding: 20px;
+    text-align: left;
+    border-bottom: 1px solid rgba(0, 191, 99, 0.1);
+}
+
+.points-table th {
+    background: var(--gradient-primary);
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+}
+
+.points-table td {
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 15px;
+}
+
+.points-table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.points-table tbody tr:hover {
+    background: linear-gradient(135deg, rgba(0, 191, 99, 0.05) 0%, rgba(30, 64, 175, 0.05) 100%);
+    transform: scale(1.01);
+}
+
+/* Dynamic Filter Section */
+.simple-filters {
+    margin-bottom: 30px;
+    padding: 25px;
+    background: linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+}
+
+.simple-filters::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gradient-primary);
+}
+
+.filter-row {
+    display: flex;
+    align-items: end;
+    gap: 25px;
+    flex-wrap: wrap;
+}
+
+.filter-item {
+    display: flex;
+    flex-direction: column;
+    min-width: 220px;
+    position: relative;
+}
+
+.filter-item label {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.filter-input {
+    padding: 15px 18px;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: white;
+}
+
+.filter-input:focus {
+    outline: none;
+    border-color: var(--primary-dark);
+    box-shadow: 0 0 0 4px rgba(0, 191, 99, 0.1);
+    transform: translateY(-2px);
+}
+
+.filter-btn {
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: fit-content;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(0, 191, 99, 0.3);
+}
+
+.filter-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 191, 99, 0.4);
+}
+
+.filter-btn:active {
+    transform: translateY(0) scale(0.95);
+}
+
+/* Enhanced Sports Table */
+.simple-table-container {
+    overflow-x: auto;
+    border-radius: 16px;
+    box-shadow: var(--shadow-secondary);
+    background: white;
+}
+
+.simple-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+.simple-table th,
+.simple-table td {
+    padding: 20px;
+    text-align: left;
+    border-bottom: 1px solid rgba(0, 191, 99, 0.1);
+}
+
+.simple-table th {
+    background: var(--gradient-primary);
+    color: white;
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+}
+
+.simple-table td {
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 15px;
+}
+
+.simple-table tbody tr {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.simple-table tbody tr:hover {
+    background: linear-gradient(135deg, rgba(0, 191, 99, 0.05) 0%, rgba(30, 64, 175, 0.05) 100%);
+    transform: translateX(5px);
+}
+
+.simple-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Animated Status Badges */
+.status-badge {
+    padding: 8px 16px;
+    border-radius: 25px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.status-badge::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: left 0.5s;
+}
+
+.status-badge:hover::before {
+    left: 100%;
+}
+
+.status-badge.upcoming {
+    background: var(--gradient-warning);
+    color: white;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+}
+
+.status-badge.completed {
+    background: var(--gradient-success);
+    color: white;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.status-badge.cancelled {
+    background: var(--gradient-danger);
+    color: white;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+.status-badge.success {
+    background: var(--gradient-success);
+    color: white;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.status-badge.pending {
+    background: linear-gradient(135deg, #06B6D4 0%, #0891B2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
+}
+
+.status-badge.failed {
+    background: var(--gradient-danger);
+    color: white;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+/* Premium Voucher Cards */
+.voucher-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 30px;
+    margin-top: 25px;
+}
+
+.voucher-card {
+    background: linear-gradient(145deg, #FFFFFF 0%, #F8FAFC 100%);
+    border-radius: 20px;
+    padding: 30px;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.voucher-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--gradient-primary);
+    padding: 2px;
+    border-radius: 20px;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    z-index: -1;
+}
+
+.voucher-card.active {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 191, 99, 0.2);
+}
+
+.voucher-card.active::before {
+    background: var(--gradient-success);
+}
+
+.voucher-card.expired {
+    opacity: 0.7;
+    filter: grayscale(50%);
+}
+
+.voucher-card.expired::before {
+    background: var(--gradient-danger);
+}
+
+.voucher-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.voucher-header h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    flex: 1;
+    line-height: 1.3;
+}
+
+.voucher-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--gradient-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 20px rgba(0, 191, 99, 0.3);
+}
+
+.voucher-icon img {
+    width: 70%;
+    height: 70%;
+    object-fit: cover;
+    filter: brightness(0) invert(1);
+}
+
+.voucher-discount {
+    font-size: 32px;
+    font-weight: 900;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.voucher-card.active .voucher-discount {
+    background: var(--gradient-success);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.voucher-card.expired .voucher-discount {
+    background: var(--gradient-danger);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.voucher-details {
+    margin-bottom: 20px;
+}
+
+.voucher-info {
+    display: flex;
+    gap: 20px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.voucher-description {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 25px;
+    font-weight: 500;
+}
+
+.voucher-btn {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.voucher-btn.apply {
+    background: var(--gradient-success);
+    color: white;
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+}
+
+.voucher-btn.apply:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+    animation: bounce 0.6s ease-in-out;
+}
+
+.voucher-btn.expired {
+    background: linear-gradient(135deg, #9CA3AF 0%, #6B7280 100%);
+    color: white;
+    cursor: not-allowed;
+    box-shadow: 0 4px 15px rgba(156, 163, 175, 0.3);
+}
+
+/* Enhanced Responsive Design */
+@media (max-width: 1024px) {
+    .profile-main {
+        padding: 30px;
+    }
+    
+    .voucher-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .profile-container {
+        flex-direction: column;
+    }
+    
+    .profile-sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        background: var(--gradient-primary);
+    }
+    
+    .profile-nav {
+        display: flex;
+        overflow-x: auto;
+        padding: 15px 0;
+        gap: 5px;
+    }
+    
+    .profile-nav-item {
+        white-space: nowrap;
+        min-width: 160px;
+        text-align: center;
+        border-radius: 12px;
+        margin: 0 5px;
+        color: white;
+        border-bottom: none;
+    }
+    
+    .profile-nav-item.active {
+        background: rgba(255, 255, 255, 0.2);
+        border-left: none;
+        backdrop-filter: blur(10px);
+    }
+    
+    .profile-main {
+        max-width: 100%;
+        padding: 20px;
+    }
+    
+    .profile-section {
+        padding: 25px 20px;
+    }
+    
+    .profile-section-header {
+        flex-direction: column;
+        gap: 20px;
+        align-items: flex-start;
+    }
+    
+    .filter-row {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .filter-item {
+        min-width: 100%;
+    }
+    
+    .profile-form-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+        padding: 15px 0;
+    }
+    
+    .profile-label {
+        min-width: auto;
+        margin-right: 0;
+    }
+    
+    .profile-input-container {
+        width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .simple-table {
+        font-size: 13px;
+    }
+    
+    .simple-table th,
+    .simple-table td {
+        padding: 12px 8px;
+    }
+    
+    .profile-main {
+        padding: 15px;
+    }
+    
+    .profile-section {
+        padding: 20px 15px;
+        margin-bottom: 20px;
+    }
+    
+    .voucher-card {
+        padding: 20px;
+    }
+    
+    .profile-section-title {
+        font-size: 22px;
+    }
+} 

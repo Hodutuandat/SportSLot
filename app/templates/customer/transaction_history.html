@@ -1,1 +1,311 @@
- 
+{% extends 'base.html' %}
+{% block title %}Lịch sử giao dịch | SportSlot{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/customer/transaction_history.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="transaction-page-container">
+    <div class="transaction-page-header">
+        <div class="header-left">
+            <h1 class="page-title">Lịch sử giao dịch</h1>
+            <p class="page-subtitle">Quản lý và theo dõi các giao dịch của bạn</p>
+        </div>
+        <div class="header-right">
+            <a href="/profile" class="back-to-profile-btn">
+                <i class="fas fa-arrow-left"></i>
+                Quay lại hồ sơ
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="transaction-stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon success">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">12</div>
+                <div class="stat-label">Giao dịch thành công</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon pending">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">1</div>
+                <div class="stat-label">Đang xử lý</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon failed">
+                <i class="fas fa-times-circle"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">2</div>
+                <div class="stat-label">Thất bại</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon total">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">3.250.000 VNĐ</div>
+                <div class="stat-label">Tổng chi tiêu</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="transaction-filters">
+        <div class="filter-group">
+            <div class="filter-item">
+                <label for="statusFilter">Trạng thái:</label>
+                <select id="statusFilter" class="filter-select">
+                    <option value="">Tất cả</option>
+                    <option value="success">Thành công</option>
+                    <option value="pending">Đang xử lý</option>
+                    <option value="failed">Thất bại</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <label for="timeFilter">Thời gian:</label>
+                <select id="timeFilter" class="filter-select">
+                    <option value="">Tất cả</option>
+                    <option value="today">Hôm nay</option>
+                    <option value="week">7 ngày qua</option>
+                    <option value="month">30 ngày qua</option>
+                    <option value="quarter">3 tháng qua</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <label for="searchTransaction">Tìm kiếm:</label>
+                <input type="text" id="searchTransaction" class="filter-search" placeholder="Tìm kiếm giao dịch...">
+            </div>
+        </div>
+        <button class="filter-clear-btn" id="clearFilters">
+            <i class="fas fa-times"></i>
+            Xóa bộ lọc
+        </button>
+    </div>
+
+    <!-- Transaction Table -->
+    <div class="transaction-table-container">
+        <table class="transaction-table">
+            <thead>
+                <tr>
+                    <th>Mã giao dịch</th>
+                    <th>Ngày/Giờ</th>
+                    <th>Mô tả</th>
+                    <th>Phương thức</th>
+                    <th>Số tiền</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody id="transactionTableBody">
+                <tr class="transaction-row" data-status="success" data-date="2024-12-15" data-transaction-id="TXN001">
+                    <td class="transaction-id">#TXN001</td>
+                    <td class="transaction-date">15/12/2024 14:30</td>
+                    <td class="transaction-desc">Đặt sân bóng đá - Sân ABC</td>
+                    <td class="transaction-method">
+                        <div class="payment-method-badge momo">
+                            <i class="fas fa-mobile-alt"></i>
+                            MoMo
+                        </div>
+                    </td>
+                    <td class="transaction-amount">200.000 VNĐ</td>
+                    <td class="transaction-status">
+                        <span class="status-badge success">Thành công</span>
+                    </td>
+                    <td class="transaction-actions">
+                        <button class="action-btn view-btn" onclick="viewTransaction('TXN001')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="action-btn download-btn" onclick="downloadReceipt('TXN001')">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </td>
+                </tr>
+                <tr class="transaction-row" data-status="success" data-date="2024-12-10" data-transaction-id="TXN002">
+                    <td class="transaction-id">#TXN002</td>
+                    <td class="transaction-date">10/12/2024 09:15</td>
+                    <td class="transaction-desc">Đặt sân tennis - Sân XYZ</td>
+                    <td class="transaction-method">
+                        <div class="payment-method-badge banking">
+                            <i class="fas fa-university"></i>
+                            Banking
+                        </div>
+                    </td>
+                    <td class="transaction-amount">150.000 VNĐ</td>
+                    <td class="transaction-status">
+                        <span class="status-badge success">Thành công</span>
+                    </td>
+                    <td class="transaction-actions">
+                        <button class="action-btn view-btn" onclick="viewTransaction('TXN002')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="action-btn download-btn" onclick="downloadReceipt('TXN002')">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </td>
+                </tr>
+                <tr class="transaction-row" data-status="pending" data-date="2024-12-08" data-transaction-id="TXN003">
+                    <td class="transaction-id">#TXN003</td>
+                    <td class="transaction-date">08/12/2024 16:45</td>
+                    <td class="transaction-desc">Đặt sân cầu lông - Sân DEF</td>
+                    <td class="transaction-method">
+                        <div class="payment-method-badge momo">
+                            <i class="fas fa-mobile-alt"></i>
+                            MoMo
+                        </div>
+                    </td>
+                    <td class="transaction-amount">120.000 VNĐ</td>
+                    <td class="transaction-status">
+                        <span class="status-badge pending">Đang xử lý</span>
+                    </td>
+                    <td class="transaction-actions">
+                        <button class="action-btn view-btn" onclick="viewTransaction('TXN003')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="action-btn cancel-btn" onclick="cancelTransaction('TXN003')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </td>
+                </tr>
+                <tr class="transaction-row" data-status="failed" data-date="2024-12-05" data-transaction-id="TXN004">
+                    <td class="transaction-id">#TXN004</td>
+                    <td class="transaction-date">05/12/2024 11:20</td>
+                    <td class="transaction-desc">Đặt sân bóng đá - Sân GHI</td>
+                    <td class="transaction-method">
+                        <div class="payment-method-badge banking">
+                            <i class="fas fa-university"></i>
+                            Banking
+                        </div>
+                    </td>
+                    <td class="transaction-amount">180.000 VNĐ</td>
+                    <td class="transaction-status">
+                        <span class="status-badge failed">Thất bại</span>
+                    </td>
+                    <td class="transaction-actions">
+                        <button class="action-btn view-btn" onclick="viewTransaction('TXN004')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="action-btn retry-btn" onclick="retryTransaction('TXN004')">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                    </td>
+                </tr>
+                <tr class="transaction-row" data-status="success" data-date="2024-12-01" data-transaction-id="TXN005">
+                    <td class="transaction-id">#TXN005</td>
+                    <td class="transaction-date">01/12/2024 19:20</td>
+                    <td class="transaction-desc">Đặt sân badminton - Sân JKL</td>
+                    <td class="transaction-method">
+                        <div class="payment-method-badge momo">
+                            <i class="fas fa-mobile-alt"></i>
+                            MoMo
+                        </div>
+                    </td>
+                    <td class="transaction-amount">100.000 VNĐ</td>
+                    <td class="transaction-status">
+                        <span class="status-badge success">Thành công</span>
+                    </td>
+                    <td class="transaction-actions">
+                        <button class="action-btn view-btn" onclick="viewTransaction('TXN005')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="action-btn download-btn" onclick="downloadReceipt('TXN005')">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="transaction-pagination">
+        <button class="pagination-btn" id="prevPage" disabled>
+            <i class="fas fa-chevron-left"></i>
+            Trước
+        </button>
+        <div class="pagination-info">
+            <span>Trang <span id="currentPage">1</span> / <span id="totalPages">1</span></span>
+        </div>
+        <button class="pagination-btn" id="nextPage" disabled>
+            Tiếp
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Transaction Detail Modal -->
+<div class="transaction-detail-modal" id="transactionDetailModal">
+    <div class="transaction-detail-overlay"></div>
+    <div class="transaction-detail-content">
+        <div class="transaction-detail-header">
+            <h3>Chi tiết giao dịch</h3>
+            <button class="transaction-detail-close">&times;</button>
+        </div>
+        <div class="transaction-detail-body">
+            <div class="transaction-detail-info">
+                <div class="detail-row">
+                    <label>Mã giao dịch:</label>
+                    <span id="detailTransactionId">#TXN001</span>
+                </div>
+                <div class="detail-row">
+                    <label>Ngày/Giờ:</label>
+                    <span id="detailDateTime">15/12/2024 14:30</span>
+                </div>
+                <div class="detail-row">
+                    <label>Mô tả:</label>
+                    <span id="detailDescription">Đặt sân bóng đá - Sân ABC</span>
+                </div>
+                <div class="detail-row">
+                    <label>Phương thức thanh toán:</label>
+                    <span id="detailPaymentMethod">MoMo</span>
+                </div>
+                <div class="detail-row">
+                    <label>Số tiền:</label>
+                    <span id="detailAmount" class="amount-highlight">200.000 VNĐ</span>
+                </div>
+                <div class="detail-row">
+                    <label>Trạng thái:</label>
+                    <span id="detailStatus" class="status-badge success">Thành công</span>
+                </div>
+                <div class="detail-row">
+                    <label>Địa chỉ sân:</label>
+                    <span id="detailFieldAddress">123 Đường ABC, Quận 1, TP.HCM</span>
+                </div>
+                <div class="detail-row">
+                    <label>Thời gian đặt sân:</label>
+                    <span id="detailBookingTime">16:00 - 18:00, 15/12/2024</span>
+                </div>
+                <div class="detail-row">
+                    <label>Voucher áp dụng:</label>
+                    <span id="detailVoucher">SAVE50K (Giảm 50.000 VNĐ)</span>
+                </div>
+            </div>
+            <div class="transaction-detail-actions">
+                <button class="detail-action-btn download" onclick="downloadReceipt()">
+                    <i class="fas fa-download"></i>
+                    Tải hóa đơn
+                </button>
+                <button class="detail-action-btn contact" onclick="contactSupport()">
+                    <i class="fas fa-headset"></i>
+                    Liên hệ hỗ trợ
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/customer/transaction_history.js') }}"></script>
+{% endblock %} 

@@ -3,6 +3,9 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/customer/home.css') }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -12,29 +15,146 @@
         <p>SportSlot giúp bạn tìm kiếm, đặt sân, thanh toán và quản lý lịch chơi thể thao mọi lúc, mọi nơi.</p>
         <a href="/register" class="hero__cta">Đăng ký miễn phí</a>
     </div>
-    <div class="hero__image">
-        <img src="{{ url_for('static', filename='images/hero-demo.png') }}" alt="SportSlot App Demo">
+    <div class="hero__demo">
+        <div class="phone-mockup">
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <!-- Status Bar -->
+                    <div class="status-bar">
+                        <span class="time">9:41</span>
+                        <div class="status-icons">
+                            <span class="signal">📶</span>
+                            <span class="wifi">📶</span>
+                            <span class="battery">🔋</span>
+                        </div>
+                    </div>
+                    
+                    <!-- App Header -->
+                    <div class="app-header">
+                        <div class="app-logo">⚽ SportSlot</div>
+                        <div class="notification-badge">3</div>
+                    </div>
+                    
+                    <!-- App Content -->
+                    <div class="app-content" id="appContent">
+                        <!-- Screen 1: Home -->
+                        <div class="app-screen active" data-screen="home">
+                            <div class="search-bar">
+                                <span class="search-icon">🔍</span>
+                                <span class="search-text">Tìm sân gần bạn...</span>
+                            </div>
+                            <div class="quick-actions">
+                                <div class="action-card">
+                                    <span class="action-icon">🏟️</span>
+                                    <span class="action-text">Đặt sân</span>
+                                </div>
+                                <div class="action-card">
+                                    <span class="action-icon">📅</span>
+                                    <span class="action-text">Lịch sử</span>
+                                </div>
+                                <div class="action-card">
+                                    <span class="action-icon">🎟️</span>
+                                    <span class="action-text">Voucher</span>
+                                </div>
+                            </div>
+                            <div class="field-list">
+                                <div class="field-card">
+                                    <div class="field-image">🏟️</div>
+                                    <div class="field-info">
+                                        <h4>Sân Bóng Đá ABC</h4>
+                                        <p>📍 Quận 1, TP.HCM</p>
+                                        <p>💰 200.000đ/giờ</p>
+                                    </div>
+                                </div>
+                                <div class="field-card">
+                                    <div class="field-image">🏸</div>
+                                    <div class="field-info">
+                                        <h4>Sân Cầu Lông XYZ</h4>
+                                        <p>📍 Quận 3, TP.HCM</p>
+                                        <p>💰 150.000đ/giờ</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Screen 2: Booking -->
+                        <div class="app-screen" data-screen="booking">
+                            <div class="booking-header">
+                                <h3>📅 Đặt lịch sân</h3>
+                            </div>
+                            <div class="time-slots">
+                                <div class="time-slot available">09:00</div>
+                                <div class="time-slot booked">10:00</div>
+                                <div class="time-slot available selected">11:00</div>
+                                <div class="time-slot available">12:00</div>
+                            </div>
+                            <div class="booking-info">
+                                <p>⚽ Sân Bóng Đá ABC</p>
+                                <p>📅 Hôm nay, 11:00 - 12:00</p>
+                                <p>💰 200.000đ</p>
+                            </div>
+                            <button class="book-button">Đặt ngay</button>
+                        </div>
+                        
+                        <!-- Screen 3: Success -->
+                        <div class="app-screen" data-screen="success">
+                            <div class="success-content">
+                                <div class="success-icon">✅</div>
+                                <h3>Đặt sân thành công!</h3>
+                                <p>Mã đặt sân: #SP001234</p>
+                                <div class="booking-details">
+                                    <p>⚽ Sân Bóng Đá ABC</p>
+                                    <p>📅 Hôm nay, 11:00 - 12:00</p>
+                                    <p>💰 200.000đ</p>
+                                </div>
+                                <button class="view-ticket">Xem vé</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Navigation -->
+                    <div class="bottom-nav">
+                        <div class="nav-item active">
+                            <span class="nav-icon">🏠</span>
+                            <span class="nav-label">Trang chủ</span>
+                        </div>
+                        <div class="nav-item">
+                            <span class="nav-icon">🏟️</span>
+                            <span class="nav-label">Sân</span>
+                        </div>
+                        <div class="nav-item">
+                            <span class="nav-icon">📅</span>
+                            <span class="nav-label">Lịch</span>
+                        </div>
+                        <div class="nav-item">
+                            <span class="nav-icon">👤</span>
+                            <span class="nav-label">Tài khoản</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
 <section class="features">
-    <div class="feature">
-        <img src="{{ url_for('static', filename='images/feature-search.png') }}" alt="Tìm kiếm sân">
+    <div class="feature" data-feature="search">
+        <span class="feature-icon">🔍</span>
         <h3>Tìm kiếm & Đặt sân</h3>
         <p>Dễ dàng tìm kiếm, lọc và đặt sân phù hợp với nhu cầu của bạn.</p>
     </div>
-    <div class="feature">
-        <img src="{{ url_for('static', filename='images/feature-voucher.png') }}" alt="Ưu đãi">
+    <div class="feature" data-feature="voucher">
+        <span class="feature-icon">🎟️</span>
         <h3>Ưu đãi & Voucher</h3>
         <p>Nhận nhiều ưu đãi hấp dẫn, áp dụng voucher khi thanh toán.</p>
     </div>
-    <div class="feature">
-        <img src="{{ url_for('static', filename='images/feature-payment.png') }}" alt="Thanh toán">
+    <div class="feature" data-feature="payment">
+        <span class="feature-icon">💳</span>
         <h3>Thanh toán tiện lợi</h3>
         <p>Thanh toán online an toàn, hỗ trợ nhiều phương thức.</p>
     </div>
-    <div class="feature">
-        <img src="{{ url_for('static', filename='images/feature-manage.png') }}" alt="Quản lý lịch">
+    <div class="feature" data-feature="manage">
+        <span class="feature-icon">📅</span>
         <h3>Quản lý lịch đặt sân</h3>
         <p>Xem, chỉnh sửa, hủy lịch đặt sân dễ dàng trên mọi thiết bị.</p>
     </div>
@@ -43,19 +163,19 @@
 <section class="how-it-works">
     <h2>Quy trình đặt sân với SportSlot</h2>
     <div class="steps">
-        <div class="step">
+        <div class="step" data-step="1">
             <span>1</span>
             <p>Đăng ký tài khoản</p>
         </div>
-        <div class="step">
+        <div class="step" data-step="2">
             <span>2</span>
             <p>Tìm kiếm & chọn sân phù hợp</p>
         </div>
-        <div class="step">
+        <div class="step" data-step="3">
             <span>3</span>
             <p>Đặt sân & thanh toán</p>
         </div>
-        <div class="step">
+        <div class="step" data-step="4">
             <span>4</span>
             <p>Quản lý lịch & nhận ưu đãi</p>
         </div>
@@ -71,6 +191,14 @@
     <div class="faq__item">
         <button class="faq__question">Tôi có thể hủy lịch đặt sân không?</button>
         <div class="faq__answer">Bạn có thể hủy lịch đặt sân trước giờ bắt đầu theo chính sách của chủ sân.</div>
+    </div>
+    <div class="faq__item">
+        <button class="faq__question">Có bao nhiều loại sân thể thao?</button>
+        <div class="faq__answer">SportSlot hỗ trợ đa dạng các loại sân: bóng đá, bóng rổ, tennis, cầu lông, bóng chuyền và nhiều môn thể thao khác.</div>
+    </div>
+    <div class="faq__item">
+        <button class="faq__question">Làm thế nào để nhận ưu đãi?</button>
+        <div class="faq__answer">Bạn sẽ nhận điểm thưởng sau mỗi lần đặt sân và có thể sử dụng các voucher đặc biệt từ chúng tôi.</div>
     </div>
 </section>
 {% endblock %}

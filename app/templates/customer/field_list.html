@@ -3,41 +3,191 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/customer/field_list.css') }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
 <section class="field-list-page">
-    <div class="field-list-filters">
-        <select class="filter-select">
-            <option>Chọn môn thể thao</option>
-            <option>Bóng đá</option>
-            <option>Bóng chuyền</option>
-            <option>Bóng rổ</option>
-        </select>
-        <input type="date" class="filter-date">
-        <select class="filter-select">
-            <option>Giờ đặt</option>
-            <option>06:00 - 08:00</option>
-            <option>08:00 - 10:00</option>
-            <option>10:00 - 12:00</option>
-        </select>
-        <button class="filter-btn">Lọc</button>
+    <!-- Header Section -->
+    <div class="field-list-header">
+        <h1 class="field-list-title">Danh Sách Sân Thể Thao</h1>
+        <p class="field-list-subtitle">Khám phá và đặt sân thể thao tốt nhất tại thành phố</p>
     </div>
-    <h2 class="field-list-title">Danh sách sân trống</h2>
-    <div class="field-list-cards">
-        {% for field in fields %}
-        <div class="field-card">
-            <img src="{{ field.image or url_for('static', filename='images/field-placeholder.png') }}" alt="{{ field.name }}">
-            <div class="field-card-body">
-                <h3>{{ field.name }}</h3>
-                <div class="field-info">
-                    <span>{{ field.phone }}</span><br>
-                    <span>{{ field.address }}</span>
-                </div>
-                <a href="/fields/{{ field.id }}" class="field-detail-btn">Chi tiết</a>
-            </div>
+
+    <!-- Filters Section -->
+    <div class="field-list-filters">
+        <select class="filter-select" id="sportFilter">
+            <option value="">Chọn môn thể thao</option>
+            <option value="football">⚽ Bóng đá</option>
+            <option value="volleyball">🏐 Bóng chuyền</option>
+            <option value="basketball">🏀 Bóng rổ</option>
+            <option value="badminton">🏸 Cầu lông</option>
+            <option value="tennis">🎾 Tennis</option>
+        </select>
+        
+        <input type="date" class="filter-date" id="dateFilter" placeholder="Chọn ngày">
+        
+        <select class="filter-select" id="timeFilter">
+            <option value="">Chọn giờ đặt</option>
+            <option value="morning">🌅 Sáng (06:00 - 10:00)</option>
+            <option value="noon">☀️ Trưa (10:00 - 14:00)</option>
+            <option value="afternoon">🌆 Chiều (14:00 - 18:00)</option>
+            <option value="evening">🌙 Tối (18:00 - 22:00)</option>
+        </select>
+        
+        <input type="text" class="filter-input" id="locationFilter" placeholder="🔍 Tìm theo khu vực...">
+        
+        <button class="filter-btn" onclick="applyFilters()">Tìm kiếm</button>
+    </div>
+
+    <!-- Statistics Bar -->
+    <div class="field-stats">
+        <div class="stat-item">
+            <span class="stat-number">{{ fields|length if fields else 0 }}</span>
+            <span class="stat-label">Sân hiện có</span>
         </div>
-        {% endfor %}
+        <div class="stat-item">
+            <span class="stat-number">5+</span>
+            <span class="stat-label">Môn thể thao</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number">24/7</span>
+            <span class="stat-label">Hỗ trợ</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number">1000+</span>
+            <span class="stat-label">Đặt sân/tháng</span>
+        </div>
+    </div>
+
+    <!-- Field Cards -->
+    <div class="field-list-cards" id="fieldCards">
+        {% if fields %}
+            {% for field in fields %}
+            <div class="field-card" data-sport="{{ field.sport_type|lower if field.sport_type else 'general' }}" data-location="{{ field.address|lower if field.address else '' }}">
+                {% if field.image %}
+                    <img src="{{ field.image }}" alt="{{ field.name }}" loading="lazy">
+                {% else %}
+                    <div class="no-image"></div>
+                {% endif %}
+                
+                <div class="field-card-body">
+                    <h3>{{ field.name }}</h3>
+                    <div class="field-info">
+                        <span>{{ field.phone if field.phone else 'Đang cập nhật' }}</span>
+                        <span>{{ field.address if field.address else 'Địa chỉ đang cập nhật' }}</span>
+                                                 {% if field.price %}
+                         <span>💰 {{ "{:,.0f}".format(field.price) }}đ/giờ</span>
+                         {% endif %}
+                    </div>
+                    <a href="/fields/{{ field.id }}" class="field-detail-btn">Xem chi tiết</a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <!-- Empty State -->
+            <div class="empty-state">
+                <div class="empty-state-icon">🏟️</div>
+                <h3>Không tìm thấy sân nào</h3>
+                <p>Hiện tại chưa có sân thể thao nào. Vui lòng thử lại sau hoặc liên hệ với chúng tôi để biết thêm thông tin.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Loading State (Hidden by default, shown during AJAX requests) -->
+    <div class="loading-cards" id="loadingCards" style="display: none;">
+        <div class="loading-card"></div>
+        <div class="loading-card"></div>
+        <div class="loading-card"></div>
+        <div class="loading-card"></div>
     </div>
 </section>
+
+<script>
+// Filter functionality
+function applyFilters() {
+    const sportFilter = document.getElementById('sportFilter').value.toLowerCase();
+    const locationFilter = document.getElementById('locationFilter').value.toLowerCase();
+    const fieldCards = document.querySelectorAll('.field-card');
+    
+    let visibleCount = 0;
+    
+    fieldCards.forEach(card => {
+        const cardSport = card.dataset.sport || '';
+        const cardLocation = card.dataset.location || '';
+        
+        const sportMatch = !sportFilter || cardSport.includes(sportFilter);
+        const locationMatch = !locationFilter || cardLocation.includes(locationFilter);
+        
+        if (sportMatch && locationMatch) {
+            card.style.display = 'flex';
+            card.style.animation = `slideInUp 0.5s ease-out ${visibleCount * 0.1}s both`;
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    // Show empty state if no results
+    const emptyState = document.querySelector('.empty-state');
+    if (visibleCount === 0 && !emptyState) {
+        const container = document.getElementById('fieldCards');
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">🔍</div>
+                <h3>Không tìm thấy sân phù hợp</h3>
+                <p>Thử thay đổi bộ lọc hoặc tìm kiếm với từ khóa khác.</p>
+            </div>
+        `;
+    }
+    
+}
+
+
+
+// Enhanced card interactions
+document.addEventListener('DOMContentLoaded', function() {
+    const fieldCards = document.querySelectorAll('.field-card');
+    
+    fieldCards.forEach((card, index) => {
+        // Staggered entrance animation
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+        
+        // Enhanced click effects
+        card.addEventListener('click', function(e) {
+            if (e.target.classList.contains('field-detail-btn')) return;
+            
+            this.style.transform = 'translateY(-10px) scale(0.98)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+        });
+    });
+    
+    // Filter input enhancements
+    const filterInputs = document.querySelectorAll('.filter-select, .filter-date, .filter-input');
+    filterInputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.style.transform = 'translateY(-2px)';
+        });
+        
+        input.addEventListener('blur', function() {
+            this.style.transform = '';
+        });
+    });
+    
+    console.log('🏟️ Field List initialized with sports theme!');
+});
+
+
+</script>
 {% endblock %} 

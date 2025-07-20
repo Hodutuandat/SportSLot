@@ -3,6 +3,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/customer/field_detail.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
@@ -26,10 +27,216 @@
                 <b>Mô tả:</b><br>{{ field.description }}
             </div>
             <div class="field-detail-actions">
-                <a href="#" class="voucher-btn">Phiếu giảm giá</a>
-                <a href="#" class="book-btn">Đặt Sân</a>
+                <a href="#" class="book-btn" id="openBookingBtn">Đặt Sân</a>
             </div>
         </div>
     </div>
 </section>
+
+<!-- Voucher Popup Modal -->
+<div class="voucher-modal" id="voucherModal">
+    <div class="voucher-modal-overlay" id="voucherOverlay"></div>
+    <div class="voucher-modal-content">
+        <div class="voucher-modal-header">
+            <h2 class="voucher-modal-title">Chọn Phiếu Giảm Giá</h2>
+            <button class="voucher-modal-close" id="closeVoucherBtn">&times;</button>
+        </div>
+        <div class="voucher-modal-body">
+            <div class="voucher-list">
+                <!-- Voucher Item 1 -->
+                <div class="voucher-item" data-discount="50000" data-code="SAVE50K">
+                    <div class="voucher-item-info">
+                        <div class="voucher-item-title">Giảm 50.000 VNĐ</div>
+                        <div class="voucher-item-desc">Áp dụng cho đơn hàng từ 200.000 VNĐ</div>
+                        <div class="voucher-item-code">Mã: SAVE50K</div>
+                        <div class="voucher-item-expire">Hết hạn: 31/12/2024</div>
+                    </div>
+                    <div class="voucher-item-action">
+                        <button class="voucher-apply-btn">Áp dụng</button>
+                    </div>
+                </div>
+
+                <!-- Voucher Item 2 -->
+                <div class="voucher-item" data-discount="100000" data-code="SAVE100K">
+                    <div class="voucher-item-info">
+                        <div class="voucher-item-title">Giảm 100.000 VNĐ</div>
+                        <div class="voucher-item-desc">Áp dụng cho đơn hàng từ 500.000 VNĐ</div>
+                        <div class="voucher-item-code">Mã: SAVE100K</div>
+                        <div class="voucher-item-expire">Hết hạn: 31/12/2024</div>
+                    </div>
+                    <div class="voucher-item-action">
+                        <button class="voucher-apply-btn">Áp dụng</button>
+                    </div>
+                </div>
+
+                <!-- Voucher Item 3 -->
+                <div class="voucher-item" data-discount="20" data-code="PERCENT20">
+                    <div class="voucher-item-info">
+                        <div class="voucher-item-title">Giảm 20%</div>
+                        <div class="voucher-item-desc">Giảm tối đa 150.000 VNĐ</div>
+                        <div class="voucher-item-code">Mã: PERCENT20</div>
+                        <div class="voucher-item-expire">Hết hạn: 31/12/2024</div>
+                    </div>
+                    <div class="voucher-item-action">
+                        <button class="voucher-apply-btn">Áp dụng</button>
+                    </div>
+                </div>
+
+                <!-- Voucher Item 4 -->
+                <div class="voucher-item" data-discount="30000" data-code="NEWUSER">
+                    <div class="voucher-item-info">
+                        <div class="voucher-item-title">Giảm 30.000 VNĐ</div>
+                        <div class="voucher-item-desc">Dành cho khách hàng mới</div>
+                        <div class="voucher-item-code">Mã: NEWUSER</div>
+                        <div class="voucher-item-expire">Hết hạn: 31/12/2024</div>
+                    </div>
+                    <div class="voucher-item-action">
+                        <button class="voucher-apply-btn">Áp dụng</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="voucher-modal-footer">
+            <button class="voucher-modal-cancel" id="cancelVoucherBtn">Hủy</button>
+        </div>
+    </div>
+</div>
+
+<!-- Booking Popup Modal -->
+<div class="booking-modal" id="bookingModal">
+    <div class="booking-modal-overlay" id="bookingOverlay"></div>
+    <div class="booking-modal-content">
+        <div class="booking-modal-header">
+            <h2 class="booking-modal-title">Đặt Sân - {{ field.name }}</h2>
+            <button class="booking-modal-close" id="closeBookingBtn">&times;</button>
+        </div>
+        <div class="booking-modal-body">
+            <form class="booking-form" id="bookingForm">
+                <!-- Thông tin sân và giá -->
+                <div class="booking-field-info">
+                    <div class="booking-field-price">
+                        <span class="price-label">Giá sân:</span>
+                        <span class="price-value">{{ field.price }} VNĐ/giờ</span>
+                    </div>
+                    <div class="booking-field-address">{{ field.address }}</div>
+                </div>
+
+                <!-- Chọn ngày đặt -->
+                <div class="booking-field-group">
+                    <label class="booking-label">Chọn ngày đặt <span class="required">*</span></label>
+                    <input type="date" id="bookingDate" name="booking_date" class="booking-input" required>
+                    <small class="booking-help">Chọn ngày bạn muốn đặt sân</small>
+                </div>
+
+                <!-- Chọn giờ bắt đầu -->
+                <div class="booking-field-group">
+                    <label class="booking-label">Giờ bắt đầu <span class="required">*</span></label>
+                    <select id="bookingStartTime" name="start_time" class="booking-select" required>
+                        <option value="">-- Chọn giờ bắt đầu --</option>
+                        <option value="06:00">06:00</option>
+                        <option value="07:00">07:00</option>
+                        <option value="08:00">08:00</option>
+                        <option value="09:00">09:00</option>
+                        <option value="10:00">10:00</option>
+                        <option value="11:00">11:00</option>
+                        <option value="12:00">12:00</option>
+                        <option value="13:00">13:00</option>
+                        <option value="14:00">14:00</option>
+                        <option value="15:00">15:00</option>
+                        <option value="16:00">16:00</option>
+                        <option value="17:00">17:00</option>
+                        <option value="18:00">18:00</option>
+                        <option value="19:00">19:00</option>
+                        <option value="20:00">20:00</option>
+                        <option value="21:00">21:00</option>
+                        <option value="22:00">22:00</option>
+                    </select>
+                </div>
+
+                <!-- Số giờ đặt -->
+                <div class="booking-field-group">
+                    <label class="booking-label">Số giờ đặt <span class="required">*</span></label>
+                    <select id="bookingDuration" name="duration" class="booking-select" required>
+                        <option value="">-- Chọn số giờ --</option>
+                        <option value="1">1 giờ</option>
+                        <option value="2">2 giờ</option>
+                        <option value="3">3 giờ</option>
+                        <option value="4">4 giờ</option>
+                        <option value="5">5 giờ</option>
+                        <option value="6">6 giờ</option>
+                    </select>
+                    <div class="booking-time-summary" id="timeSummary" style="display: none;">
+                        <span id="timeRange"></span>
+                    </div>
+                </div>
+
+                <!-- Hình thức thanh toán -->
+                <div class="booking-field-group">
+                    <label class="booking-label">Hình thức thanh toán <span class="required">*</span></label>
+                    <div class="payment-methods">
+                        <div class="payment-method">
+                            <input type="radio" id="paymentMomo" name="payment_method" value="momo" required>
+                            <label for="paymentMomo" class="payment-label">
+                                <div class="payment-icon momo-icon">
+                                    <i class="fas fa-mobile-alt"></i>
+                                </div>
+                                <div class="payment-info">
+                                    <div class="payment-name">Ví MoMo</div>
+                                    <div class="payment-desc">Thanh toán qua ví điện tử MoMo</div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="payment-method">
+                            <input type="radio" id="paymentBanking" name="payment_method" value="banking" required>
+                            <label for="paymentBanking" class="payment-label">
+                                <div class="payment-icon banking-icon">
+                                    <i class="fas fa-university"></i>
+                                </div>
+                                <div class="payment-info">
+                                    <div class="payment-name">Chuyển khoản ngân hàng</div>
+                                    <div class="payment-desc">Thanh toán qua chuyển khoản</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Áp dụng voucher -->
+                <div class="booking-field-group">
+                    <div class="voucher-section">
+                        <label class="booking-label">Phiếu giảm giá</label>
+                        <div class="voucher-display" id="voucherDisplay">
+                            <span class="no-voucher">Chưa chọn voucher</span>
+                            <button type="button" class="change-voucher-btn" id="changeVoucherBtn">Chọn voucher</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tổng tiền -->
+                <div class="booking-summary">
+                    <div class="summary-row">
+                        <span>Giá sân ({{ field.price }} VNĐ × <span id="durationDisplay">0</span> giờ):</span>
+                        <span id="subtotalAmount">0 VNĐ</span>
+                    </div>
+                    <div class="summary-row discount-row" id="discountRow" style="display: none;">
+                        <span>Giảm giá:</span>
+                        <span id="discountAmount">-0 VNĐ</span>
+                    </div>
+                    <div class="summary-row total-row">
+                        <span>Tổng cộng:</span>
+                        <span id="totalAmount">0 VNĐ</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="booking-modal-footer">
+            <button type="button" class="booking-modal-cancel" id="cancelBookingBtn">Hủy</button>
+            <button type="submit" form="bookingForm" class="booking-confirm-btn" id="confirmBookingBtn">Xác nhận đặt sân</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/customer/field_detail.js') }}"></script>
 {% endblock %} 
