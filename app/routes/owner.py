@@ -425,37 +425,147 @@ def notifications():
     if not current_user.is_owner():
         return redirect(url_for('common.home'))
     
-    # Tạo thông báo mẫu
+    # Tạo thông báo mẫu chi tiết
     notifications = [
         {
             'id': 1,
-            'title': 'Đặt sân mới',
-            'message': 'Trần Minh Tuấn đã đặt Sân Bóng Đá A cho ngày 16/12/2024',
+            'title': 'Booking cần duyệt gấp',
+            'message': 'Sân bóng đá A - Khách hàng: Nguyễn Văn Nam',
+            'details': '21/12/2024 15:00-17:00 | 400.000đ',
             'date': '2024-12-12 14:30',
             'type': 'booking',
-            'read': False
+            'subtype': 'urgent',
+            'read': False,
+            'action_required': True,
+            'booking_id': 1,
+            'field_name': 'Sân Bóng Đá A',
+            'customer_name': 'Nguyễn Văn Nam',
+            'booking_time': '21/12/2024 15:00-17:00',
+            'amount': 400000
         },
         {
             'id': 2,
             'title': 'Thanh toán thành công',
-            'message': 'Nguyễn Văn Nam đã thanh toán 400.000đ cho booking #1',
+            'message': 'Booking #BK003 - Sân Tennis Elite',
+            'details': '400.000đ | Phương thức: VNPay',
             'date': '2024-12-10 16:45',
             'type': 'payment',
-            'read': True
+            'subtype': 'success',
+            'read': False,
+            'action_required': False,
+            'booking_id': 3,
+            'field_name': 'Sân Tennis Elite',
+            'customer_name': 'Trần Minh Tuấn',
+            'amount': 400000,
+            'payment_method': 'VNPay'
         },
         {
             'id': 3,
-            'title': 'Đánh giá mới',
-            'message': 'Lê Hoàng Anh đã đánh giá 5 sao cho Sân Mini Football Pro',
+            'title': 'Đánh giá mới 5 sao',
+            'message': 'Sân bóng đá B - Khách hàng: Lê Hoàng Anh',
+            'details': '"Sân đẹp, chất lượng tốt, nhân viên phục vụ nhiệt tình"',
             'date': '2024-12-09 10:15',
             'type': 'review',
-            'read': True
+            'subtype': 'positive',
+            'read': False,
+            'action_required': False,
+            'field_name': 'Sân Bóng Đá B',
+            'customer_name': 'Lê Hoàng Anh',
+            'rating': 5,
+            'review_text': 'Sân đẹp, chất lượng tốt, nhân viên phục vụ nhiệt tình'
+        },
+        {
+            'id': 4,
+            'title': 'Báo cáo doanh thu tuần',
+            'message': 'Tuần này: 15.2M VNĐ (+12% so với tuần trước)',
+            'details': '45 booking | 8.5 sao trung bình',
+            'date': '2024-12-08 09:00',
+            'type': 'report',
+            'subtype': 'weekly',
+            'read': True,
+            'action_required': False,
+            'revenue': 15200000,
+            'growth': 12,
+            'total_bookings': 45,
+            'avg_rating': 8.5
+        },
+        {
+            'id': 5,
+            'title': 'Sân mới được duyệt',
+            'message': 'Sân Tennis Elite đã được phê duyệt thành công',
+            'details': 'Sân sẽ hoạt động từ ngày mai',
+            'date': '2024-12-07 15:30',
+            'type': 'system',
+            'subtype': 'approval',
+            'read': True,
+            'action_required': False,
+            'field_name': 'Sân Tennis Elite',
+            'status': 'approved'
+        },
+        {
+            'id': 6,
+            'title': 'Booking bị hủy',
+            'message': 'Sân Mini Football Pro - Khách hàng: Phạm Thị Mai',
+            'details': 'Lý do: Khách hàng yêu cầu hủy',
+            'date': '2024-12-06 11:20',
+            'type': 'booking',
+            'subtype': 'cancelled',
+            'read': True,
+            'action_required': False,
+            'field_name': 'Sân Mini Football Pro',
+            'customer_name': 'Phạm Thị Mai',
+            'cancel_reason': 'Khách hàng yêu cầu hủy'
+        },
+        {
+            'id': 7,
+            'title': 'Đánh giá cần phản hồi',
+            'message': 'Sân Bóng Đá A - Khách hàng: Vũ Đức Hùng',
+            'details': '3 sao - "Sân hơi ẩm, cần cải thiện"',
+            'date': '2024-12-05 14:15',
+            'type': 'review',
+            'subtype': 'negative',
+            'read': False,
+            'action_required': True,
+            'field_name': 'Sân Bóng Đá A',
+            'customer_name': 'Vũ Đức Hùng',
+            'rating': 3,
+            'review_text': 'Sân hơi ẩm, cần cải thiện'
+        },
+        {
+            'id': 8,
+            'title': 'Thanh toán thất bại',
+            'message': 'Booking #BK004 - Sân Bóng Đá A',
+            'details': '200.000đ | Lỗi: Thẻ bị từ chối',
+            'date': '2024-12-04 16:00',
+            'type': 'payment',
+            'subtype': 'failed',
+            'read': False,
+            'action_required': True,
+            'field_name': 'Sân Bóng Đá A',
+            'customer_name': 'Đặng Văn Minh',
+            'amount': 200000,
+            'error': 'Thẻ bị từ chối'
         }
     ]
     
+    # Thống kê thông báo
+    stats = {
+        'total': len(notifications),
+        'unread': len([n for n in notifications if not n['read']]),
+        'urgent': len([n for n in notifications if n.get('action_required', False)]),
+        'by_type': {
+            'booking': len([n for n in notifications if n['type'] == 'booking']),
+            'payment': len([n for n in notifications if n['type'] == 'payment']),
+            'review': len([n for n in notifications if n['type'] == 'review']),
+            'report': len([n for n in notifications if n['type'] == 'report']),
+            'system': len([n for n in notifications if n['type'] == 'system'])
+        }
+    }
+    
     return render_template('owner/notification.html', 
                          user=current_user, 
-                         notifications=notifications)
+                         notifications=notifications,
+                         stats=stats)
 
 @owner_bp.route('/approve-booking/<int:booking_id>')
 @login_required

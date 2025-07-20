@@ -232,13 +232,15 @@
     background: white;
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    width: 380px;
+    width: 420px;
     opacity: 0;
     visibility: hidden;
     transform: translateY(-10px);
     transition: all 0.3s ease;
     z-index: 1001;
     border: 1px solid rgba(245, 158, 11, 0.2);
+    max-height: 600px;
+    overflow: hidden;
 }
 
 .owner-navbar .notification-dropdown.show {
@@ -248,13 +250,28 @@
 }
 
 .owner-navbar .notification-header {
-    padding: 20px 20px 10px;
+    padding: 20px 20px 15px;
     border-bottom: 1px solid #e5e7eb;
     display: flex;
     justify-content: space-between;
     align-items: center;
     background: linear-gradient(135deg, #fef3c7, #fde68a);
     border-radius: 15px 15px 0 0;
+}
+
+.owner-navbar .notification-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.owner-navbar .notification-count {
+    background: #f59e0b;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
 }
 
 .owner-navbar .notification-header h3 {
@@ -265,12 +282,58 @@
 }
 
 .owner-navbar .mark-all-read {
-    background: none;
-    border: none;
+    background: rgba(217, 119, 6, 0.1);
+    border: 1px solid #d97706;
     color: #d97706;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 700;
     cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s ease;
+}
+
+.owner-navbar .mark-all-read:hover {
+    background: #d97706;
+    color: white;
+}
+
+.owner-navbar .mark-all-icon {
+    font-size: 0.9rem;
+}
+
+.owner-navbar .notification-filters {
+    display: flex;
+    gap: 8px;
+    padding: 15px 20px 10px;
+    border-bottom: 1px solid #f3f4f6;
+    background: #f9fafb;
+}
+
+.owner-navbar .filter-btn {
+    background: white;
+    border: 1px solid #d1d5db;
+    color: #6b7280;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.owner-navbar .filter-btn:hover {
+    border-color: #9ca3af;
+    color: #374151;
+}
+
+.owner-navbar .filter-btn.active {
+    background: #1e90ff;
+    border-color: #1e90ff;
+    color: white;
 }
 
 .owner-navbar .notification-list {
@@ -284,6 +347,27 @@
     display: flex;
     gap: 15px;
     transition: all 0.2s ease;
+    position: relative;
+}
+
+.owner-navbar .notification-item[data-type="booking"] {
+    border-left: 4px solid #3b82f6;
+}
+
+.owner-navbar .notification-item[data-type="payment"] {
+    border-left: 4px solid #10b981;
+}
+
+.owner-navbar .notification-item[data-type="review"] {
+    border-left: 4px solid #f59e0b;
+}
+
+.owner-navbar .notification-item[data-type="report"] {
+    border-left: 4px solid #8b5cf6;
+}
+
+.owner-navbar .notification-item[data-type="system"] {
+    border-left: 4px solid #6b7280;
 }
 
 .owner-navbar .notification-item:hover {
@@ -312,6 +396,31 @@
     flex-shrink: 0;
 }
 
+.owner-navbar .urgent-icon {
+    background: #fef2f2;
+    color: #ef4444;
+}
+
+.owner-navbar .payment-icon {
+    background: #f0fdf4;
+    color: #10b981;
+}
+
+.owner-navbar .review-icon {
+    background: #fffbeb;
+    color: #f59e0b;
+}
+
+.owner-navbar .report-icon {
+    background: #faf5ff;
+    color: #8b5cf6;
+}
+
+.owner-navbar .system-icon {
+    background: #f9fafb;
+    color: #6b7280;
+}
+
 .owner-navbar .notification-content {
     flex: 1;
 }
@@ -320,14 +429,112 @@
     font-weight: 700;
     color: #232a34;
     font-size: 0.95rem;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.owner-navbar .notification-type-badge {
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.owner-navbar .notification-type-badge.urgent {
+    background: #fef2f2;
+    color: #ef4444;
+}
+
+.owner-navbar .notification-type-badge.payment {
+    background: #f0fdf4;
+    color: #10b981;
+}
+
+.owner-navbar .notification-type-badge.review {
+    background: #fffbeb;
+    color: #f59e0b;
+}
+
+.owner-navbar .notification-type-badge.report {
+    background: #faf5ff;
+    color: #8b5cf6;
+}
+
+.owner-navbar .notification-type-badge.system {
+    background: #f9fafb;
+    color: #6b7280;
 }
 
 .owner-navbar .notification-text {
     color: #6b7280;
     font-size: 0.85rem;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
     line-height: 1.4;
+}
+
+.owner-navbar .notification-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.owner-navbar .action-btn {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.owner-navbar .action-btn.approve {
+    background: #10b981;
+    color: white;
+}
+
+.owner-navbar .action-btn.approve:hover {
+    background: #059669;
+}
+
+.owner-navbar .action-btn.reject {
+    background: #ef4444;
+    color: white;
+}
+
+.owner-navbar .action-btn.reject:hover {
+    background: #dc2626;
+}
+
+.owner-navbar .action-btn.view-review,
+.owner-navbar .action-btn.view-report {
+    background: #3b82f6;
+    color: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.owner-navbar .action-btn.view-review:hover,
+.owner-navbar .action-btn.view-report:hover {
+    background: #2563eb;
+    color: white;
+    text-decoration: none;
+}
+
+.owner-navbar .booking-details,
+.owner-navbar .payment-amount,
+.owner-navbar .review-text,
+.owner-navbar .report-details,
+.owner-navbar .system-details {
+    font-size: 0.8rem;
+    color: #9ca3af;
+    font-style: italic;
 }
 
 .owner-navbar .notification-time {
@@ -339,9 +546,22 @@
 .owner-navbar .notification-footer {
     padding: 15px 20px;
     border-top: 1px solid #e5e7eb;
-    text-align: center;
     background: #fafafa;
     border-radius: 0 0 15px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.owner-navbar .notification-stats {
+    display: flex;
+    gap: 15px;
+}
+
+.owner-navbar .stats-item {
+    font-size: 0.8rem;
+    color: #6b7280;
+    font-weight: 600;
 }
 
 .owner-navbar .view-all-notifications {
@@ -349,6 +569,23 @@
     text-decoration: none;
     font-weight: 700;
     font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s ease;
+}
+
+.owner-navbar .view-all-notifications:hover {
+    color: #b45309;
+}
+
+.owner-navbar .view-all-arrow {
+    font-size: 0.8rem;
+    transition: transform 0.2s ease;
+}
+
+.owner-navbar .view-all-notifications:hover .view-all-arrow {
+    transform: translateX(3px);
 }
 
 /* User Menu */
@@ -888,6 +1125,39 @@
 @keyframes spin {
     0% { transform: translate(-50%, -50%) rotate(0deg); }
     100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes slideOut {
+    0% { 
+        opacity: 1;
+        transform: translateX(0);
+    }
+    100% { 
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+}
+
+@keyframes slideInRight {
+    0% { 
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    100% { 
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOutRight {
+    0% { 
+        opacity: 1;
+        transform: translateX(0);
+    }
+    100% { 
+        opacity: 0;
+        transform: translateX(100%);
+    }
 }
 
 /* Success states */

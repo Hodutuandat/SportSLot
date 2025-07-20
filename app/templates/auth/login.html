@@ -5,10 +5,17 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/auth/login.css') }}">
 {% endblock %}
 
+
+
 {% block content %}
 <section class="login-page">
     <h2 class="login-title">Đăng Nhập</h2>
-    <form class="login-form">
+    {% if error %}
+    <div class="login-error">
+        {{ error }}
+    </div>
+    {% endif %}
+    <form class="login-form" method="POST" action="{{ url_for('auth.login') }}">
         <div class="login-field">
             <label for="login_input">Tên đăng nhập hoặc Email</label>
             <div class="login-input-wrap">

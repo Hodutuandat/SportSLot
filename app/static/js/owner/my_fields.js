@@ -1,4 +1,6 @@
 // My Fields Page JavaScript
+let currentFieldId = null;
+
 document.addEventListener('DOMContentLoaded', function() {
     
     // Setup event listeners
@@ -111,32 +113,51 @@ function viewBookings(fieldId) {
     const modal = document.getElementById('bookingModal');
     const calendar = document.getElementById('bookingCalendar');
     
+    // Set current field ID
+    currentFieldId = fieldId;
+    
     // Show modal
     modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
     
-    // Generate calendar for the field (simplified)
+    // Generate calendar for the field
     calendar.innerHTML = generateCalendar(fieldId);
+    
+    // Add animation
+    const modalContent = modal.querySelector('.modal-content');
+    modalContent.style.animation = 'slideDown 0.4s ease';
 }
 
 function generateCalendar(fieldId) {
-    // Simulate calendar data
+    // Get current date
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth();
     const currentYear = currentDate.getFullYear();
     
-    // Sample booking data
-    const bookings = {
-        '2024-12-15': ['18:00-20:00', '20:00-22:00'],
-        '2024-12-16': ['14:00-16:00'],
-        '2024-12-17': ['16:00-18:00', '18:00-20:00'],
-        '2024-12-18': ['19:00-21:00'],
-        '2024-12-20': ['15:00-17:00', '17:00-19:00', '19:00-21:00']
-    };
+    // Get field name
+    const fieldCard = document.querySelector(`[data-field-id="${fieldId}"]`);
+    const fieldName = fieldCard ? fieldCard.querySelector('.field-name').textContent : 'Sân';
     
+    // Sample booking data for the field
+    const bookings = getFieldBookings(fieldId);
+    
+    // Generate calendar HTML
     let calendarHTML = `
         <div class="calendar-header">
-            <h4>Lịch đặt sân - Tháng ${currentMonth + 1}/${currentYear}</h4>
+            <h4>Lịch đặt sân - ${fieldName}</h4>
+            <button class="close-calendar" onclick="closeModal()">&times;</button>
         </div>
+        
+        <div class="calendar-navigation">
+            <button class="calendar-nav-btn" onclick="changeMonth(-1)">
+                <span>←</span> Tháng trước
+            </button>
+            <div class="calendar-month-year">Tháng ${currentMonth + 1}/${currentYear}</div>
+            <button class="calendar-nav-btn" onclick="changeMonth(1)">
+                Tháng sau <span>→</span>
+            </button>
+        </div>
+        
         <div class="calendar-grid">
             <div class="calendar-day-header">CN</div>
             <div class="calendar-day-header">T2</div>
@@ -159,13 +180,15 @@ function generateCalendar(fieldId) {
     // Add days of the month
     for (let day = 1; day <= daysInMonth; day++) {
         const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const hasBookings = bookings[dateStr];
-        const isToday = day === currentDate.getDate();
+        const dayBookings = bookings[dateStr] || [];
+        const isToday = day === currentDate.getDate() && currentMonth === currentDate.getMonth() && currentYear === currentDate.getFullYear();
+        const isPast = new Date(currentYear, currentMonth, day) < new Date(currentDate.setHours(0,0,0,0));
         
         calendarHTML += `
-            <div class="calendar-day ${isToday ? 'today' : ''} ${hasBookings ? 'has-bookings' : ''}">
+            <div class="calendar-day ${isToday ? 'today' : ''} ${dayBookings.length > 0 ? 'has-bookings' : ''} ${isPast ? 'past' : ''}" 
+                 onclick="viewDayBookings('${dateStr}', ${dayBookings.length})">
                 <div class="day-number">${day}</div>
-                ${hasBookings ? `<div class="booking-count">${hasBookings.length} đặt</div>` : ''}
+                ${dayBookings.length > 0 ? `<div class="booking-count">${dayBookings.length} đặt</div>` : ''}
             </div>
         `;
     }
@@ -183,10 +206,84 @@ function generateCalendar(fieldId) {
                 <div class="legend-color has-bookings"></div>
                 <span>Có booking</span>
             </div>
+            <div class="legend-item">
+                <div class="legend-color past"></div>
+                <span>Đã qua</span>
+            </div>
         </div>
     `;
     
     return calendarHTML;
+}
+
+function getFieldBookings(fieldId) {
+    // Mock booking data for different fields
+    const fieldBookings = {
+        '1': {
+            '2024-12-15': [
+                { time: '18:00-20:00', customer: 'Nguyễn Văn Nam', status: 'confirmed' },
+                { time: '20:00-22:00', customer: 'Trần Minh Tuấn', status: 'confirmed' }
+            ],
+            '2024-12-16': [
+                { time: '14:00-16:00', customer: 'Lê Hoàng Anh', status: 'confirmed' }
+            ],
+            '2024-12-17': [
+                { time: '16:00-18:00', customer: 'Phạm Thị Mai', status: 'confirmed' },
+                { time: '18:00-20:00', customer: 'Vũ Đức Hùng', status: 'pending' }
+            ],
+            '2024-12-18': [
+                { time: '19:00-21:00', customer: 'Ngô Thị Lan', status: 'confirmed' }
+            ],
+            '2024-12-20': [
+                { time: '15:00-17:00', customer: 'Đỗ Văn Sơn', status: 'confirmed' },
+                { time: '17:00-19:00', customer: 'Hoàng Văn Dũng', status: 'confirmed' },
+                { time: '19:00-21:00', customer: 'Lý Thị Hoa', status: 'confirmed' }
+            ]
+        },
+        '7': {
+            '2024-12-15': [
+                { time: '19:00-21:00', customer: 'Bùi Thị Thu', status: 'confirmed' }
+            ],
+            '2024-12-17': [
+                { time: '20:00-22:00', customer: 'Hồ Văn Long', status: 'confirmed' }
+            ],
+            '2024-12-19': [
+                { time: '18:00-20:00', customer: 'Đặng Văn Minh', status: 'pending' }
+            ]
+        }
+    };
+    
+    return fieldBookings[fieldId] || {};
+}
+
+function changeMonth(direction) {
+    // This would update the calendar to show previous/next month
+    // For now, just show a toast message
+    const monthNames = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 
+                       'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
+    const currentDate = new Date();
+    const newMonth = currentDate.getMonth() + direction;
+    const monthName = monthNames[newMonth >= 0 ? newMonth : newMonth + 12];
+    
+    showToast(`Chuyển đến ${monthName}`, 'info');
+}
+
+function viewDayBookings(dateStr, bookingCount) {
+    if (bookingCount === 0) {
+        showToast('Không có đặt sân nào trong ngày này', 'info');
+        return;
+    }
+    
+    // Show booking details for the selected day
+    const bookings = getFieldBookings(currentFieldId)[dateStr] || [];
+    let bookingDetails = `Đặt sân ngày ${dateStr}:\n\n`;
+    
+    bookings.forEach((booking, index) => {
+        const statusIcon = booking.status === 'confirmed' ? '✅' : '⏳';
+        bookingDetails += `${index + 1}. ${statusIcon} ${booking.time} - ${booking.customer}\n`;
+    });
+    
+    showToast(bookingDetails, 'info');
 }
 
 function toggleStatus(fieldId, currentStatus) {
@@ -248,6 +345,8 @@ function updateFieldStatus(fieldId, newStatus) {
 function closeModal() {
     const modal = document.getElementById('bookingModal');
     modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+    currentFieldId = null;
 }
 
 function closeConfirmModal() {

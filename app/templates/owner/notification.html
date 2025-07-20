@@ -1,1 +1,224 @@
- 
+{% extends 'base.html' %}
+{% block title %}Thông báo | SportSlot Owner{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/owner/notification.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="notification-page">
+    <!-- Header -->
+    <div class="notification-header">
+        <div class="header-left">
+            <h1>Thông báo</h1>
+            <p class="header-subtitle">Quản lý tất cả thông báo hệ thống</p>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="markAllRead()">
+                <span class="btn-icon">✓</span>
+                Đánh dấu tất cả đã đọc
+            </button>
+            <button class="btn btn-primary" onclick="refreshNotifications()">
+                <span class="btn-icon">↻</span>
+                Làm mới
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="notification-stats">
+        <div class="stat-card">
+            <div class="stat-icon total">📊</div>
+            <div class="stat-content">
+                <div class="stat-number">{{ stats.total }}</div>
+                <div class="stat-label">Tổng thông báo</div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon unread">🔔</div>
+            <div class="stat-content">
+                <div class="stat-number">{{ stats.unread }}</div>
+                <div class="stat-label">Chưa đọc</div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon urgent">⚠️</div>
+            <div class="stat-content">
+                <div class="stat-number">{{ stats.urgent }}</div>
+                <div class="stat-label">Cần xử lý</div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon booking">⚽</div>
+            <div class="stat-content">
+                <div class="stat-number">{{ stats.by_type.booking }}</div>
+                <div class="stat-label">Booking</div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon payment">💰</div>
+            <div class="stat-content">
+                <div class="stat-number">{{ stats.by_type.payment }}</div>
+                <div class="stat-label">Thanh toán</div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon review">⭐</div>
+            <div class="stat-content">
+                <div class="stat-number">{{ stats.by_type.review }}</div>
+                <div class="stat-label">Đánh giá</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="notification-controls">
+        <div class="filter-section">
+            <button class="filter-btn active" data-filter="all">
+                Tất cả <span class="filter-count">{{ stats.total }}</span>
+            </button>
+            <button class="filter-btn" data-filter="urgent">
+                Khẩn cấp <span class="filter-count">{{ stats.urgent }}</span>
+            </button>
+            <button class="filter-btn" data-filter="booking">
+                Booking <span class="filter-count">{{ stats.by_type.booking }}</span>
+            </button>
+            <button class="filter-btn" data-filter="payment">
+                Thanh toán <span class="filter-count">{{ stats.by_type.payment }}</span>
+            </button>
+            <button class="filter-btn" data-filter="review">
+                Đánh giá <span class="filter-count">{{ stats.by_type.review }}</span>
+            </button>
+            <button class="filter-btn" data-filter="report">
+                Báo cáo <span class="filter-count">{{ stats.by_type.report }}</span>
+            </button>
+            <button class="filter-btn" data-filter="system">
+                Hệ thống <span class="filter-count">{{ stats.by_type.system }}</span>
+            </button>
+        </div>
+        
+        <div class="search-section">
+            <div class="search-box">
+                <input type="text" id="notificationSearch" placeholder="Tìm kiếm thông báo...">
+                <span class="search-icon">🔍</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications List -->
+    <div class="notifications-container">
+        <div class="notifications-list" id="notificationsList">
+            {% for notification in notifications %}
+            <div class="notification-item {{ 'unread' if not notification.read }} {{ notification.type }} {{ notification.subtype }}" 
+                 data-id="{{ notification.id }}" 
+                 data-type="{{ notification.type }}"
+                 data-subtype="{{ notification.subtype }}">
+                
+                <div class="notification-icon">
+                    {% if notification.type == 'booking' %}
+                        {% if notification.subtype == 'urgent' %}⚠️{% else %}📅{% endif %}
+                    {% elif notification.type == 'payment' %}
+                        {% if notification.subtype == 'success' %}💰{% else %}❌{% endif %}
+                    {% elif notification.type == 'review' %}
+                        {% if notification.subtype == 'positive' %}⭐{% else %}😞{% endif %}
+                    {% elif notification.type == 'report' %}📊
+                    {% elif notification.type == 'system' %}✅
+                    {% endif %}
+                </div>
+                
+                <div class="notification-content">
+                    <div class="notification-header">
+                        <div class="notification-title">
+                            <span class="type-badge {{ notification.type }}">{{ notification.type|title }}</span>
+                            {% if notification.subtype == 'urgent' %}
+                                <span class="urgent-badge">Khẩn cấp</span>
+                            {% endif %}
+                            {{ notification.title }}
+                        </div>
+                        <div class="notification-time">{{ notification.date }}</div>
+                    </div>
+                    
+                    <div class="notification-message">{{ notification.message }}</div>
+                    <div class="notification-details">{{ notification.details }}</div>
+                    
+                    {% if notification.action_required %}
+                    <div class="notification-actions">
+                        {% if notification.type == 'booking' and notification.subtype == 'urgent' %}
+                            <button class="action-btn approve" onclick="approveBooking({{ notification.booking_id }})">
+                                <span class="action-icon">✓</span> Duyệt
+                            </button>
+                            <button class="action-btn reject" onclick="rejectBooking({{ notification.booking_id }})">
+                                <span class="action-icon">✕</span> Từ chối
+                            </button>
+                        {% elif notification.type == 'review' and notification.subtype == 'negative' %}
+                            <button class="action-btn respond" onclick="respondToReview({{ notification.id }})">
+                                <span class="action-icon">💬</span> Phản hồi
+                            </button>
+                        {% elif notification.type == 'payment' and notification.subtype == 'failed' %}
+                            <button class="action-btn retry" onclick="retryPayment({{ notification.id }})">
+                                <span class="action-icon">🔄</span> Thử lại
+                            </button>
+                        {% elif notification.type == 'report' %}
+                            <a href="{{ url_for('owner.transaction_history') }}" class="action-btn view-report">
+                                <span class="action-icon">📊</span> Xem báo cáo
+                            </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="notification-status">
+                    {% if not notification.read %}
+                        <div class="unread-indicator"></div>
+                    {% endif %}
+                    <button class="status-btn" onclick="toggleNotificationStatus({{ notification.id }})">
+                        {% if notification.read %}✓{% else %}○{% endif %}
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <div class="empty-icon">🔔</div>
+            <h3>Không có thông báo nào</h3>
+            <p>Tất cả thông báo đã được xử lý hoặc không có thông báo mới.</p>
+        </div>
+    </div>
+
+    <!-- Load More -->
+    <div class="load-more-section">
+        <button class="load-more-btn" onclick="loadMoreNotifications()">
+            <span class="load-more-icon">↓</span>
+            Tải thêm thông báo
+        </button>
+    </div>
+</div>
+
+<!-- Notification Detail Modal -->
+<div class="notification-modal" id="notificationModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">Chi tiết thông báo</h3>
+            <button class="modal-close" onclick="closeNotificationModal()">×</button>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <!-- Content will be loaded here -->
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeNotificationModal()">Đóng</button>
+            <button class="btn btn-primary" id="modalActionBtn" style="display: none;">Thực hiện</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/owner/notification.js') }}"></script>
+{% endblock %} 

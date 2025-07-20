@@ -56,54 +56,119 @@
                 
                 <div class="notification-dropdown" id="ownerNotificationDropdown">
                     <div class="notification-header">
-                        <h3>Thông báo</h3>
-                        <button class="mark-all-read">Đánh dấu đã đọc</button>
+                        <div class="notification-header-left">
+                            <h3>Thông báo</h3>
+                            <span class="notification-count">5 mới</span>
+                        </div>
+                        <button class="mark-all-read" onclick="markAllNotificationsRead()">
+                            <span class="mark-all-icon">✓</span>
+                            Đánh dấu đã đọc
+                        </button>
+                    </div>
+                    
+                    <div class="notification-filters">
+                        <button class="filter-btn active" data-filter="all">Tất cả</button>
+                        <button class="filter-btn" data-filter="urgent">Khẩn cấp</button>
+                        <button class="filter-btn" data-filter="booking">Booking</button>
+                        <button class="filter-btn" data-filter="payment">Thanh toán</button>
                     </div>
                     
                     <div class="notification-list">
-                        <div class="notification-item unread urgent">
+                        <div class="notification-item unread urgent" data-type="booking" data-id="1">
+                            <div class="notification-icon urgent-icon">⚠️</div>
                             <div class="notification-content">
-                                <div class="notification-title">Booking cần duyệt</div>
-                                <div class="notification-text">Sân bóng đá A - 21/12/2024 15:00</div>
+                                <div class="notification-title">
+                                    <span class="notification-type-badge urgent">Khẩn cấp</span>
+                                    Booking cần duyệt gấp
+                                </div>
+                                <div class="notification-text">
+                                    <strong>Sân bóng đá A</strong> - Khách hàng: Nguyễn Văn Nam<br>
+                                    <span class="booking-details">21/12/2024 15:00-17:00 | 400.000đ</span>
+                                </div>
+                                <div class="notification-actions">
+                                    <button class="action-btn approve" onclick="approveBooking(1)">Duyệt</button>
+                                    <button class="action-btn reject" onclick="rejectBooking(1)">Từ chối</button>
+                                </div>
                                 <div class="notification-time">5 phút trước</div>
                             </div>
                         </div>
                         
-                        <div class="notification-item unread">
+                        <div class="notification-item unread" data-type="payment" data-id="2">
+                            <div class="notification-icon payment-icon">💰</div>
                             <div class="notification-content">
-                                <div class="notification-title">Thanh toán thành công</div>
-                                <div class="notification-text">400.000đ - Booking #BK003</div>
+                                <div class="notification-title">
+                                    <span class="notification-type-badge payment">Thanh toán</span>
+                                    Thanh toán thành công
+                                </div>
+                                <div class="notification-text">
+                                    <strong>Booking #BK003</strong> - Sân Tennis Elite<br>
+                                    <span class="payment-amount">400.000đ</span> | Phương thức: VNPay
+                                </div>
                                 <div class="notification-time">30 phút trước</div>
                             </div>
                         </div>
                         
-                        <div class="notification-item unread">
+                        <div class="notification-item unread" data-type="review" data-id="3">
+                            <div class="notification-icon review-icon">⭐</div>
                             <div class="notification-content">
-                                <div class="notification-title">Đánh giá mới</div>
-                                <div class="notification-text">5 sao - "Sân đẹp, chất lượng tốt"</div>
+                                <div class="notification-title">
+                                    <span class="notification-type-badge review">Đánh giá</span>
+                                    Đánh giá mới 5 sao
+                                </div>
+                                <div class="notification-text">
+                                    <strong>Sân bóng đá B</strong> - Khách hàng: Trần Minh Tuấn<br>
+                                    <span class="review-text">"Sân đẹp, chất lượng tốt, nhân viên phục vụ nhiệt tình"</span>
+                                </div>
+                                <div class="notification-actions">
+                                    <button class="action-btn view-review" onclick="viewReview(3)">Xem chi tiết</button>
+                                </div>
                                 <div class="notification-time">1 giờ trước</div>
                             </div>
                         </div>
                         
-                        <div class="notification-item">
+                        <div class="notification-item" data-type="report" data-id="4">
+                            <div class="notification-icon report-icon">📊</div>
                             <div class="notification-content">
-                                <div class="notification-title">Báo cáo tuần</div>
-                                <div class="notification-text">Doanh thu tuần này: 15.2M VNĐ</div>
+                                <div class="notification-title">
+                                    <span class="notification-type-badge report">Báo cáo</span>
+                                    Báo cáo doanh thu tuần
+                                </div>
+                                <div class="notification-text">
+                                    <strong>Tuần này:</strong> 15.2M VNĐ (+12% so với tuần trước)<br>
+                                    <span class="report-details">45 booking | 8.5 sao trung bình</span>
+                                </div>
+                                <div class="notification-actions">
+                                    <a href="{{ url_for('owner.transaction_history') }}" class="action-btn view-report">Xem báo cáo</a>
+                                </div>
                                 <div class="notification-time">2 giờ trước</div>
                             </div>
                         </div>
                         
-                        <div class="notification-item">
+                        <div class="notification-item" data-type="system" data-id="5">
+                            <div class="notification-icon system-icon">✅</div>
                             <div class="notification-content">
-                                <div class="notification-title">Sân mới được duyệt</div>
-                                <div class="notification-text">Sân Tennis Elite đã được phê duyệt</div>
+                                <div class="notification-title">
+                                    <span class="notification-type-badge system">Hệ thống</span>
+                                    Sân mới được duyệt
+                                </div>
+                                <div class="notification-text">
+                                    <strong>Sân Tennis Elite</strong> đã được phê duyệt thành công<br>
+                                    <span class="system-details">Sân sẽ hoạt động từ ngày mai</span>
+                                </div>
                                 <div class="notification-time">1 ngày trước</div>
                             </div>
                         </div>
                     </div>
                     
                     <div class="notification-footer">
-                        <a href="{{ url_for('owner.notifications') }}" class="view-all-notifications">Xem tất cả</a>
+                        <div class="notification-stats">
+                            <span class="stats-item">5 thông báo mới</span>
+                            <span class="stats-item">2 cần xử lý</span>
+                        </div>
+                        <a href="{{ url_for('owner.notifications') }}" class="view-all-notifications">
+                            Xem tất cả thông báo
+                            <span class="view-all-arrow">→</span>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -143,30 +208,14 @@
                             <span class="menu-badge">5</span>
                         </a>
                         
-                        <a href="#" class="menu-item">
-                            <span class="menu-text">Cài đặt</span>
-                        </a>
-                        
-                        <a href="#" class="menu-item">
+                        <a href="{{ url_for('owner.transaction_history') }}" class="menu-item">
                             <span class="menu-text">Báo cáo chi tiết</span>
-                        </a>
-                        
-                        <a href="#" class="menu-item">
-                            <span class="menu-text">Thanh toán & Hóa đơn</span>
-                        </a>
-                        
-                        <a href="#" class="menu-item">
-                            <span class="menu-text">Hướng dẫn sử dụng</span>
                         </a>
                     </div>
                     
                     <div class="menu-divider"></div>
                     
-                    <div class="menu-footer">
-                        <a href="#" class="menu-item">
-                            <span class="menu-text">Hỗ trợ</span>
-                        </a>
-                        
+                    <div class="menu-footer">  
                         <a href="{{ url_for('auth.logout') }}" class="menu-item logout-item">
                             <span class="menu-text">Đăng xuất</span>
                         </a>
@@ -304,6 +353,129 @@ document.addEventListener('click', function(event) {
     if (notificationBell && !notificationBell.contains(event.target)) {
         document.getElementById('ownerNotificationDropdown').classList.remove('show');
     }
+});
+
+// Notification functions
+function markAllNotificationsRead() {
+    const unreadItems = document.querySelectorAll('.notification-item.unread');
+    unreadItems.forEach(item => {
+        item.classList.remove('unread');
+    });
+    
+    // Update notification count
+    const badge = document.querySelector('.notification-badge');
+    const count = document.querySelector('.notification-count');
+    if (badge) badge.textContent = '0';
+    if (count) count.textContent = '0 mới';
+    
+    // Show success message
+    showNotificationToast('Đã đánh dấu tất cả thông báo đã đọc');
+}
+
+function approveBooking(bookingId) {
+    // Simulate API call
+    showNotificationToast('Đã duyệt booking #' + bookingId);
+    
+    // Remove the notification item
+    const notificationItem = document.querySelector(`[data-id="${bookingId}"]`);
+    if (notificationItem) {
+        notificationItem.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            notificationItem.remove();
+            updateNotificationCount();
+        }, 300);
+    }
+}
+
+function rejectBooking(bookingId) {
+    // Simulate API call
+    showNotificationToast('Đã từ chối booking #' + bookingId);
+    
+    // Remove the notification item
+    const notificationItem = document.querySelector(`[data-id="${bookingId}"]`);
+    if (notificationItem) {
+        notificationItem.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            notificationItem.remove();
+            updateNotificationCount();
+        }, 300);
+    }
+}
+
+function viewReview(reviewId) {
+    showNotificationToast('Mở trang đánh giá #' + reviewId);
+    // Redirect to review page
+    // window.location.href = '/owner/reviews/' + reviewId;
+}
+
+function viewReport(reportId) {
+    showNotificationToast('Mở báo cáo #' + reportId);
+    // Redirect to transaction history page
+    window.location.href = '{{ url_for("owner.transaction_history") }}';
+}
+
+function updateNotificationCount() {
+    const unreadItems = document.querySelectorAll('.notification-item.unread');
+    const badge = document.querySelector('.notification-badge');
+    const count = document.querySelector('.notification-count');
+    
+    if (badge) badge.textContent = unreadItems.length;
+    if (count) count.textContent = unreadItems.length + ' mới';
+}
+
+function showNotificationToast(message) {
+    // Create toast notification
+    const toast = document.createElement('div');
+    toast.className = 'notification-toast';
+    toast.textContent = message;
+    toast.style.cssText = `
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        background: #10b981;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        z-index: 10000;
+        animation: slideInRight 0.3s ease;
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.animation = 'slideOutRight 0.3s ease';
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Filter notifications
+document.addEventListener('DOMContentLoaded', function() {
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const filter = this.getAttribute('data-filter');
+            
+            // Update active button
+            filterBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Filter notifications
+            const notifications = document.querySelectorAll('.notification-item');
+            notifications.forEach(item => {
+                if (filter === 'all' || item.getAttribute('data-type') === filter) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
 });
 
 // Update revenue display (simulated)
