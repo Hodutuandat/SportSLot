@@ -1,1 +1,246 @@
- 
+{% extends "base.html" %}
+
+{% block title %}Lịch sử đặt sân - SportSlot{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/customer/booking_history.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="booking-history-container">
+    <!-- Header Section -->
+    <div class="main-header">
+        <div class="header-content">
+            <div class="header-left">
+                <h1>📅 Lịch sử đặt sân</h1>
+                <p class="header-subtitle">Theo dõi tất cả các lần đặt sân của bạn</p>
+            </div>
+            <div class="header-actions">
+                <div class="stats-summary">
+                    <div class="stat-item">
+                        <span class="stat-number">{{ total_bookings }}</span>
+                        <span class="stat-label">Tổng đặt sân</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">{{ active_bookings }}</span>
+                        <span class="stat-label">Đang hoạt động</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <div class="filter-controls">
+            <div class="filter-group">
+                <label for="status-filter">Trạng thái:</label>
+                <select id="status-filter" class="filter-select">
+                    <option value="all">Tất cả</option>
+                    <option value="confirmed">Đã xác nhận</option>
+                    <option value="pending">Chờ xác nhận</option>
+                    <option value="completed">Đã hoàn thành</option>
+                    <option value="cancelled">Đã hủy</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="date-filter">Thời gian:</label>
+                <select id="date-filter" class="filter-select">
+                    <option value="all">Tất cả</option>
+                    <option value="today">Hôm nay</option>
+                    <option value="week">Tuần này</option>
+                    <option value="month">Tháng này</option>
+                    <option value="year">Năm nay</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="field-filter">Sân:</label>
+                <select id="field-filter" class="filter-select">
+                    <option value="all">Tất cả sân</option>
+                    {% for field in fields %}
+                    <option value="{{ field.id }}">{{ field.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button class="clear-filters-btn" onclick="clearFilters()">
+                <i class="fas fa-times"></i>
+                Xóa bộ lọc
+            </button>
+        </div>
+    </div>
+
+    <!-- Booking History List -->
+    <div class="booking-list-container">
+        {% if bookings %}
+        <div class="booking-list" id="booking-list">
+            {% for booking in bookings %}
+            <div class="booking-card" data-status="{{ booking.status }}" data-field="{{ booking.field_id }}" data-date="{{ booking.booking_date }}">
+                <div class="booking-header">
+                    <div class="booking-info">
+                        <h3 class="field-name">{{ booking.field_name }}</h3>
+                        <p class="booking-date">
+                            <i class="fas fa-calendar"></i>
+                            {{ booking.booking_date.strftime('%d/%m/%Y') }}
+                        </p>
+                        <p class="booking-time">
+                            <i class="fas fa-clock"></i>
+                            {{ booking.start_time }} - {{ booking.end_time }}
+                        </p>
+                    </div>
+                    <div class="booking-status">
+                        <span class="status-badge status-{{ booking.status }}">
+                            {% if booking.status == 'confirmed' %}
+                                <i class="fas fa-check-circle"></i>
+                                Đã xác nhận
+                            {% elif booking.status == 'pending' %}
+                                <i class="fas fa-clock"></i>
+                                Chờ xác nhận
+                            {% elif booking.status == 'completed' %}
+                                <i class="fas fa-flag-checkered"></i>
+                                Đã hoàn thành
+                            {% elif booking.status == 'cancelled' %}
+                                <i class="fas fa-times-circle"></i>
+                                Đã hủy
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="booking-details">
+                    <div class="detail-row">
+                        <div class="detail-item">
+                            <span class="detail-label">Mã đặt sân:</span>
+                            <span class="detail-value">{{ booking.booking_code }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Thời gian:</span>
+                            <span class="detail-value">{{ booking.duration }} giờ</span>
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-item">
+                            <span class="detail-label">Giá:</span>
+                            <span class="detail-value price">{{ "{:,.0f}".format(booking.total_price) }} VNĐ</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Phương thức:</span>
+                            <span class="detail-value">{{ booking.payment_method }}</span>
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-item">
+                            <span class="detail-label">Địa chỉ:</span>
+                            <span class="detail-value">{{ booking.field_address }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="booking-actions">
+                    {% if booking.status == 'pending' %}
+                    <button class="action-btn cancel-btn" onclick="cancelBooking('{{ booking.id }}')">
+                        <i class="fas fa-times"></i>
+                        Hủy đặt sân
+                    </button>
+                    {% endif %}
+                    
+                    {% if booking.status == 'confirmed' %}
+                    <button class="action-btn view-btn" onclick="viewBookingDetails('{{ booking.id }}')">
+                        <i class="fas fa-eye"></i>
+                        Xem chi tiết
+                    </button>
+                    <button class="action-btn qr-btn" onclick="showQRCode('{{ booking.id }}')">
+                        <i class="fas fa-qrcode"></i>
+                        Mã QR
+                    </button>
+                    {% endif %}
+                    
+                    {% if booking.status == 'completed' %}
+                    <button class="action-btn review-btn" onclick="writeReview('{{ booking.id }}')">
+                        <i class="fas fa-star"></i>
+                        Đánh giá
+                    </button>
+                    <button class="action-btn rebook-btn" onclick="rebookField('{{ booking.field_id }}')">
+                        <i class="fas fa-redo"></i>
+                        Đặt lại
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        <div class="pagination-container">
+            {% if pagination.has_prev %}
+            <a href="{{ url_for('customer.booking_history', page=pagination.prev_num) }}" class="pagination-btn">
+                <i class="fas fa-chevron-left"></i>
+                Trước
+            </a>
+            {% endif %}
+            
+            <div class="pagination-info">
+                <span class="page-info">Trang {{ pagination.page }} / {{ pagination.pages }}</span>
+                <span class="items-info">Hiển thị {{ (pagination.page - 1) * pagination.per_page + 1 }}-{{ [pagination.page * pagination.per_page, pagination.total] | min }} trong tổng số {{ pagination.total }} đặt sân</span>
+            </div>
+            
+            {% if pagination.has_next %}
+            <a href="{{ url_for('customer.booking_history', page=pagination.next_num) }}" class="pagination-btn">
+                Sau
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            {% endif %}
+        </div>
+        
+        {% else %}
+        <!-- Empty State -->
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-calendar-times"></i>
+            </div>
+            <h3>Chưa có lịch sử đặt sân</h3>
+            <p>Bạn chưa có lần đặt sân nào. Hãy bắt đầu đặt sân ngay hôm nay!</p>
+            <a href="{{ url_for('customer.field_list') }}" class="cta-btn">
+                <i class="fas fa-search"></i>
+                Tìm sân ngay
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- QR Code Modal -->
+<div id="qr-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Mã QR đặt sân</h3>
+            <span class="close" onclick="closeQRModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div id="qr-code-container"></div>
+            <p class="qr-instruction">Hiển thị mã QR này cho nhân viên để xác nhận đặt sân</p>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Booking Modal -->
+<div id="cancel-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Xác nhận hủy đặt sân</h3>
+            <span class="close" onclick="closeCancelModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p>Bạn có chắc chắn muốn hủy đặt sân này không?</p>
+            <p class="warning-text">Hành động này không thể hoàn tác.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeCancelModal()">Không</button>
+            <button class="btn-danger" onclick="confirmCancelBooking()">Có, hủy đặt sân</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/customer/booking_history.js') }}"></script>
+{% endblock %} 

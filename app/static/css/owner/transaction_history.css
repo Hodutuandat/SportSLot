@@ -1,1 +1,721 @@
- 
+/* Revenue/Transaction History Page Styles */
+
+/* Main Container */
+.owner-revenue-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #f8f9fa;
+    min-height: calc(100vh - 95px);
+}
+
+/* Header Styles */
+.main-header {
+    background: white;
+    border-radius: 12px;
+    padding: 20px 30px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.header-content h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #232a34;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.date-filter select {
+    padding: 10px 15px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.date-filter select:focus {
+    outline: none;
+    border-color: #1e90ff;
+    box-shadow: 0 0 0 3px rgba(30,144,255,0.1);
+}
+
+.export-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #1e90ff, #0066cc);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.export-btn:hover {
+    background: linear-gradient(135deg, #0066cc, #004499);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(30,144,255,0.3);
+}
+
+/* Revenue Overview Cards */
+.revenue-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.revenue-card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    border-left: 4px solid;
+}
+
+.revenue-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.revenue-card.total-revenue {
+    border-left-color: #10b981;
+}
+
+.revenue-card.total-bookings {
+    border-left-color: #1e90ff;
+}
+
+.revenue-card.avg-revenue {
+    border-left-color: #f59e0b;
+}
+
+.revenue-card.conversion-rate {
+    border-left-color: #8b5cf6;
+}
+
+.card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+}
+
+.card-value {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #232a34;
+    margin-bottom: 5px;
+}
+
+.card-label {
+    font-size: 1rem;
+    color: #6b7280;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.card-change {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.card-change.positive {
+    color: #10b981;
+}
+
+.card-change.negative {
+    color: #ef4444;
+}
+
+.change-icon {
+    font-size: 1rem;
+}
+
+.change-period {
+    color: #9ca3af;
+    font-weight: 500;
+}
+
+/* Charts Section */
+.charts-section {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.chart-container {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.chart-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #232a34;
+}
+
+.chart-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.chart-btn {
+    padding: 8px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 6px;
+    background: white;
+    color: #6b7280;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.chart-btn.active,
+.chart-btn:hover {
+    background: #1e90ff;
+    color: white;
+    border-color: #1e90ff;
+}
+
+.chart-wrapper {
+    height: 300px;
+    position: relative;
+}
+
+/* Revenue Details */
+.revenue-details {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.detail-section {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.section-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #232a34;
+}
+
+.view-all-link {
+    color: #1e90ff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.view-all-link:hover {
+    color: #0066cc;
+}
+
+/* Top Customers */
+.top-customers {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.customer-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    border-radius: 8px;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+.customer-item:hover {
+    background: #f3f4f6;
+    transform: translateX(5px);
+}
+
+.customer-rank {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1e90ff, #0066cc);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.customer-info {
+    flex: 1;
+}
+
+.customer-name {
+    font-weight: 700;
+    color: #232a34;
+    margin-bottom: 5px;
+}
+
+.customer-stats {
+    display: flex;
+    gap: 15px;
+    font-size: 0.85rem;
+    color: #6b7280;
+}
+
+.booking-count {
+    color: #1e90ff;
+    font-weight: 600;
+}
+
+.total-spent {
+    color: #10b981;
+    font-weight: 600;
+}
+
+.customer-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+/* Transaction Filters */
+.transaction-filters {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.transaction-filters input {
+    padding: 8px 12px;
+    border: 2px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    min-width: 200px;
+}
+
+.transaction-filters input:focus {
+    outline: none;
+    border-color: #1e90ff;
+}
+
+.transaction-filters select {
+    padding: 8px 12px;
+    border: 2px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background: white;
+}
+
+/* Transactions Table */
+.transactions-table {
+    overflow-x: auto;
+}
+
+.transactions-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.transactions-table th {
+    background: #f8f9fa;
+    padding: 15px 12px;
+    text-align: left;
+    font-weight: 700;
+    color: #374151;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.transactions-table td {
+    padding: 15px 12px;
+    border-bottom: 1px solid #e5e7eb;
+    color: #6b7280;
+}
+
+.transactions-table tr:hover {
+    background: #f8f9fa;
+}
+
+.amount {
+    font-weight: 700;
+    color: #10b981;
+}
+
+.status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status.completed {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status.pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status.cancelled {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.action-btn {
+    padding: 6px 12px;
+    border: 1px solid #1e90ff;
+    border-radius: 4px;
+    background: white;
+    color: #1e90ff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+    background: #1e90ff;
+    color: white;
+}
+
+/* Revenue Insights */
+.revenue-insights {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.insight-card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    transition: all 0.3s ease;
+}
+
+.insight-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.insight-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.insight-content h4 {
+    margin: 0 0 10px 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #232a34;
+}
+
+.insight-content p {
+    margin: 0;
+    color: #6b7280;
+    line-height: 1.5;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 5% auto;
+    padding: 0;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    animation: slideDown 0.3s ease;
+}
+
+.transaction-modal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.transaction-modal .modal-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #232a34;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #6b7280;
+    padding: 5px;
+    transition: color 0.3s ease;
+}
+
+.close-btn:hover {
+    color: #232a34;
+}
+
+.transaction-modal .modal-body {
+    padding: 25px;
+}
+
+.transaction-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #374151;
+    min-width: 120px;
+}
+
+.detail-value {
+    color: #6b7280;
+    text-align: right;
+    flex: 1;
+}
+
+.detail-value.amount {
+    color: #10b981;
+    font-weight: 700;
+}
+
+.transaction-modal .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 20px 25px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn.primary {
+    background: linear-gradient(135deg, #1e90ff, #0066cc);
+    color: white;
+}
+
+.btn.primary:hover {
+    background: linear-gradient(135deg, #0066cc, #004499);
+}
+
+.btn.secondary {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.btn.secondary:hover {
+    background: #d1d5db;
+}
+
+/* Animations */
+@keyframes slideDown {
+    from { 
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .charts-section {
+        grid-template-columns: 1fr;
+    }
+    
+    .revenue-details {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .owner-revenue-container {
+        padding: 15px;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .header-actions {
+        justify-content: center;
+    }
+    
+    .revenue-overview {
+        grid-template-columns: 1fr;
+    }
+    
+    .revenue-insights {
+        grid-template-columns: 1fr;
+    }
+    
+    .chart-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .transaction-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .transactions-table {
+        font-size: 0.8rem;
+    }
+    
+    .transactions-table th,
+    .transactions-table td {
+        padding: 10px 8px;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-header {
+        padding: 15px 20px;
+    }
+    
+    .header-content h1 {
+        font-size: 1.5rem;
+    }
+    
+    .revenue-card {
+        padding: 20px;
+    }
+    
+    .card-value {
+        font-size: 1.8rem;
+    }
+    
+    .chart-container,
+    .detail-section {
+        padding: 20px;
+    }
+    
+    .insight-card {
+        padding: 20px;
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .detail-value {
+        text-align: left;
+    }
+} 

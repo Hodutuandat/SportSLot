@@ -1,0 +1,152 @@
+<!-- Customer Navigation Bar -->
+<nav class="customer-navbar">
+    <div class="navbar-container">
+        <!-- Brand/Logo -->
+        <div class="navbar-brand">
+            <a href="{{ url_for('common.home') }}" class="brand-link">
+                <span class="logo-text">SportSlot</span>
+            </a>
+        </div>
+
+        <!-- Main Navigation -->
+        <div class="navbar-menu">
+            <div class="navbar-nav">
+                <a href="{{ url_for('common.home') }}" class="nav-item {% if request.endpoint == 'common.home' %}active{% endif %}">
+                    Trang chủ
+                </a>
+                
+                <a href="{{ url_for('customer.field_list') }}" class="nav-item {% if request.endpoint == 'customer.field_list' %}active{% endif %}">
+                    Danh sách sân
+                </a>
+                
+                <a href="{{ url_for('common.voucher') }}" class="nav-item {% if request.endpoint == 'common.voucher' %}active{% endif %}">
+                    Ưu đãi
+                </a>
+                
+                <a href="{{ url_for('common.about') }}" class="nav-item {% if request.endpoint == 'common.about' %}active{% endif %}">
+                    Liên hệ
+                </a>
+            </div>
+        </div>
+
+        <!-- User Actions - Only for authenticated customers -->
+        <div class="navbar-actions">
+            <!-- User Menu Dropdown -->
+            <div class="user-menu-dropdown">
+                <button class="user-menu-trigger" onclick="toggleUserMenu()">
+                    <div class="user-avatar">
+                        {{ current_user.username[0].upper() }}
+                    </div>
+                    <span class="user-name">{{ current_user.username }}</span>
+                    <span class="dropdown-arrow">⌄</span>
+                </button>
+                
+                <div class="user-menu-content" id="userMenuContent">
+                    <div class="menu-items">
+                        <a href="{{ url_for('auth.profile') }}" class="menu-item">
+                            Hồ sơ cá nhân
+                        </a>
+                        
+                        <a href="{{ url_for('customer.booking_history') }}" class="menu-item">
+                            Lịch sử đặt sân
+                        </a>
+                        
+                        <a href="{{ url_for('customer.transaction_history') }}" class="menu-item">
+                            Lịch sử giao dịch
+                        </a>
+                        
+                        <a href="{{ url_for('customer.my_vouchers') }}" class="menu-item">
+                            Voucher của tôi
+                        </a>
+                        
+                        <div class="menu-divider"></div>
+                        
+                        <a href="{{ url_for('auth.logout') }}" class="menu-item logout-item">
+                            Đăng xuất
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Toggle -->
+        <div class="mobile-menu-toggle">
+            <button class="hamburger-btn" onclick="toggleMobileMenu()">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay">
+        <div class="mobile-menu-content">
+            <div class="mobile-menu-header">
+                <div class="mobile-brand">
+                    <span class="logo-text">SportSlot</span>
+                </div>
+                <button class="mobile-close-btn" onclick="toggleMobileMenu()">×</button>
+            </div>
+            
+            <div class="mobile-menu-items">
+                <a href="{{ url_for('common.home') }}" class="mobile-nav-item">
+                    Trang chủ
+                </a>
+                
+                <a href="{{ url_for('customer.field_list') }}" class="mobile-nav-item">
+                    Danh sách sân
+                </a>
+                
+                <a href="{{ url_for('common.voucher') }}" class="mobile-nav-item">
+                    Ưu đãi
+                </a>
+                
+                <a href="{{ url_for('common.about') }}" class="mobile-nav-item">
+                    Liên hệ
+                </a>
+                
+                <div class="mobile-divider"></div>
+                
+                <a href="{{ url_for('auth.profile') }}" class="mobile-nav-item">
+                    Hồ sơ cá nhân
+                </a>
+                
+                <a href="{{ url_for('customer.booking_history') }}" class="mobile-nav-item">
+                    Lịch sử đặt sân
+                </a>
+                
+                <a href="{{ url_for('customer.my_vouchers') }}" class="mobile-nav-item">
+                    Voucher của tôi
+                </a>
+                
+                <a href="{{ url_for('auth.logout') }}" class="mobile-nav-item logout">
+                    Đăng xuất
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Customer Navbar JavaScript -->
+<script>
+function toggleUserMenu() {
+    const menu = document.getElementById('userMenuContent');
+    menu.classList.toggle('show');
+}
+
+function toggleMobileMenu() {
+    const overlay = document.getElementById('mobileMenuOverlay');
+    overlay.classList.toggle('show');
+    document.body.classList.toggle('mobile-menu-open');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const userMenu = document.querySelector('.user-menu-dropdown');
+    
+    if (userMenu && !userMenu.contains(event.target)) {
+        document.getElementById('userMenuContent').classList.remove('show');
+    }
+});
+</script> 

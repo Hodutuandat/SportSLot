@@ -1,1 +1,548 @@
- 
+{% extends 'base.html' %}
+{% block title %}Lịch đặt sân | SportSlot Owner{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/owner/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/owner/booking_schedule.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="owner-booking-schedule-container">
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-content">
+            <h1>Lịch đặt sân</h1>
+            <div class="header-actions">
+                <div class="date-navigation">
+                    <button class="nav-btn prev-week" onclick="previousWeek()">
+                        <span class="btn-icon">‹</span>
+                        Tuần trước
+                    </button>
+                    <div class="current-week">
+                        <span class="week-display">Tuần 18 - 24 Tháng 12, 2024</span>
+                    </div>
+                    <button class="nav-btn next-week" onclick="nextWeek()">
+                        Tuần sau
+                        <span class="btn-icon">›</span>
+                    </button>
+                </div>
+                <button class="today-btn" onclick="goToToday()">Hôm nay</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Legend -->
+    <div class="schedule-legend">
+        <div class="legend-item">
+            <div class="legend-color booked"></div>
+            <span class="legend-text">Đã đặt</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color maintenance"></div>
+            <span class="legend-text">Bảo trì</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color inactive"></div>
+            <span class="legend-text">Không hoạt động</span>
+        </div>
+    </div>
+
+    <!-- Schedule Container -->
+    <div class="schedule-container">
+        <!-- Time Column -->
+        <div class="time-column">
+            <div class="time-header">Thời gian</div>
+            <div class="time-slots">
+                <div class="time-slot morning">
+                    <div class="time-label">Sáng</div>
+                    <div class="time-range">05:00 - 12:00</div>
+                </div>
+                <div class="time-slot afternoon">
+                    <div class="time-label">Trưa</div>
+                    <div class="time-range">12:00 - 17:00</div>
+                </div>
+                <div class="time-slot evening">
+                    <div class="time-label">Chiều</div>
+                    <div class="time-range">17:00 - 23:00</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Days Columns -->
+        <div class="days-container">
+            <!-- Monday -->
+            <div class="day-column">
+                <div class="day-header">
+                    <div class="day-name">Thứ 2</div>
+                    <div class="day-date">18/12</div>
+                </div>
+                <div class="day-slots">
+                    <div class="slot morning-slot" data-day="monday" data-time="morning">
+                        <div class="slot-content">
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân B</div>
+                                    <div class="customer-name">Nguyễn Văn Nam</div>
+                                    <div class="booking-time">18:00-20:00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slot afternoon-slot" data-day="monday" data-time="afternoon">
+                        <div class="slot-content">
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân A</div>
+                                    <div class="customer-name">Trần Minh Tuấn</div>
+                                    <div class="booking-time">14:00-16:00</div>
+                                </div>
+                            </div>
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân B</div>
+                                    <div class="customer-name">Lê Hoàng Anh</div>
+                                    <div class="booking-time">15:00-17:00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slot evening-slot" data-day="monday" data-time="evening">
+                        <div class="slot-content">
+                            <div class="booking-item maintenance">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân A</div>
+                                    <div class="maintenance-text">Bảo trì</div>
+                                </div>
+                            </div>
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân B</div>
+                                    <div class="customer-name">Phạm Thị Mai</div>
+                                    <div class="booking-time">19:00-21:00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tuesday -->
+            <div class="day-column">
+                <div class="day-header">
+                    <div class="day-name">Thứ 3</div>
+                    <div class="day-date">19/12</div>
+                </div>
+                <div class="day-slots">
+                    <div class="slot morning-slot" data-day="tuesday" data-time="morning">
+                        <div class="slot-content">
+                            <!-- Không có booking nào -->
+                        </div>
+                    </div>
+                    <div class="slot afternoon-slot" data-day="tuesday" data-time="afternoon">
+                        <div class="slot-content">
+                            <!-- Không có booking nào -->
+                        </div>
+                    </div>
+                    <div class="slot evening-slot" data-day="tuesday" data-time="evening">
+                        <div class="slot-content">
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân A</div>
+                                    <div class="customer-name">Vũ Đức Hùng</div>
+                                    <div class="booking-time">20:00-22:00</div>
+                                </div>
+                            </div>
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân B</div>
+                                    <div class="customer-name">Ngô Thị Lan</div>
+                                    <div class="booking-time">19:00-21:00</div>
+                                </div>
+                            </div>
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân C</div>
+                                    <div class="customer-name">Đỗ Văn Sơn</div>
+                                    <div class="booking-time">18:00-20:00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wednesday -->
+            <div class="day-column">
+                <div class="day-header">
+                    <div class="day-name">Thứ 4</div>
+                    <div class="day-date">20/12</div>
+                </div>
+                <div class="day-slots">
+                    <div class="slot morning-slot" data-day="wednesday" data-time="morning">
+                        <div class="slot-content">
+                            <div class="booking-item inactive">
+                                <div class="booking-info">
+                                    <div class="field-name">Tất cả sân</div>
+                                    <div class="inactive-text">Không hoạt động</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slot afternoon-slot" data-day="wednesday" data-time="afternoon">
+                        <div class="slot-content">
+                            <!-- Không có booking nào -->
+                        </div>
+                    </div>
+                    <div class="slot evening-slot" data-day="wednesday" data-time="evening">
+                        <div class="slot-content">
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân A</div>
+                                    <div class="customer-name">Hoàng Văn Dũng</div>
+                                    <div class="booking-time">17:00-19:00</div>
+                                </div>
+                            </div>
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân C</div>
+                                    <div class="customer-name">Lý Thị Hoa</div>
+                                    <div class="booking-time">20:00-22:00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thursday -->
+            <div class="day-column">
+                <div class="day-header">
+                    <div class="day-name">Thứ 5</div>
+                    <div class="day-date">21/12</div>
+                </div>
+                <div class="day-slots">
+                    <div class="slot morning-slot" data-day="thursday" data-time="morning">
+                        <div class="slot-content">
+                            <!-- Không có booking nào -->
+                        </div>
+                    </div>
+                    <div class="slot afternoon-slot" data-day="thursday" data-time="afternoon">
+                        <div class="slot-content">
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân A</div>
+                                    <div class="customer-name">Trần Văn Phúc</div>
+                                    <div class="booking-time">14:00-16:00</div>
+                                </div>
+                            </div>
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân B</div>
+                                    <div class="customer-name">Nguyễn Thị Nga</div>
+                                    <div class="booking-time">15:00-17:00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slot evening-slot" data-day="thursday" data-time="evening">
+                        <div class="slot-content">
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân A</div>
+                                    <div class="customer-name">Lê Văn Tâm</div>
+                                    <div class="booking-time">18:00-20:00</div>
+                                </div>
+                            </div>
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân B</div>
+                                    <div class="customer-name">Phạm Văn Thành</div>
+                                    <div class="booking-time">19:00-21:00</div>
+                                </div>
+                            </div>
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân C</div>
+                                    <div class="customer-name">Vũ Thị Hương</div>
+                                    <div class="booking-time">20:00-22:00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Friday -->
+            <div class="day-column">
+                <div class="day-header">
+                    <div class="day-name">Thứ 6</div>
+                    <div class="day-date">22/12</div>
+                </div>
+                <div class="day-slots">
+                    <div class="slot morning-slot" data-day="friday" data-time="morning">
+                        <div class="slot-content">
+                            <!-- Không có booking nào -->
+                        </div>
+                    </div>
+                    <div class="slot afternoon-slot" data-day="friday" data-time="afternoon">
+                        <div class="slot-content">
+                            <div class="booking-item maintenance">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân A & B</div>
+                                    <div class="maintenance-text">Bảo trì</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slot evening-slot" data-day="friday" data-time="evening">
+                        <div class="slot-content">
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân A</div>
+                                    <div class="customer-name">Đặng Văn Minh</div>
+                                    <div class="booking-time">17:00-19:00</div>
+                                </div>
+                            </div>
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân B</div>
+                                    <div class="customer-name">Bùi Thị Thu</div>
+                                    <div class="booking-time">19:00-21:00</div>
+                                </div>
+                            </div>
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân C</div>
+                                    <div class="customer-name">Hồ Văn Long</div>
+                                    <div class="booking-time">20:00-22:00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Saturday -->
+            <div class="day-column">
+                <div class="day-header">
+                    <div class="day-name">Thứ 7</div>
+                    <div class="day-date">23/12</div>
+                </div>
+                <div class="day-slots">
+                    <div class="slot morning-slot" data-day="saturday" data-time="morning">
+                        <div class="slot-content">
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân A</div>
+                                    <div class="customer-name">Nguyễn Văn Hải</div>
+                                    <div class="booking-time">08:00-10:00</div>
+                                </div>
+                            </div>
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân B</div>
+                                    <div class="customer-name">Trần Thị Loan</div>
+                                    <div class="booking-time">09:00-11:00</div>
+                                </div>
+                            </div>
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân C</div>
+                                    <div class="customer-name">Lê Văn Sinh</div>
+                                    <div class="booking-time">10:00-12:00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slot afternoon-slot" data-day="saturday" data-time="afternoon">
+                        <div class="slot-content">
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân A</div>
+                                    <div class="customer-name">Phạm Văn Đức</div>
+                                    <div class="booking-time">14:00-16:00</div>
+                                </div>
+                            </div>
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân B</div>
+                                    <div class="customer-name">Vũ Thị Nhung</div>
+                                    <div class="booking-time">15:00-17:00</div>
+                                </div>
+                            </div>
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân C</div>
+                                    <div class="customer-name">Đỗ Văn Tú</div>
+                                    <div class="booking-time">16:00-18:00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slot evening-slot" data-day="saturday" data-time="evening">
+                        <div class="slot-content">
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân A</div>
+                                    <div class="customer-name">Hoàng Văn Nam</div>
+                                    <div class="booking-time">18:00-20:00</div>
+                                </div>
+                            </div>
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân B</div>
+                                    <div class="customer-name">Lý Văn Thắng</div>
+                                    <div class="booking-time">19:00-21:00</div>
+                                </div>
+                            </div>
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân C</div>
+                                    <div class="customer-name">Ngô Thị Mai</div>
+                                    <div class="booking-time">20:00-22:00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sunday -->
+            <div class="day-column">
+                <div class="day-header">
+                    <div class="day-name">Chủ nhật</div>
+                    <div class="day-date">24/12</div>
+                </div>
+                <div class="day-slots">
+                    <div class="slot morning-slot" data-day="sunday" data-time="morning">
+                        <div class="slot-content">
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân A</div>
+                                    <div class="customer-name">Trần Văn Hùng</div>
+                                    <div class="booking-time">07:00-09:00</div>
+                                </div>
+                            </div>
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân B</div>
+                                    <div class="customer-name">Nguyễn Thị Hoa</div>
+                                    <div class="booking-time">08:00-10:00</div>
+                                </div>
+                            </div>
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân C</div>
+                                    <div class="customer-name">Lê Văn Dũng</div>
+                                    <div class="booking-time">09:00-11:00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slot afternoon-slot" data-day="sunday" data-time="afternoon">
+                        <div class="slot-content">
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân A</div>
+                                    <div class="customer-name">Phạm Văn Sơn</div>
+                                    <div class="booking-time">13:00-15:00</div>
+                                </div>
+                            </div>
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân B</div>
+                                    <div class="customer-name">Vũ Thị Lan</div>
+                                    <div class="booking-time">14:00-16:00</div>
+                                </div>
+                            </div>
+                            <div class="booking-item booked">
+                                <div class="booking-info">
+                                    <div class="field-name">Sân C</div>
+                                    <div class="customer-name">Đỗ Văn Minh</div>
+                                    <div class="booking-time">15:00-17:00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slot evening-slot" data-day="sunday" data-time="evening">
+                        <div class="slot-content">
+                            <!-- Không có booking nào -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <button class="action-btn primary" onclick="addBooking()">
+            <span class="btn-icon">+</span>
+            Thêm đặt sân
+        </button>
+        <button class="action-btn secondary" onclick="exportSchedule()">
+            Xuất báo cáo
+        </button>
+        <button class="action-btn secondary" onclick="refreshSchedule()">
+            Làm mới
+        </button>
+    </div>
+</div>
+
+<!-- Booking Modal -->
+<div id="bookingModal" class="modal">
+    <div class="modal-content booking-modal">
+        <div class="modal-header">
+            <h3>Thêm đặt sân</h3>
+            <button class="close-btn" onclick="closeBookingModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="bookingForm">
+                <div class="form-group">
+                    <label for="bookingField">Chọn sân</label>
+                    <select id="bookingField" required>
+                        <option value="">Chọn sân</option>
+                        <option value="field-a">Sân A</option>
+                        <option value="field-b">Sân B</option>
+                        <option value="field-c">Sân C</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="bookingDate">Ngày</label>
+                    <input type="date" id="bookingDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="bookingTime">Khung giờ</label>
+                    <select id="bookingTime" required>
+                        <option value="">Chọn khung giờ</option>
+                        <option value="morning">Sáng (05:00 - 12:00)</option>
+                        <option value="afternoon">Trưa (12:00 - 17:00)</option>
+                        <option value="evening">Chiều (17:00 - 23:00)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="bookingCustomer">Khách hàng</label>
+                    <input type="text" id="bookingCustomer" placeholder="Tên khách hàng" required>
+                </div>
+                <div class="form-group">
+                    <label for="bookingPhone">Số điện thoại</label>
+                    <input type="tel" id="bookingPhone" placeholder="Số điện thoại" required>
+                </div>
+                <div class="form-group">
+                    <label for="bookingNotes">Ghi chú</label>
+                    <textarea id="bookingNotes" rows="3" placeholder="Ghi chú thêm..."></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn secondary" onclick="closeBookingModal()">Hủy</button>
+            <button class="btn primary" onclick="saveBooking()">Lưu đặt sân</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/owner/booking_schedule.js') }}"></script>
+{% endblock %} 

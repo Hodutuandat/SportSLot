@@ -262,7 +262,6 @@
 }
 
 .navbar__register-btn::before {
-    content: '🚀';
     margin-right: 8px;
     font-size: 1rem;
 }
@@ -304,7 +303,6 @@
 }
 
 .navbar__login-btn::after {
-    content: '🏆';
     margin-left: 8px;
     font-size: 1rem;
 }

@@ -1,0 +1,346 @@
+/* About Page Styles */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Hero Section */
+.about-hero {
+    background: linear-gradient(135deg, #232a34 0%, #1e90ff 100%);
+    color: white;
+    padding: 80px 0;
+    text-align: center;
+}
+
+.about-title {
+    font-size: 3.5rem;
+    font-weight: 900;
+    margin-bottom: 20px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.about-subtitle {
+    font-size: 1.3rem;
+    opacity: 0.9;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* Company Section */
+.about-company {
+    padding: 80px 0;
+    background: #f8f9fa;
+}
+
+.company-info h2 {
+    font-size: 2.5rem;
+    color: #232a34;
+    margin-bottom: 30px;
+    text-align: center;
+    font-weight: 700;
+}
+
+.company-info p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #555;
+    margin-bottom: 25px;
+    text-align: justify;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 30px;
+    margin-top: 50px;
+}
+
+.stat-item {
+    text-align: center;
+    background: white;
+    padding: 30px 20px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.stat-item:hover {
+    transform: translateY(-5px);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #1e90ff;
+    margin-bottom: 10px;
+}
+
+.stat-label {
+    font-size: 1rem;
+    color: #666;
+    font-weight: 600;
+}
+
+/* Mission Section */
+.about-mission {
+    padding: 80px 0;
+    background: white;
+}
+
+.mission-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 40px;
+    margin-top: 40px;
+}
+
+.mission-item {
+    text-align: center;
+    padding: 40px 30px;
+    background: #f8f9fa;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+.mission-item:hover {
+    background: #232a34;
+    color: white;
+    transform: translateY(-5px);
+}
+
+.mission-icon {
+    font-size: 3rem;
+    margin-bottom: 20px;
+}
+
+.mission-item h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: inherit;
+}
+
+.mission-item p {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: inherit;
+}
+
+/* Team Section */
+.about-team {
+    padding: 80px 0;
+    background: #f8f9fa;
+}
+
+.team-title {
+    font-size: 2.5rem;
+    color: #232a34;
+    text-align: center;
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+.team-subtitle {
+    font-size: 1.1rem;
+    color: #666;
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 40px;
+}
+
+.team-member {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.team-member:hover {
+    transform: translateY(-10px);
+}
+
+.member-avatar {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.avatar-placeholder {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #1e90ff, #232a34);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.member-info h3 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #232a34;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+.member-role {
+    font-size: 1rem;
+    color: #1e90ff;
+    text-align: center;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.member-description {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #555;
+    text-align: justify;
+    margin-bottom: 20px;
+}
+
+.member-contact {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.contact-email, .contact-specialty {
+    font-size: 0.9rem;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.contact-email {
+    color: #1e90ff;
+    font-weight: 600;
+}
+
+/* Contact Section */
+.about-contact {
+    padding: 80px 0;
+    background: white;
+}
+
+.contact-info h2 {
+    font-size: 2.5rem;
+    color: #232a34;
+    text-align: center;
+    margin-bottom: 50px;
+    font-weight: 700;
+}
+
+.contact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+}
+
+.contact-item {
+    text-align: center;
+    padding: 30px 20px;
+    background: #f8f9fa;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+}
+
+.contact-item:hover {
+    background: #232a34;
+    color: white;
+    transform: translateY(-5px);
+}
+
+.contact-icon {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+}
+
+.contact-item h4 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: inherit;
+}
+
+.contact-item p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: inherit;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .about-title {
+        font-size: 2.5rem;
+    }
+    
+    .about-subtitle {
+        font-size: 1.1rem;
+    }
+    
+    .company-info h2,
+    .team-title,
+    .contact-info h2 {
+        font-size: 2rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+    
+    .mission-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .team-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .contact-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+    
+    .container {
+        padding: 0 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .about-hero {
+        padding: 60px 0;
+    }
+    
+    .about-title {
+        font-size: 2rem;
+    }
+    
+    .stats-grid,
+    .contact-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .team-member {
+        padding: 20px;
+    }
+    
+    .member-contact {
+        font-size: 0.85rem;
+    }
+} 

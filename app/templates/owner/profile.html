@@ -1,1 +1,240 @@
- 
+{% extends 'base.html' %}
+{% block title %}Hồ sơ cá nhân | SportSlot Owner{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/owner/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/owner/profile.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="owner-profile-container">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="header-content">
+                <h1>Hồ sơ cá nhân</h1>
+                <div class="header-actions">
+                    <button class="edit-profile-btn">
+                        <span class="btn-icon">✏️</span>
+                        Chỉnh sửa
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Profile Content -->
+        <div class="profile-content">
+            <!-- Profile Overview -->
+            <div class="profile-overview">
+                <div class="profile-card">
+                    <div class="profile-avatar">
+                        <div class="avatar-display">{{ user.username[0].upper() }}</div>
+                        <button class="change-avatar-btn">📷</button>
+                    </div>
+                    <div class="profile-info">
+                        <h2 class="profile-name">{{ user.username }}</h2>
+                        <p class="profile-role">Chủ sân thể thao</p>
+                        <p class="profile-member-since">Thành viên từ: Tháng 1, 2024</p>
+                        <div class="profile-stats">
+                            <div class="stat-item">
+                                <span class="stat-number">2</span>
+                                <span class="stat-label">Số sân</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">83</span>
+                                <span class="stat-label">Booking</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">4.8⭐</span>
+                                <span class="stat-label">Đánh giá</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logout Section -->
+                <div class="logout-section">
+                    <div class="logout-card">
+                        <div class="logout-header">
+                            <h3>Quản lý phiên đăng nhập</h3>
+                            <p>Đăng xuất khỏi tài khoản của bạn một cách an toàn</p>
+                        </div>
+                        <div class="logout-actions">
+                            <button class="logout-btn primary" onclick="confirmLogout()">
+                                <span class="btn-icon">🚪</span>
+                                Đăng xuất
+                            </button>
+                            <button class="logout-btn secondary" onclick="logoutAllDevices()">
+                                <span class="btn-icon">📱</span>
+                                Đăng xuất tất cả thiết bị
+                            </button>
+                        </div>
+                        <div class="session-info">
+                            <p><strong>Phiên hiện tại:</strong> Windows PC</p>
+                            <p><strong>Đăng nhập lúc:</strong> <span id="currentTime">20/12/2024 14:30</span></p>
+                            <p><strong>IP:</strong> 127.0.0.1</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Details -->
+            <div class="profile-details">
+                <!-- Personal Information -->
+                <div class="details-section">
+                    <h3>Thông tin cá nhân</h3>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <label>Tên đăng nhập:</label>
+                            <span>{{ user.username }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Email:</label>
+                            <span>owner123@sportslot.vn</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Số điện thoại:</label>
+                            <span>0901 234 567</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Địa chỉ:</label>
+                            <span>Quận 1, TP. Hồ Chí Minh</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Ngày sinh:</label>
+                            <span>15/06/1990</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Giới tính:</label>
+                            <span>Nam</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Business Information -->
+                <div class="details-section">
+                    <h3>Thông tin kinh doanh</h3>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <label>Tên doanh nghiệp:</label>
+                            <span>Công ty TNHH Thể Thao ABC</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Mã số thuế:</label>
+                            <span>0123456789</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Ngân hàng:</label>
+                            <span>Vietcombank - Chi nhánh Sài Gòn</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Số tài khoản:</label>
+                            <span>1234567890</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Chủ tài khoản:</label>
+                            <span>Nguyễn Văn A</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Trạng thái xác minh:</label>
+                            <span class="status verified">✅ Đã xác minh</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Settings -->
+                <div class="details-section">
+                    <h3>Bảo mật</h3>
+                    <div class="security-items">
+                        <div class="security-item">
+                            <div class="security-info">
+                                <h4>Mật khẩu</h4>
+                                <p>Lần thay đổi cuối: 15/11/2024</p>
+                            </div>
+                            <button class="security-btn">Thay đổi</button>
+                        </div>
+                        <div class="security-item">
+                            <div class="security-info">
+                                <h4>Xác thực 2 bước</h4>
+                                <p>Tăng cường bảo mật tài khoản</p>
+                            </div>
+                            <button class="security-btn">Kích hoạt</button>
+                        </div>
+                        <div class="security-item">
+                            <div class="security-info">
+                                <h4>Email khôi phục</h4>
+                                <p>recovery@******.com</p>
+                            </div>
+                            <button class="security-btn">Cập nhật</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activity Log -->
+                <div class="details-section">
+                    <h3>Hoạt động gần đây</h3>
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <div class="activity-icon">🏟️</div>
+                            <div class="activity-details">
+                                <p><strong>Cập nhật thông tin sân</strong></p>
+                                <span>Sân Bóng Đá A - 20/12/2024 14:30</span>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon">✅</div>
+                            <div class="activity-details">
+                                <p><strong>Duyệt booking</strong></p>
+                                <span>Booking #BK002 - 19/12/2024 16:15</span>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon">💰</div>
+                            <div class="activity-details">
+                                <p><strong>Nhận thanh toán</strong></p>
+                                <span>400.000đ - 18/12/2024 09:45</span>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon">🔔</div>
+                            <div class="activity-details">
+                                <p><strong>Cập nhật thông báo</strong></p>
+                                <span>Đọc 3 thông báo mới - 17/12/2024 11:20</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
+
+<!-- Logout Confirmation Modal -->
+<div id="logoutModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Xác nhận đăng xuất</h3>
+            <button class="close-btn" onclick="closeLogoutModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="logout-confirm-content">
+                <div class="logout-icon">🚪</div>
+                <p>Bạn có chắc chắn muốn đăng xuất khỏi tài khoản không?</p>
+                <div class="logout-options">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="rememberMe">
+                        <span class="checkmark"></span>
+                        Ghi nhớ phiên đăng nhập lần sau
+                    </label>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="action-btn cancel-btn" onclick="closeLogoutModal()">Hủy</button>
+                <button class="action-btn confirm-btn" onclick="performLogout()">Đăng xuất</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/owner/profile.js') }}"></script>
+{% endblock %} 

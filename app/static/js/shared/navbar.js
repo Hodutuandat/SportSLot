@@ -140,16 +140,10 @@ function addClickEffects() {
     const buttons = document.querySelectorAll('.navbar__login-btn, .navbar__register-btn, .navbar__profile-btn');
     const regularLinks = document.querySelectorAll('.navbar__menu li a:not(.navbar__login-btn):not(.navbar__register-btn):not(.navbar__profile-btn)');
     
-    // Button click effects
+    // Button click effects - No size changes
     buttons.forEach(button => {
         button.addEventListener('click', function(e) {
-            // Add click animation
-            this.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-                this.style.transform = '';
-            }, 150);
-            
-            // Button click effect only
+            // No transform effects - only color changes via CSS
             const buttonText = this.textContent.trim();
             if (buttonText.includes('Hồ Sơ')) {
                 createCelebrationBurst(this);
@@ -157,15 +151,10 @@ function addClickEffects() {
         });
     });
     
-    // Regular link click effects
+    // Regular link click effects - No size changes
     regularLinks.forEach(link => {
         link.addEventListener('click', function(e) {
-            this.style.transform = 'scale(0.98)';
-            setTimeout(() => {
-                this.style.transform = '';
-            }, 150);
-            
-
+            // No transform effects
         });
     });
 }

@@ -8,4 +8,16 @@ def home():
 
 @common_bp.route('/contact')
 def contact():
-    return render_template('customer/contact.html') 
+    return render_template('customer/contact.html')
+
+@common_bp.route('/about')
+def about():
+    return render_template('about.html')
+
+@common_bp.route('/fields')
+def fields():
+    return render_template('customer/field_list.html')
+
+@common_bp.route('/voucher')
+def voucher():
+    return render_template('customer/voucher_promotions.html') 

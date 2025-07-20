@@ -1,0 +1,405 @@
+/* Public Navbar - Clean & Modern Design */
+
+:root {
+    --primary-dark: #1F2937;
+    --primary-dark-light: #374151;
+    --text-primary: #1E293B;
+    --text-secondary: #64748B;
+    --text-light: #94A3B8;
+    --bg-primary: #F8FAFC;
+    --bg-secondary: #FFFFFF;
+    --border-light: #E5E7EB;
+    --accent-blue: #3B82F6;
+    --accent-blue-hover: #2563EB;
+    --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* Public Navbar */
+.public-navbar {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-light);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: var(--shadow-light);
+}
+
+.navbar-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 30px;
+    display: flex;
+    align-items: center;
+    height: 70px;
+}
+
+/* Brand - Positioned to the left */
+.navbar-brand {
+    flex-shrink: 0;
+    margin-right: auto;
+    margin-left: -10px;
+}
+
+.brand-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.brand-link:hover {
+    color: var(--accent-blue);
+    text-decoration: none;
+}
+
+.brand-icon {
+    font-size: 2rem;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-blue-hover));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.brand-text {
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.02em;
+}
+
+/* Navigation Menu - Hidden on desktop */
+.navbar-menu {
+    display: none;
+}
+
+.navbar-nav {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+.nav-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1rem;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.nav-link:hover {
+    color: var(--text-primary);
+    background: var(--bg-primary);
+    text-decoration: none;
+}
+
+.nav-link.active {
+    color: var(--accent-blue);
+    background: #eff6ff;
+}
+
+/* Auth Buttons - Positioned to the right */
+.navbar-auth {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+    margin-left: auto;
+    margin-right: -10px;
+}
+
+.auth-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+    white-space: nowrap;
+    text-align: center;
+    width: 100px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    transform: none !important;
+    will-change: color, background-color, border-color;
+    outline: none;
+}
+
+.auth-btn:focus {
+    outline: none;
+    transform: none !important;
+    width: 100px !important;
+    height: 40px !important;
+}
+
+.login-btn {
+    color: var(--text-primary);
+    background: transparent;
+    border: 1px solid var(--border-light);
+    width: 100px;
+    height: 40px;
+}
+
+.login-btn:active,
+.login-btn:focus {
+    color: white;
+    background: var(--accent-blue);
+    border-color: var(--accent-blue);
+    text-decoration: none;
+    transform: none !important;
+    width: 100px !important;
+    height: 40px !important;
+}
+
+.login-btn:hover {
+    color: white;
+    background: var(--accent-blue);
+    border-color: var(--accent-blue);
+    text-decoration: none;
+}
+
+.register-btn {
+    color: white;
+    background: var(--accent-blue);
+    border: 1px solid var(--accent-blue);
+    width: 100px;
+    height: 40px;
+}
+
+.register-btn:active,
+.register-btn:focus {
+    background: var(--accent-blue-hover);
+    border-color: var(--accent-blue-hover);
+    text-decoration: none;
+    color: white;
+    transform: none !important;
+    width: 100px !important;
+    height: 40px !important;
+}
+
+.register-btn:hover {
+    background: var(--accent-blue-hover);
+    border-color: var(--accent-blue-hover);
+    text-decoration: none;
+    color: white;
+}
+
+/* Mobile Menu Toggle */
+.mobile-menu-toggle {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background 0.3s ease;
+}
+
+.mobile-menu-toggle:hover {
+    background: var(--bg-primary);
+}
+
+.hamburger {
+    width: 24px;
+    height: 3px;
+    background: var(--text-primary);
+    margin: 2px 0;
+    transition: all 0.3s ease;
+    border-radius: 2px;
+}
+
+.mobile-menu-toggle.active .hamburger:nth-child(1) {
+    transform: rotate(-45deg) translate(-5px, 6px);
+}
+
+.mobile-menu-toggle.active .hamburger:nth-child(2) {
+    opacity: 0;
+}
+
+.mobile-menu-toggle.active .hamburger:nth-child(3) {
+    transform: rotate(45deg) translate(-5px, -6px);
+}
+
+/* Mobile Menu */
+.mobile-menu {
+    display: none;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-light);
+    box-shadow: var(--shadow-medium);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.mobile-menu.active {
+    max-height: 300px;
+}
+
+.mobile-nav {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mobile-nav-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 12px 16px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.mobile-nav-link:hover {
+    color: var(--text-primary);
+    background: var(--bg-primary);
+    text-decoration: none;
+}
+
+.mobile-auth {
+    padding: 0 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+}
+
+.mobile-auth-btn {
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    text-align: center;
+    transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+    width: 100px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    transform: none !important;
+    will-change: color, background-color, border-color;
+    outline: none;
+}
+
+.mobile-auth-btn:focus {
+    outline: none;
+    transform: none !important;
+    width: 100px !important;
+    height: 44px !important;
+}
+
+.mobile-auth-btn.login-btn {
+    color: var(--text-primary);
+    background: transparent;
+    border: 1px solid var(--border-light);
+    width: 100px;
+    height: 44px;
+}
+
+.mobile-auth-btn.login-btn:hover,
+.mobile-auth-btn.login-btn:active,
+.mobile-auth-btn.login-btn:focus {
+    color: white;
+    background: var(--accent-blue);
+    border-color: var(--accent-blue);
+    text-decoration: none;
+    transform: none !important;
+    width: 100px !important;
+    height: 44px !important;
+}
+
+.mobile-auth-btn.register-btn {
+    color: white;
+    background: var(--accent-blue);
+    border: 1px solid var(--accent-blue);
+    width: 100px;
+    height: 44px;
+}
+
+.mobile-auth-btn.register-btn:hover,
+.mobile-auth-btn.register-btn:active,
+.mobile-auth-btn.register-btn:focus {
+    background: var(--accent-blue-hover);
+    border-color: var(--accent-blue-hover);
+    text-decoration: none;
+    color: white;
+    transform: none !important;
+    width: 100px !important;
+    height: 44px !important;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .navbar-container {
+        padding: 0 25px;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar-container {
+        padding: 0 15px;
+        height: 60px;
+    }
+    
+    .navbar-brand {
+        margin-left: 0;
+    }
+    
+    .brand-link {
+        font-size: 1.3rem;
+        gap: 8px;
+    }
+    
+    .brand-icon {
+        font-size: 1.6rem;
+    }
+    
+    .navbar-auth {
+        display: none;
+    }
+    
+    .mobile-menu-toggle {
+        display: flex;
+        margin-right: 0;
+    }
+    
+    .mobile-menu {
+        display: block;
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar-container {
+        padding: 0 15px;
+        height: 56px;
+    }
+    
+    .brand-link {
+        font-size: 1.2rem;
+        gap: 6px;
+    }
+    
+    .brand-icon {
+        font-size: 1.4rem;
+    }
+    
+    .hamburger {
+        width: 20px;
+        height: 2.5px;
+    }
+    
+    .mobile-nav,
+    .mobile-auth {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+} 

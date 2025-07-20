@@ -1,1 +1,445 @@
- 
+{% extends 'base.html' %}
+{% block title %}Thêm sân mới | SportSlot Owner{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/owner/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/owner/add_field.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="owner-add-field-container">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="header-content">
+                <h1>Thêm sân mới</h1>
+                <div class="header-actions">
+                    <button class="draft-btn" onclick="saveDraft()">
+                        <span class="btn-icon">💾</span>
+                        Lưu nháp
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Add Field Content -->
+        <div class="add-field-content">
+            <!-- Progress Steps -->
+            <div class="progress-container">
+                <div class="progress-steps">
+                    <div class="step active" data-step="1">
+                        <div class="step-number">1</div>
+                        <div class="step-label">Thông tin cơ bản</div>
+                    </div>
+                    <div class="step" data-step="2">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Vị trí & Địa chỉ</div>
+                    </div>
+                    <div class="step" data-step="3">
+                        <div class="step-number">3</div>
+                        <div class="step-label">Hình ảnh & Tiện ích</div>
+                    </div>
+                    <div class="step" data-step="4">
+                        <div class="step-number">4</div>
+                        <div class="step-label">Giá cả & Thời gian</div>
+                    </div>
+                    <div class="step" data-step="5">
+                        <div class="step-number">5</div>
+                        <div class="step-label">Xem lại & Xác nhận</div>
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 20%"></div>
+                </div>
+            </div>
+
+            <!-- Form Container -->
+            <form id="addFieldForm" class="add-field-form">
+                <!-- Step 1: Basic Information -->
+                <div class="form-step active" data-step="1">
+                    <div class="step-content">
+                        <div class="step-header">
+                            <h2>Thông tin cơ bản</h2>
+                            <p>Nhập thông tin cơ bản về sân thể thao của bạn</p>
+                        </div>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="fieldName">Tên sân <span class="required">*</span></label>
+                                <input type="text" id="fieldName" name="fieldName" placeholder="Ví dụ: Sân Bóng Đá Premier League" required>
+                                <div class="input-hint">Tên sân sẽ hiển thị cho khách hàng</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="fieldType">Loại sân <span class="required">*</span></label>
+                                <select id="fieldType" name="fieldType" required>
+                                    <option value="">Chọn loại sân</option>
+                                    <option value="football">⚽ Sân Bóng Đá</option>
+                                    <option value="tennis">🎾 Sân Tennis</option>
+                                    <option value="badminton">🏸 Sân Cầu Lông</option>
+                                    <option value="basketball">🏀 Sân Bóng Rổ</option>
+                                    <option value="volleyball">🏐 Sân Bóng Chuyền</option>
+                                    <option value="futsal">⚽ Sân Futsal</option>
+                                    <option value="ping-pong">🏓 Bàn Ping Pong</option>
+                                    <option value="other">🏟️ Khác</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="fieldDescription">Mô tả sân</label>
+                                <textarea id="fieldDescription" name="fieldDescription" rows="4" placeholder="Mô tả chi tiết về sân thể thao, điều kiện, chất lượng..."></textarea>
+                                <div class="input-hint">Mô tả chi tiết sẽ giúp khách hàng hiểu rõ hơn về sân</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="capacity">Sức chứa (người)</label>
+                                <input type="number" id="capacity" name="capacity" min="2" max="50" placeholder="Ví dụ: 22">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="fieldSize">Kích thước sân</label>
+                                <input type="text" id="fieldSize" name="fieldSize" placeholder="Ví dụ: 100m x 60m">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Location & Address -->
+                <div class="form-step" data-step="2">
+                    <div class="step-content">
+                        <div class="step-header">
+                            <h2>Vị trí & Địa chỉ</h2>
+                            <p>Thông tin vị trí và địa chỉ chi tiết của sân</p>
+                        </div>
+                        
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label for="address">Địa chỉ đầy đủ <span class="required">*</span></label>
+                                <input type="text" id="address" name="address" placeholder="Số nhà, tên đường, phường/xã, quận/huyện, thành phố" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="city">Tỉnh/Thành phố <span class="required">*</span></label>
+                                <select id="city" name="city" required>
+                                    <option value="">Chọn tỉnh/thành</option>
+                                    <option value="ho-chi-minh">TP. Hồ Chí Minh</option>
+                                    <option value="ha-noi">Hà Nội</option>
+                                    <option value="da-nang">Đà Nẵng</option>
+                                    <option value="can-tho">Cần Thơ</option>
+                                    <option value="hai-phong">Hải Phòng</option>
+                                    <option value="other">Khác</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="district">Quận/Huyện <span class="required">*</span></label>
+                                <select id="district" name="district" required>
+                                    <option value="">Chọn quận/huyện</option>
+                                    <option value="quan-1">Quận 1</option>
+                                    <option value="quan-2">Quận 2</option>
+                                    <option value="quan-3">Quận 3</option>
+                                    <option value="quan-4">Quận 4</option>
+                                    <option value="thu-duc">Thủ Đức</option>
+                                    <option value="other">Khác</option>
+                                </select>
+                            </div>
+
+                            <!-- Map Container -->
+                            <div class="form-group full-width">
+                                <label>Vị trí trên bản đồ</label>
+                                <div class="map-container">
+                                    <div id="map" class="map-display">
+                                        <div class="map-placeholder">
+                                            <div class="map-icon">🗺️</div>
+                                            <p>Click để chọn vị trí chính xác</p>
+                                            <div class="coordinates">
+                                                <span>Lat: <span id="latitude">10.7769</span></span>
+                                                <span>Lng: <span id="longitude">106.7009</span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="parking">Chỗ đỗ xe</label>
+                                <select id="parking" name="parking">
+                                    <option value="available">Có chỗ đỗ xe</option>
+                                    <option value="limited">Chỗ đỗ xe hạn chế</option>
+                                    <option value="none">Không có chỗ đỗ xe</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="transportation">Phương tiện công cộng</label>
+                                <textarea id="transportation" name="transportation" rows="2" placeholder="Gần trạm xe bus, metro..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Images & Amenities -->
+                <div class="form-step" data-step="3">
+                    <div class="step-content">
+                        <div class="step-header">
+                            <h2>Hình ảnh & Tiện ích</h2>
+                            <p>Upload hình ảnh và mô tả các tiện ích đi kèm</p>
+                        </div>
+                        
+                        <div class="form-grid">
+                            <!-- Image Upload -->
+                            <div class="form-group full-width">
+                                <label>Hình ảnh sân <span class="required">*</span></label>
+                                <div class="image-upload-container">
+                                    <div class="upload-zone" onclick="triggerFileInput()">
+                                        <div class="upload-icon">📷</div>
+                                        <p>Kéo thả hoặc click để upload hình ảnh</p>
+                                        <div class="upload-hint">JPG, PNG, tối đa 5MB mỗi ảnh</div>
+                                    </div>
+                                    <input type="file" id="fieldImages" name="fieldImages" multiple accept="image/*" style="display: none;">
+                                    <div class="image-preview-container">
+                                        <!-- Preview images will be added here -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Amenities -->
+                            <div class="form-group full-width">
+                                <label>Tiện ích có sẵn</label>
+                                <div class="amenities-grid">
+                                    <div class="amenity-item">
+                                        <input type="checkbox" id="parking-amenity" name="amenities" value="parking">
+                                        <label for="parking-amenity">🚗 Bãi đỗ xe</label>
+                                    </div>
+                                    <div class="amenity-item">
+                                        <input type="checkbox" id="restroom" name="amenities" value="restroom">
+                                        <label for="restroom">🚻 Phòng vệ sinh</label>
+                                    </div>
+                                    <div class="amenity-item">
+                                        <input type="checkbox" id="shower" name="amenities" value="shower">
+                                        <label for="shower">🚿 Phòng tắm</label>
+                                    </div>
+                                    <div class="amenity-item">
+                                        <input type="checkbox" id="locker" name="amenities" value="locker">
+                                        <label for="locker">🗄️ Tủ đồ</label>
+                                    </div>
+                                    <div class="amenity-item">
+                                        <input type="checkbox" id="lighting" name="amenities" value="lighting">
+                                        <label for="lighting">💡 Ánh sáng đêm</label>
+                                    </div>
+                                    <div class="amenity-item">
+                                        <input type="checkbox" id="water" name="amenities" value="water">
+                                        <label for="water">💧 Nước uống</label>
+                                    </div>
+                                    <div class="amenity-item">
+                                        <input type="checkbox" id="equipment" name="amenities" value="equipment">
+                                        <label for="equipment">⚽ Dụng cụ thể thao</label>
+                                    </div>
+                                    <div class="amenity-item">
+                                        <input type="checkbox" id="wifi" name="amenities" value="wifi">
+                                        <label for="wifi">📶 WiFi miễn phí</label>
+                                    </div>
+                                    <div class="amenity-item">
+                                        <input type="checkbox" id="canteen" name="amenities" value="canteen">
+                                        <label for="canteen">🍽️ Căng tin</label>
+                                    </div>
+                                    <div class="amenity-item">
+                                        <input type="checkbox" id="first-aid" name="amenities" value="first-aid">
+                                        <label for="first-aid">🏥 Y tế cơ bản</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Field Rules -->
+                            <div class="form-group full-width">
+                                <label for="rules">Quy định sử dụng sân</label>
+                                <textarea id="rules" name="rules" rows="4" placeholder="Các quy định về an toàn, sử dụng thiết bị, thời gian..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Pricing & Schedule -->
+                <div class="form-step" data-step="4">
+                    <div class="step-content">
+                        <div class="step-header">
+                            <h2>Giá cả & Thời gian</h2>
+                            <p>Thiết lập giá thuê và thời gian hoạt động</p>
+                        </div>
+                        
+                        <div class="form-grid">
+                            <!-- Operating Hours -->
+                            <div class="form-group full-width">
+                                <label>Giờ hoạt động</label>
+                                <div class="schedule-grid">
+                                    <div class="schedule-item">
+                                        <label>Thứ 2 - Thứ 6:</label>
+                                        <div class="time-range">
+                                            <input type="time" name="weekday_start" value="06:00">
+                                            <span>đến</span>
+                                            <input type="time" name="weekday_end" value="23:00">
+                                        </div>
+                                    </div>
+                                    <div class="schedule-item">
+                                        <label>Thứ 7 - Chủ nhật:</label>
+                                        <div class="time-range">
+                                            <input type="time" name="weekend_start" value="05:00">
+                                            <span>đến</span>
+                                            <input type="time" name="weekend_end" value="23:00">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Pricing Table -->
+                            <div class="form-group full-width">
+                                <label>Bảng giá thuê sân (VNĐ/giờ)</label>
+                                <div class="pricing-table">
+                                    <div class="pricing-header">
+                                        <div>Khung giờ</div>
+                                        <div>Thứ 2-6</div>
+                                        <div>Thứ 7-CN</div>
+                                    </div>
+                                    <div class="pricing-row">
+                                        <div class="time-slot">Sáng (05:00-12:00)</div>
+                                        <input type="number" name="morning_weekday" placeholder="200000" min="0">
+                                        <input type="number" name="morning_weekend" placeholder="250000" min="0">
+                                    </div>
+                                    <div class="pricing-row">
+                                        <div class="time-slot">Chiều (12:00-17:00)</div>
+                                        <input type="number" name="afternoon_weekday" placeholder="300000" min="0">
+                                        <input type="number" name="afternoon_weekend" placeholder="350000" min="0">
+                                    </div>
+                                    <div class="pricing-row">
+                                        <div class="time-slot">Tối (17:00-23:00)</div>
+                                        <input type="number" name="evening_weekday" placeholder="400000" min="0">
+                                        <input type="number" name="evening_weekend" placeholder="450000" min="0">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="deposit">Tiền cọc (%)</label>
+                                <input type="number" id="deposit" name="deposit" min="0" max="100" value="30" placeholder="30">
+                                <div class="input-hint">Phần trăm tiền cọc khi đặt sân</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cancellation">Chính sách hủy (giờ trước)</label>
+                                <select id="cancellation" name="cancellation">
+                                    <option value="2">2 giờ trước</option>
+                                    <option value="4">4 giờ trước</option>
+                                    <option value="12">12 giờ trước</option>
+                                    <option value="24">24 giờ trước</option>
+                                    <option value="48">48 giờ trước</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 5: Review & Confirm -->
+                <div class="form-step" data-step="5">
+                    <div class="step-content">
+                        <div class="step-header">
+                            <h2>Xem lại & Xác nhận</h2>
+                            <p>Kiểm tra lại thông tin trước khi tạo sân mới</p>
+                        </div>
+                        
+                        <div class="review-container">
+                            <div class="review-section">
+                                <h3>Thông tin cơ bản</h3>
+                                <div class="review-grid">
+                                    <div class="review-item">
+                                        <label>Tên sân:</label>
+                                        <span id="review-name">-</span>
+                                    </div>
+                                    <div class="review-item">
+                                        <label>Loại sân:</label>
+                                        <span id="review-type">-</span>
+                                    </div>
+                                    <div class="review-item">
+                                        <label>Sức chứa:</label>
+                                        <span id="review-capacity">-</span>
+                                    </div>
+                                    <div class="review-item full-width">
+                                        <label>Mô tả:</label>
+                                        <span id="review-description">-</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="review-section">
+                                <h3>Vị trí</h3>
+                                <div class="review-grid">
+                                    <div class="review-item full-width">
+                                        <label>Địa chỉ:</label>
+                                        <span id="review-address">-</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="review-section">
+                                <h3>Hình ảnh & Tiện ích</h3>
+                                <div class="review-images">
+                                    <div id="review-images-container">
+                                        <!-- Images will be shown here -->
+                                    </div>
+                                </div>
+                                <div class="review-amenities">
+                                    <label>Tiện ích:</label>
+                                    <div id="review-amenities-list">-</div>
+                                </div>
+                            </div>
+
+                            <div class="review-section">
+                                <h3>Giá cả & Thời gian</h3>
+                                <div class="review-pricing">
+                                    <div id="review-pricing-table">
+                                        <!-- Pricing table will be generated here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Navigation -->
+                <div class="form-navigation">
+                    <button type="button" class="nav-btn prev-btn" onclick="previousStep()" style="display: none;">
+                        <span class="btn-icon">⬅️</span>
+                        Quay lại
+                    </button>
+                    <button type="button" class="nav-btn next-btn" onclick="nextStep()">
+                        Tiếp theo
+                        <span class="btn-icon">➡️</span>
+                    </button>
+                    <button type="submit" class="nav-btn submit-btn" style="display: none;">
+                        <span class="btn-icon">✅</span>
+                        Tạo sân mới
+                    </button>
+                </div>
+            </form>
+        </div>
+</div>
+
+<!-- Success Modal -->
+<div id="successModal" class="modal">
+    <div class="modal-content success-modal">
+        <button class="close-btn" onclick="closeSuccessModal()" style="position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #6b7280; padding: 5px; transition: color 0.3s ease;">&times;</button>
+        <div class="success-animation">
+            <div class="checkmark">✓</div>
+        </div>
+        <h3>Thành công!</h3>
+        <p>Sân thể thao của bạn đã được tạo thành công và đang chờ duyệt.</p>
+        <div class="modal-actions">
+            <button class="action-btn primary" onclick="redirectToMyFields()">Xem sân của tôi</button>
+            <button class="action-btn secondary" onclick="createAnotherField()">Thêm sân khác</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/owner/add_field.js') }}"></script>
+{% endblock %} 

@@ -1,0 +1,308 @@
+{% extends 'base.html' %}
+{% block title %}Ưu đãi | SportSlot{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/customer/voucher_promotions.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="voucher-page">
+    <!-- Hero Section -->
+    <div class="voucher-hero">
+        <div class="container">
+            <h1 class="voucher-title">Ưu Đãi & Khuyến Mãi</h1>
+            <p class="voucher-subtitle">Tận hưởng những ưu đãi tuyệt vời khi đặt sân tại SportSlot</p>
+        </div>
+    </div>
+
+    <!-- Membership Tiers -->
+    <section class="membership-section">
+        <div class="container">
+            <h2 class="section-title">Cấp Bậc Thành Viên</h2>
+            <p class="section-desc">Tích điểm và thăng hạng để nhận được nhiều ưu đãi hơn</p>
+            
+            <div class="membership-grid">
+                <div class="membership-card bronze">
+                    <div class="card-header">
+                        <div class="tier-icon">🥉</div>
+                        <h3>Bronze</h3>
+                        <p class="tier-requirement">0 - 500 điểm</p>
+                    </div>
+                    <div class="card-benefits">
+                        <h4>Quyền lợi:</h4>
+                        <ul>
+                            <li>Giảm 5% cho lần đặt sân đầu tiên</li>
+                            <li>Tích điểm 1 điểm/1.000 VND</li>
+                            <li>Thông báo ưu đãi mới</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="membership-card silver">
+                    <div class="card-header">
+                        <div class="tier-icon">🥈</div>
+                        <h3>Silver</h3>
+                        <p class="tier-requirement">501 - 1.500 điểm</p>
+                    </div>
+                    <div class="card-benefits">
+                        <h4>Quyền lợi:</h4>
+                        <ul>
+                            <li>Giảm 8% mọi lần đặt sân</li>
+                            <li>Tích điểm 1.2 điểm/1.000 VND</li>
+                            <li>Ưu tiên hỗ trợ khách hàng</li>
+                            <li>Voucher sinh nhật 50.000 VND</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="membership-card gold popular">
+                    <div class="popular-badge">PHỔ BIẾN</div>
+                    <div class="card-header">
+                        <div class="tier-icon">🥇</div>
+                        <h3>Gold</h3>
+                        <p class="tier-requirement">1.501 - 3.000 điểm</p>
+                    </div>
+                    <div class="card-benefits">
+                        <h4>Quyền lợi:</h4>
+                        <ul>
+                            <li>Giảm 12% mọi lần đặt sân</li>
+                            <li>Tích điểm 1.5 điểm/1.000 VND</li>
+                            <li>Đặt sân trước 30 phút</li>
+                            <li>Voucher sinh nhật 100.000 VND</li>
+                            <li>Miễn phí hủy đặt sân (trước 2h)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="membership-card platinum">
+                    <div class="card-header">
+                        <div class="tier-icon">💎</div>
+                        <h3>Platinum</h3>
+                        <p class="tier-requirement">3.001+ điểm</p>
+                    </div>
+                    <div class="card-benefits">
+                        <h4>Quyền lợi:</h4>
+                        <ul>
+                            <li>Giảm 15% mọi lần đặt sân</li>
+                            <li>Tích điểm 2 điểm/1.000 VND</li>
+                            <li>Đặt sân trước 1 giờ</li>
+                            <li>Voucher sinh nhật 200.000 VND</li>
+                            <li>Miễn phí hủy đặt sân</li>
+                            <li>Tư vấn cá nhân 24/7</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Monthly Promotions -->
+    <section class="monthly-section">
+        <div class="container">
+            <h2 class="section-title">Ưu Đãi Theo Tháng</h2>
+            <div class="monthly-nav">
+                <button class="month-btn active" data-month="current">Tháng này</button>
+                <button class="month-btn" data-month="next">Tháng tới</button>
+                <button class="month-btn" data-month="season">Theo mùa</button>
+            </div>
+
+            <div class="monthly-content">
+                <div class="month-offers active" id="current-month">
+                    <h3>🎃 Ưu đãi tháng 12 - Mừng Giáng Sinh</h3>
+                    <div class="offers-grid">
+                        <div class="offer-card">
+                            <div class="offer-badge">-25%</div>
+                            <h4>Khuyến mãi cuối năm</h4>
+                            <p>Giảm 25% cho tất cả sân bóng đá vào cuối tuần</p>
+                            <div class="offer-code">Mã: XMAS2024</div>
+                            <div class="offer-validity">Có hiệu lực đến 31/12/2024</div>
+                        </div>
+                        
+                        <div class="offer-card">
+                            <div class="offer-badge">-20%</div>
+                            <h4>Happy Hour</h4>
+                            <p>Giảm 20% khung giờ 14:00-16:00 các ngày trong tuần</p>
+                            <div class="offer-code">Mã: HAPPY20</div>
+                            <div class="offer-validity">Áp dụng cả tháng</div>
+                        </div>
+
+                        <div class="offer-card">
+                            <div class="offer-badge">Quà tặng</div>
+                            <h4>Đặt 3 tặng 1</h4>
+                            <p>Đặt 3 lần sân trong tháng, tặng 1 lần sân miễn phí</p>
+                            <div class="offer-code">Tự động áp dụng</div>
+                            <div class="offer-validity">Chỉ áp dụng trong tháng 12</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="month-offers" id="next-month">
+                    <h3>🎆 Ưu đãi tháng 1 - Chào năm mới</h3>
+                    <div class="offers-grid">
+                        <div class="offer-card">
+                            <div class="offer-badge">-30%</div>
+                            <h4>Khởi đầu năm mới</h4>
+                            <p>Giảm 30% cho lần đặt sân đầu tiên trong năm</p>
+                            <div class="offer-code">Mã: NEWYEAR30</div>
+                            <div class="offer-validity">1/1 - 15/1/2025</div>
+                        </div>
+                        
+                        <div class="offer-card">
+                            <div class="offer-badge">-15%</div>
+                            <h4>Thể thao đầu năm</h4>
+                            <p>Giảm 15% tất cả sân thể thao mọi ngày</p>
+                            <div class="offer-code">Mã: SPORT15</div>
+                            <div class="offer-validity">Cả tháng 1/2025</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="month-offers" id="season-offers">
+                    <h3>🌟 Ưu đãi theo mùa</h3>
+                    <div class="offers-grid">
+                        <div class="offer-card">
+                            <div class="offer-badge">-40%</div>
+                            <h4>Mùa khô - Sân ngoài trời</h4>
+                            <p>Giảm 40% tất cả sân ngoài trời (tháng 12-4)</p>
+                            <div class="offer-code">Mã: OUTDOOR40</div>
+                            <div class="offer-validity">Mùa khô hàng năm</div>
+                        </div>
+
+                        <div class="offer-card">
+                            <div class="offer-badge">-20%</div>
+                            <h4>Mùa mưa - Sân trong nhà</h4>
+                            <p>Giảm 20% sân trong nhà khi trời mưa</p>
+                            <div class="offer-code">Mã: INDOOR20</div>
+                            <div class="offer-validity">Mùa mưa (5-11)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Special Events -->
+    <section class="events-section">
+        <div class="container">
+            <h2 class="section-title">Sự Kiện Đặc Biệt</h2>
+            <div class="events-grid">
+                <div class="event-card">
+                    <div class="event-image">🏆</div>
+                    <div class="event-content">
+                        <h3>Giải đấu mùa đông</h3>
+                        <p>Tham gia giải đấu và nhận ưu đãi đặt sân 50% trong 3 tháng</p>
+                        <div class="event-date">15/12 - 28/2/2025</div>
+                        <button class="event-btn">Đăng ký ngay</button>
+                    </div>
+                </div>
+
+                <div class="event-card">
+                    <div class="event-image">🎂</div>
+                    <div class="event-content">
+                        <h3>Sinh nhật SportSlot</h3>
+                        <p>Kỷ niệm 3 năm thành lập - Giảm 33% tất cả dịch vụ</p>
+                        <div class="event-date">15/3/2025</div>
+                        <button class="event-btn">Xem chi tiết</button>
+                    </div>
+                </div>
+
+                <div class="event-card">
+                    <div class="event-image">👥</div>
+                    <div class="event-content">
+                        <h3>Giới thiệu bạn bè</h3>
+                        <p>Mời bạn bè tham gia, cả hai đều nhận voucher 100k</p>
+                        <div class="event-date">Liên tục</div>
+                        <button class="event-btn">Mời ngay</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Voucher Codes -->
+    <section class="voucher-codes-section">
+        <div class="container">
+            <h2 class="section-title">Mã Giảm Giá Có Sẵn</h2>
+            <div class="voucher-list">
+                <div class="voucher-item">
+                    <div class="voucher-info">
+                        <div class="voucher-discount">20%</div>
+                        <div class="voucher-details">
+                            <h4>Giảm 20% lần đầu đặt sân</h4>
+                            <p>Áp dụng cho khách hàng mới</p>
+                            <div class="voucher-code-display">
+                                <span class="code">WELCOME20</span>
+                                <button class="copy-btn" onclick="copyCode('WELCOME20')">Sao chép</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="voucher-expiry">HSD: 31/12/2024</div>
+                </div>
+
+                <div class="voucher-item">
+                    <div class="voucher-info">
+                        <div class="voucher-discount">50K</div>
+                        <div class="voucher-details">
+                            <h4>Giảm 50.000đ cho đơn từ 300k</h4>
+                            <p>Dành cho thành viên Silver trở lên</p>
+                            <div class="voucher-code-display">
+                                <span class="code">SAVE50K</span>
+                                <button class="copy-btn" onclick="copyCode('SAVE50K')">Sao chép</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="voucher-expiry">HSD: 15/1/2025</div>
+                </div>
+
+                <div class="voucher-item">
+                    <div class="voucher-info">
+                        <div class="voucher-discount">15%</div>
+                        <div class="voucher-details">
+                            <h4>Cuối tuần siêu tiết kiệm</h4>
+                            <p>Chỉ áp dụng thứ 7, CN</p>
+                            <div class="voucher-code-display">
+                                <span class="code">WEEKEND15</span>
+                                <button class="copy-btn" onclick="copyCode('WEEKEND15')">Sao chép</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="voucher-expiry">HSD: 31/12/2024</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="how-it-works">
+        <div class="container">
+            <h2 class="section-title">Cách Thức Hoạt Động</h2>
+            <div class="steps-grid">
+                <div class="step-item">
+                    <div class="step-number">1</div>
+                    <h3>Đăng ký thành viên</h3>
+                    <p>Tạo tài khoản miễn phí để bắt đầu tích điểm</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">2</div>
+                    <h3>Đặt sân & tích điểm</h3>
+                    <p>Mỗi lần đặt sân sẽ được tích điểm tương ứng</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">3</div>
+                    <h3>Thăng hạng thành viên</h3>
+                    <p>Đạt đủ điểm sẽ tự động thăng hạng và nhận ưu đãi</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">4</div>
+                    <h3>Sử dụng ưu đãi</h3>
+                    <p>Áp dụng mã giảm giá khi thanh toán</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/customer/voucher_promotions.js') }}"></script>
+{% endblock %} 

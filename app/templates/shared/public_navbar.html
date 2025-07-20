@@ -1,0 +1,48 @@
+<!-- Public Navbar for Guest Users -->
+<nav class="public-navbar">
+    <div class="navbar-container">
+        <!-- Logo -->
+        <div class="navbar-brand">
+            <a href="{{ url_for('common.home') }}" class="brand-link">
+                <span class="brand-text">SportSlot</span>
+            </a>
+        </div>
+
+        <!-- Navigation Menu - Hidden on desktop, shown in mobile -->
+        <div class="navbar-menu">
+            <div class="navbar-nav">
+                <a href="{{ url_for('common.home') }}" class="nav-link">Trang chủ</a>
+                <a href="{{ url_for('customer.field_list') }}" class="nav-link">Danh sách sân</a>
+                <a href="/contact" class="nav-link">Liên hệ</a>
+            </div>
+        </div>
+
+        <!-- Auth Buttons -->
+        <div class="navbar-auth">
+            <a href="{{ url_for('auth.login') }}" class="auth-btn login-btn">Đăng nhập</a>
+            <a href="{{ url_for('auth.register') }}" class="auth-btn register-btn">Đăng ký</a>
+        </div>
+
+        <!-- Mobile Menu Toggle -->
+        <div class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+            <span class="hamburger"></span>
+            <span class="hamburger"></span>
+            <span class="hamburger"></span>
+        </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-nav">
+            <a href="{{ url_for('common.home') }}" class="mobile-nav-link">Trang chủ</a>
+            <a href="{{ url_for('customer.field_list') }}" class="mobile-nav-link">Danh sách sân</a>
+            <a href="/contact" class="mobile-nav-link">Liên hệ</a>
+        </div>
+        <div class="mobile-auth">
+            <a href="{{ url_for('auth.login') }}" class="mobile-auth-btn login-btn">Đăng nhập</a>
+            <a href="{{ url_for('auth.register') }}" class="mobile-auth-btn register-btn">Đăng ký</a>
+        </div>
+    </div>
+</nav>
+
+<script src="{{ url_for('static', filename='js/shared/public_navbar.js') }}"></script> 

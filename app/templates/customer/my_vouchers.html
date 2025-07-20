@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% block title %}Voucher của tôi | SportSlot{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/customer/my_vouchers.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="my-vouchers-container">
+    <!-- Header Section -->
+    <div class="vouchers-header">
+        <div class="header-content">
+            <div class="header-left">
+                <h1>🎫 Voucher của tôi</h1>
+                <p class="header-subtitle">Quản lý và sử dụng voucher của bạn</p>
+            </div>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <span class="stat-number">{{ total_vouchers }}</span>
+                    <span class="stat-label">Tổng voucher</span>
+                </div>
+                <div class="stat-item active">
+                    <span class="stat-number">{{ active_vouchers }}</span>
+                    <span class="stat-label">Đang hiệu lực</span>
+                </div>
+                <div class="stat-item expired">
+                    <span class="stat-number">{{ expired_vouchers }}</span>
+                    <span class="stat-label">Đã hết hạn</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all">
+                <i class="fas fa-list"></i>
+                Tất cả ({{ total_vouchers }})
+            </button>
+            <button class="filter-tab" data-filter="active">
+                <i class="fas fa-check-circle"></i>
+                Đang hiệu lực ({{ active_vouchers }})
+            </button>
+            <button class="filter-tab" data-filter="expired">
+                <i class="fas fa-times-circle"></i>
+                Đã hết hạn ({{ expired_vouchers }})
+            </button>
+        </div>
+    </div>
+
+    <!-- Vouchers List -->
+    <div class="vouchers-content">
+        {% if vouchers %}
+        <div class="vouchers-grid">
+            {% for voucher in vouchers %}
+            <div class="voucher-card {{ 'expired' if voucher.is_expired else 'active' }}" data-status="{{ 'expired' if voucher.is_expired else 'active' }}">
+                <div class="voucher-header">
+                    <div class="voucher-type">
+                        <i class="fas fa-{{ voucher.icon }}"></i>
+                        {{ voucher.type }}
+                    </div>
+                    <div class="voucher-status">
+                        {% if voucher.is_expired %}
+                        <span class="status-badge expired">Hết hạn</span>
+                        {% else %}
+                        <span class="status-badge active">Hiệu lực</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="voucher-body">
+                    <div class="voucher-discount">
+                        {% if voucher.discount_type == 'percentage' %}
+                        <span class="discount-value">{{ voucher.discount_value }}%</span>
+                        {% else %}
+                        <span class="discount-value">{{ voucher.discount_value }}K</span>
+                        {% endif %}
+                        <span class="discount-label">Giảm giá</span>
+                    </div>
+                    
+                    <div class="voucher-details">
+                        <h3 class="voucher-title">{{ voucher.title }}</h3>
+                        <p class="voucher-description">{{ voucher.description }}</p>
+                        
+                        <div class="voucher-conditions">
+                            <div class="condition-item">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Đơn hàng tối thiểu: {{ voucher.min_order }}K</span>
+                            </div>
+                            {% if voucher.max_discount %}
+                            <div class="condition-item">
+                                <i class="fas fa-gift"></i>
+                                <span>Giảm tối đa: {{ voucher.max_discount }}K</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="voucher-footer">
+                    <div class="voucher-code">
+                        <span class="code-label">Mã voucher:</span>
+                        <span class="code-value">{{ voucher.code }}</span>
+                        <button class="copy-btn" onclick="copyVoucherCode('{{ voucher.code }}')">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="voucher-expiry">
+                        <i class="fas fa-clock"></i>
+                        <span>HSD: {{ voucher.expiry_date }}</span>
+                    </div>
+                    
+                    {% if not voucher.is_expired %}
+                    <button class="use-voucher-btn" onclick="useVoucher('{{ voucher.code }}')">
+                        <i class="fas fa-ticket-alt"></i>
+                        Sử dụng ngay
+                    </button>
+                    {% else %}
+                    <button class="expired-btn" disabled>
+                        <i class="fas fa-times"></i>
+                        Đã hết hạn
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-vouchers">
+            <div class="empty-icon">
+                <i class="fas fa-ticket-alt"></i>
+            </div>
+            <h3>Chưa có voucher nào</h3>
+            <p>Bạn sẽ nhận được voucher khi thực hiện các hoạt động trên hệ thống hoặc tham gia các chương trình khuyến mãi.</p>
+            <a href="{{ url_for('common.voucher') }}" class="browse-vouchers-btn">
+                <i class="fas fa-gift"></i>
+                Xem ưu đãi hiện có
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Use Voucher Modal -->
+<div id="use-voucher-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Sử dụng voucher</h3>
+            <span class="close" onclick="closeUseModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p>Bạn có muốn sử dụng voucher <strong id="modal-voucher-code"></strong> ngay bây giờ?</p>
+            <p class="modal-note">Voucher sẽ được áp dụng cho lần đặt sân tiếp theo của bạn.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeUseModal()">Hủy</button>
+            <button class="btn-primary" onclick="confirmUseVoucher()">Sử dụng</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/customer/my_vouchers.js') }}"></script>
+{% endblock %} 

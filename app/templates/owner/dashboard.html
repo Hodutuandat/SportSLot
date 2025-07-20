@@ -1,1 +1,132 @@
- 
+{% extends 'base.html' %}
+{% block title %}Dashboard | SportSlot Owner{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/owner/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Hero Section -->
+    <section class="dashboard-hero">
+        <div class="hero-content">
+            <h1>Chào mừng trở lại, {{ user.username }}!</h1>
+            <p>Quản lý sân bóng và theo dõi doanh thu của bạn một cách dễ dàng</p>
+        </div>
+    </section>
+
+    <!-- Stats Cards -->
+    <section class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">🏟️</div>
+                <div class="stat-content">
+                    <h3>{{ total_fields }}</h3>
+                    <p>Tổng số sân</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-content">
+                    <h3>{{ total_bookings }}</h3>
+                    <p>Lượt đặt sân</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">💰</div>
+                <div class="stat-content">
+                    <h3>{{ "{:,.0f}".format(total_revenue) }}đ</h3>
+                    <p>Doanh thu tháng</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-content">
+                    <h3>{{ pending_bookings }}</h3>
+                    <p>Chờ duyệt</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Actions -->
+    <section class="actions-section">
+        <h2>Thao tác nhanh</h2>
+        <div class="actions-grid">
+            <a href="{{ url_for('owner.add_field') }}" class="action-card">
+                <div class="action-icon">➕</div>
+                <div class="action-content">
+                    <h3>Thêm sân mới</h3>
+                    <p>Tạo sân thể thao mới</p>
+                </div>
+            </a>
+            
+            <a href="{{ url_for('owner.booking_schedule') }}?status=pending" class="action-card">
+                <div class="action-icon">✅</div>
+                <div class="action-content">
+                    <h3>Duyệt đặt sân</h3>
+                    <p>{{ pending_bookings }} booking chờ duyệt</p>
+                </div>
+            </a>
+            
+            <a href="{{ url_for('owner.transaction_history') }}" class="action-card">
+                <div class="action-icon">📊</div>
+                <div class="action-content">
+                    <h3>Xem báo cáo</h3>
+                    <p>Thống kê chi tiết</p>
+                </div>
+            </a>
+            
+            <a href="{{ url_for('owner.notifications') }}" class="action-card">
+                <div class="action-icon">🔔</div>
+                <div class="action-content">
+                    <h3>Thông báo</h3>
+                    <p>Tin nhắn mới</p>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- Recent Activities -->
+    <section class="activities-section">
+        <h2>Hoạt động gần đây</h2>
+        <div class="activities-container">
+            {% for booking in recent_bookings %}
+            <div class="activity-item">
+                <div class="activity-icon">
+                    {% if booking.status == 'confirmed' %}✅
+                    {% elif booking.status == 'pending' %}⏳
+                    {% elif booking.status == 'cancelled' %}❌
+                    {% else %}📅{% endif %}
+                </div>
+                <div class="activity-content">
+                    <h4>{{ booking.customer_name }}</h4>
+                    <p>{{ booking.field_name }} - {{ booking.date }} {{ booking.time }}</p>
+                    <span class="activity-time">{{ booking.booking_date }}</span>
+                </div>
+                <div class="activity-amount">
+                    <span class="amount">{{ "{:,.0f}".format(booking.total_price) }}đ</span>
+                    <span class="status {{ booking.status }}">
+                        {% if booking.status == 'confirmed' %}Đã duyệt
+                        {% elif booking.status == 'pending' %}Chờ duyệt
+                        {% elif booking.status == 'cancelled' %}Đã hủy
+                        {% else %}Hoàn thành{% endif %}
+                    </span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="view-all-container">
+            <a href="{{ url_for('owner.booking_schedule') }}" class="view-all-btn">Xem tất cả hoạt động</a>
+        </div>
+    </section>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/owner/dashboard.js') }}"></script>
+{% endblock %} 

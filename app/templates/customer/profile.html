@@ -1,331 +1,288 @@
-{% extends 'base.html' %}
-{% block title %}Hồ sơ cá nhân | SportSlot{% endblock %}
+{% extends "base.html" %}
+
+{% block title %}Hồ sơ cá nhân - SportSlot{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/customer/profile.css') }}">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
 <div class="profile-container">
-    <!-- Sidebar Navigation -->
-    <div class="profile-sidebar">
-        <div class="profile-nav">
-            <div class="profile-nav-item active" data-tab="account">
-                <span>Tài khoản</span>
+    <!-- Header Section -->
+    <div class="main-header">
+        <div class="header-content">
+            <div class="header-left">
+                <h1>👤 Hồ sơ cá nhân</h1>
+                <p class="header-subtitle">Quản lý thông tin tài khoản và hoạt động của bạn</p>
             </div>
-            <div class="profile-nav-item" data-tab="booking-history">
-                <span>Lịch sử đặt sân</span>
-            </div>
-            <div class="profile-nav-item" data-tab="transaction-history">
-                <span>Lịch sử giao dịch</span>
-            </div>
-            <div class="profile-nav-item" data-tab="voucher">
-                <span>Voucher</span>
+            <div class="header-actions">
+                <div class="stats-summary">
+                    <div class="stat-item clickable-stat" onclick="goToBookingHistory()" data-booking-url="{{ url_for('customer.booking_history') }}">
+                        <span class="stat-number">{{ total_bookings }}</span>
+                        <span class="stat-label">Tổng đặt sân</span>
+                    </div>
+                    <div class="stat-item clickable-stat" onclick="scrollToPoints()">
+                        <span class="stat-number">{{ total_points }}</span>
+                        <span class="stat-label">Điểm tích lũy</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="profile-main">
-        <!-- Tab: Tài khoản -->
-        <div class="profile-tab-content active" id="account">
-            <div class="profile-section">
-                <div class="profile-section-header">
-                    <h2 class="profile-section-title">Tổng quan</h2>
-                    <button class="member-type-btn">
-                        Loại thành viên
+    <!-- Profile Information Section -->
+    <div class="profile-info-section">
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <div class="avatar-circle">
+                        {{ user.username[0].upper() }}
+                    </div>
+                </div>
+                <div class="profile-details">
+                    <h2 class="profile-name">{{ user.username }}</h2>
+                    <p class="profile-email">{{ user.email }}</p>
+                    <div class="profile-meta">
+                        <span class="member-type">
+                            <i class="fas fa-crown"></i>
+                            Thành viên VIP
+                        </span>
+                        <span class="join-date">
+                            <i class="fas fa-calendar"></i>
+                            Tham gia từ {{ join_date }}
+                        </span>
+                    </div>
+                </div>
+                <div class="profile-actions">
+                    <button class="action-btn edit-btn" onclick="editProfile()">
+                        <i class="fas fa-edit"></i>
+                        Chỉnh sửa
                     </button>
                 </div>
-                
-                <div class="profile-form-container">
-                    <div class="profile-form-row">
-                        <label class="profile-label">Tên:</label>
-                        <div class="profile-input-container">
-                            <span class="profile-value">Nguyễn Văn An</span>
-                            <div class="profile-dots"></div>
-                        </div>
-                    </div>
-                    <div class="profile-form-row">
-                        <label class="profile-label">Email:</label>
-                        <div class="profile-input-container">
-                            <span class="profile-value">nguyenvanan@gmail.com</span>
-                            <div class="profile-dots"></div>
-                        </div>
-                    </div>
-                    <div class="profile-form-row">
-                        <label class="profile-label">Số điện thoại:</label>
-                        <div class="profile-input-container">
-                            <span class="profile-value">0123456789</span>
-                            <div class="profile-dots"></div>
-                        </div>
-                    </div>
-                </div>
             </div>
-
-            <!-- Điểm tích lũy Section -->
-            <div class="profile-section">
-                <div class="profile-section-header">
-                    <h2 class="profile-section-title">Điểm tích lũy</h2>
+            
+            <div class="profile-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-value">{{ total_bookings }}</span>
+                        <span class="stat-label">Lần đặt sân</span>
+                    </div>
                 </div>
-                <div class="points-table-container">
-                    <table class="points-table">
-                        <thead>
-                            <tr>
-                                <th>Ngày / tháng / năm</th>
-                                <th>Tổng Điểm</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>15/12/2024 - Đặt sân bóng đá (+50 điểm)</td>
-                                <td>1,250</td>
-                            </tr>
-                            <tr>
-                                <td>10/12/2024 - Đặt sân tennis (+30 điểm)</td>
-                                <td>1,200</td>
-                            </tr>
-                            <tr>
-                                <td>05/12/2024 - Đặt sân cầu lông (+20 điểm)</td>
-                                <td>1,170</td>
-                            </tr>
-                            <tr>
-                                <td>01/12/2024 - Đăng ký thành viên (+100 điểm)</td>
-                                <td>1,150</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-value">{{ total_points }}</span>
+                        <span class="stat-label">Điểm tích lũy</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-ticket-alt"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-value">{{ active_vouchers }}</span>
+                        <span class="stat-label">Voucher hiệu lực</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-value">{{ total_spent }}</span>
+                        <span class="stat-label">Tổng chi tiêu</span>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Tab: Lịch sử đặt sân -->
-        <div class="profile-tab-content" id="booking-history">
-            <div class="profile-section">
-                <div class="profile-section-header">
-                    <h2 class="profile-section-title">Lịch sử đặt sân</h2>
+    <!-- Personal Information Section -->
+    <div class="info-section">
+        <div class="section-header">
+            <h3>📋 Thông tin cá nhân</h3>
+            <button class="edit-info-btn" onclick="editPersonalInfo()">
+                <i class="fas fa-edit"></i>
+                Chỉnh sửa
+            </button>
+        </div>
+        
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">
+                    <i class="fas fa-user"></i>
+                    Họ và tên
                 </div>
-                
-                <!-- Simple Filter -->
-                <div class="simple-filters">
-                    <div class="filter-row">
-                        <div class="filter-item">
-                            <label>Mã đơn:</label>
-                            <input type="text" class="filter-input" placeholder="Nhập mã đơn">
-                        </div>
-                        <div class="filter-item">
-                            <label>Từ ngày:</label>
-                            <input type="date" class="filter-input">
-                        </div>
-                        <div class="filter-item">
-                            <label>Đến ngày:</label>
-                            <input type="date" class="filter-input">
-                        </div>
-                        <button class="filter-btn">
-                            <i class="fas fa-filter"></i>
-                            Lọc
-                        </button>
-                    </div>
+                <div class="info-value">{{ user.full_name or 'Chưa cập nhật' }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">
+                    <i class="fas fa-envelope"></i>
+                    Email
                 </div>
-
-                <!-- Booking Table -->
-                <div class="simple-table-container">
-                    <table class="simple-table">
-                        <thead>
-                            <tr>
-                                <th>Thời gian</th>
-                                <th>Mã Đơn</th>
-                                <th>Sân</th>
-                                <th>Tổng tiền</th>
-                                <th>Trạng thái</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>20/12/2024 16:00</td>
-                                <td>#BK001</td>
-                                <td>Sân Bóng Đá Premier</td>
-                                <td>400.000 VNĐ</td>
-                                <td><span class="status-badge upcoming">Sắp tới</span></td>
-                            </tr>
-                            <tr>
-                                <td>22/12/2024 09:00</td>
-                                <td>#BK002</td>
-                                <td>Sân Tennis Elite</td>
-                                <td>300.000 VNĐ</td>
-                                <td><span class="status-badge upcoming">Sắp tới</span></td>
-                            </tr>
-                            <tr>
-                                <td>15/12/2024 19:00</td>
-                                <td>#BK003</td>
-                                <td>Sân Cầu Lông Victory</td>
-                                <td>240.000 VNĐ</td>
-                                <td><span class="status-badge completed">Hoàn thành</span></td>
-                            </tr>
-                            <tr>
-                                <td>10/12/2024 20:00</td>
-                                <td>#BK004</td>
-                                <td>Sân Bóng Rổ Champion</td>
-                                <td>360.000 VNĐ</td>
-                                <td><span class="status-badge completed">Hoàn thành</span></td>
-                            </tr>
-                            <tr>
-                                <td>05/12/2024 18:00</td>
-                                <td>#BK005</td>
-                                <td>Sân Bóng Đá Star</td>
-                                <td>320.000 VNĐ</td>
-                                <td><span class="status-badge cancelled">Đã hủy</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="info-value">{{ user.email }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">
+                    <i class="fas fa-phone"></i>
+                    Số điện thoại
                 </div>
+                <div class="info-value">{{ user.phone or 'Chưa cập nhật' }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Địa chỉ
+                </div>
+                <div class="info-value">{{ user.address or 'Chưa cập nhật' }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">
+                    <i class="fas fa-birthday-cake"></i>
+                    Ngày sinh
+                </div>
+                <div class="info-value">{{ user.birthday or 'Chưa cập nhật' }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">
+                    <i class="fas fa-venus-mars"></i>
+                    Giới tính
+                </div>
+                <div class="info-value">{{ user.gender or 'Chưa cập nhật' }}</div>
             </div>
         </div>
+    </div>
 
-        <!-- Tab: Lịch sử giao dịch -->
-        <div class="profile-tab-content" id="transaction-history">
-            <div class="profile-section">
-                <div class="profile-section-header">
-                    <h2 class="profile-section-title">Lịch sử giao dịch</h2>
-                </div>
-                
-                <!-- Simple Filter (identical to booking history) -->
-                <div class="simple-filters">
-                    <div class="filter-row">
-                        <div class="filter-item">
-                            <label>Mã đơn:</label>
-                            <input type="text" class="filter-input" placeholder="Nhập mã đơn">
-                        </div>
-                        <div class="filter-item">
-                            <label>Từ ngày:</label>
-                            <input type="date" class="filter-input">
-                        </div>
-                        <div class="filter-item">
-                            <label>Đến ngày:</label>
-                            <input type="date" class="filter-input">
-                        </div>
-                        <button class="filter-btn">
-                            <i class="fas fa-filter"></i>
-                            Lọc
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Transaction Table -->
-                <div class="simple-table-container">
-                    <table class="simple-table">
-                        <thead>
-                            <tr>
-                                <th>Thời gian</th>
-                                <th>Mã Đơn</th>
-                                <th>Phương thức</th>
-                                <th>Tổng tiền</th>
-                                <th>Trạng thái</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>15/12/2024 14:30</td>
-                                <td>#TXN001</td>
-                                <td>MoMo</td>
-                                <td>200.000 VNĐ</td>
-                                <td><span class="status-badge success">Thành công</span></td>
-                            </tr>
-                            <tr>
-                                <td>10/12/2024 09:15</td>
-                                <td>#TXN002</td>
-                                <td>Banking</td>
-                                <td>150.000 VNĐ</td>
-                                <td><span class="status-badge success">Thành công</span></td>
-                            </tr>
-                            <tr>
-                                <td>08/12/2024 16:45</td>
-                                <td>#TXN003</td>
-                                <td>MoMo</td>
-                                <td>120.000 VNĐ</td>
-                                <td><span class="status-badge pending">Đang xử lý</span></td>
-                            </tr>
-                            <tr>
-                                <td>05/12/2024 11:20</td>
-                                <td>#TXN004</td>
-                                <td>Banking</td>
-                                <td>180.000 VNĐ</td>
-                                <td><span class="status-badge failed">Thất bại</span></td>
-                            </tr>
-                            <tr>
-                                <td>01/12/2024 19:20</td>
-                                <td>#TXN005</td>
-                                <td>MoMo</td>
-                                <td>100.000 VNĐ</td>
-                                <td><span class="status-badge success">Thành công</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+    <!-- Points History Section -->
+    <div id="points-section" class="points-section">
+        <div class="section-header">
+            <h3>🏆 Lịch sử điểm tích lũy</h3>
+            <div class="points-summary">
+                <span class="total-points">Tổng điểm: {{ total_points }}</span>
             </div>
         </div>
-
-        <!-- Tab: Voucher -->
-        <div class="profile-tab-content" id="voucher">
-            <div class="profile-section">
-                <div class="profile-section-header">
-                    <h2 class="profile-section-title">Voucher của bạn</h2>
+        
+        <div class="points-table-container">
+            {% if points_history %}
+            <table class="points-table">
+                <thead>
+                    <tr>
+                        <th>Loại</th>
+                        <th>Mô tả</th>
+                        <th>Ngày</th>
+                        <th>Điểm</th>
+                        <th>Số dư</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for point in points_history %}
+                    <tr class="point-row">
+                        <td class="point-type">
+                            <div class="point-icon-small">
+                                <i class="fas fa-{{ point.icon }}"></i>
+                            </div>
+                        </td>
+                        <td class="point-description">{{ point.description }}</td>
+                        <td class="point-date">{{ point.date }}</td>
+                        <td class="point-amount {{ 'positive' if point.amount > 0 else 'negative' }}">
+                            {{ '+' if point.amount > 0 else '' }}{{ point.amount }}
+                        </td>
+                        <td class="point-balance">{{ point.balance }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-points">
+                <div class="empty-icon">
+                    <i class="fas fa-star"></i>
                 </div>
-                
-                <div class="voucher-grid">
-                    <!-- Voucher Card 1 -->
-                    <div class="voucher-card active">
-                        <div class="voucher-header">
-                            <h3>Giảm giá 20% đặt sân</h3>
-                            <div class="voucher-icon">
-                                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Sân cầu lông">
-                            </div>
-                        </div>
-                        <div class="voucher-discount">20% OFF</div>
-                        <div class="voucher-details">
-                            <div class="voucher-info">
-                                <span>Mã: SPORT20</span>
-                                <span>HSD: 31/12/2025</span>
-                            </div>
-                        </div>
-                        <div class="voucher-description">
-                            Áp dụng cho đơn hàng trên 200.000 VNĐ. Sử dụng 1 lần.
-                        </div>
-                        <button class="voucher-btn apply">
-                            <i class="fas fa-hand-point-up"></i>
-                            Áp dụng
-                        </button>
-                    </div>
+                <h4>Chưa có lịch sử điểm tích lũy</h4>
+                <p>Bạn sẽ thấy lịch sử điểm tích lũy tại đây khi thực hiện các hoạt động trên hệ thống.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
 
-                    <!-- Voucher Card 2 -->
-                    <div class="voucher-card expired">
-                        <div class="voucher-header">
-                            <h3>Miễn phí 1 giờ chơi</h3>
-                            <div class="voucher-icon">
-                                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Sân Tennis">
-                            </div>
-                        </div>
-                        <div class="voucher-discount">MIỄN PHÍ</div>
-                        <div class="voucher-details">
-                            <div class="voucher-info">
-                                <span>Mã: FREEHOUR</span>
-                                <span>HSD: 30/06/2024</span>
-                            </div>
-                        </div>
-                        <div class="voucher-description">
-                            Áp dụng cho sân bóng đá vào các ngày trong tuần.
-                        </div>
-                        <button class="voucher-btn expired" disabled>
-                            <i class="fas fa-ban"></i>
-                            Đã hết hạn
-                        </button>
-                    </div>
+    <!-- Recent Activity Section -->
+    <div class="activity-section">
+        <div class="section-header">
+            <h3>📊 Hoạt động gần đây</h3>
+            <a href="{{ url_for('customer.booking_history') }}" class="view-all-btn">
+                Xem tất cả
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        
+        <div class="activity-list">
+            {% for activity in recent_activities %}
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-{{ activity.icon }}"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-title">{{ activity.title }}</div>
+                    <div class="activity-description">{{ activity.description }}</div>
+                    <div class="activity-time">{{ activity.time }}</div>
+                </div>
+                <div class="activity-status">
+                    <span class="status-badge status-{{ activity.status }}">
+                        {{ activity.status_text }}
+                    </span>
                 </div>
             </div>
+            {% endfor %}
         </div>
     </div>
 </div>
 
+<!-- Edit Profile Modal -->
+<div id="edit-profile-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Chỉnh sửa thông tin cá nhân</h3>
+            <span class="close" onclick="closeEditModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form id="edit-profile-form">
+                <div class="form-group">
+                    <label for="full-name">Họ và tên</label>
+                    <input type="text" id="full-name" name="full_name" value="{{ user.full_name or '' }}">
+                </div>
+                <div class="form-group">
+                    <label for="phone">Số điện thoại</label>
+                    <input type="tel" id="phone" name="phone" value="{{ user.phone or '' }}">
+                </div>
+                <div class="form-group">
+                    <label for="address">Địa chỉ</label>
+                    <textarea id="address" name="address" rows="3">{{ user.address or '' }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="birthday">Ngày sinh</label>
+                    <input type="date" id="birthday" name="birthday" value="{{ user.birthday or '' }}">
+                </div>
+                <div class="form-group">
+                    <label for="gender">Giới tính</label>
+                    <select id="gender" name="gender">
+                        <option value="">Chọn giới tính</option>
+                        <option value="male" {{ 'selected' if user.gender == 'male' else '' }}>Nam</option>
+                        <option value="female" {{ 'selected' if user.gender == 'female' else '' }}>Nữ</option>
+                        <option value="other" {{ 'selected' if user.gender == 'other' else '' }}>Khác</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeEditModal()">Hủy</button>
+            <button class="btn-primary" onclick="saveProfile()">Lưu thay đổi</button>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}

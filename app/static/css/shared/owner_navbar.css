@@ -1,0 +1,906 @@
+/* Owner Navbar Styles */
+
+/* Base Navbar */
+.owner-navbar {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    transition: all 0.3s ease;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.owner-navbar .navbar-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    height: 75px;
+}
+
+/* Brand/Logo */
+.owner-navbar .navbar-brand {
+    display: flex;
+    align-items: center;
+}
+
+.owner-navbar .brand-link {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: #1f2937;
+}
+
+.owner-navbar .brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.owner-navbar .logo-icon {
+    font-size: 1.9rem;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.owner-navbar .logo-text {
+    font-size: 1.6rem;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+}
+
+.owner-navbar .brand-subtitle {
+    font-size: 0.8rem;
+    opacity: 0.9;
+    margin-top: -2px;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+/* Main Navigation */
+.owner-navbar .navbar-menu {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    max-width: 700px;
+}
+
+.owner-navbar .navbar-nav {
+    display: flex;
+    gap: 12px;
+}
+
+.owner-navbar .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #374151;
+    font-weight: 700;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid transparent;
+}
+
+.owner-navbar .nav-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.05);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+}
+
+.owner-navbar .nav-item:hover::before {
+    transform: scaleX(1);
+}
+
+.owner-navbar .nav-item:hover {
+    transform: translateY(-2px);
+    border-color: rgba(0, 0, 0, 0.2);
+    color: #111827;
+}
+
+.owner-navbar .nav-item.active {
+    background: #1f2937;
+    color: white;
+    border-color: #1f2937;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.owner-navbar .nav-icon {
+    font-size: 1.2rem;
+    position: relative;
+    z-index: 1;
+}
+
+.owner-navbar .nav-text {
+    position: relative;
+    z-index: 1;
+}
+
+/* Revenue Section */
+.navbar-revenue {
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+}
+
+.revenue-display {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f3f4f6;
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+}
+
+.revenue-icon {
+    font-size: 1.3rem;
+    color: #059669;
+    animation: pulse 2s infinite;
+}
+
+.revenue-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.revenue-amount {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #1f2937;
+    line-height: 1;
+}
+
+.revenue-label {
+    font-size: 0.75rem;
+    color: #6b7280;
+    font-weight: 600;
+}
+
+/* User Actions */
+.owner-navbar .navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+/* Notification Bell */
+.owner-navbar .notification-bell {
+    position: relative;
+}
+
+.owner-navbar .bell-button {
+    background: #f3f4f6;
+    border: 2px solid #e5e7eb;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.owner-navbar .bell-button:hover {
+    background: #e5e7eb;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.owner-navbar .bell-icon {
+    font-size: 1.3rem;
+    color: #374151;
+}
+
+.owner-navbar .notification-badge {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    background: #ef4444;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.75rem;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid #ffffff;
+    animation: bounce 2s infinite;
+}
+
+.owner-navbar .notification-dropdown {
+    position: absolute;
+    top: 120%;
+    right: 0;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    width: 380px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 1001;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.owner-navbar .notification-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.owner-navbar .notification-header {
+    padding: 20px 20px 10px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border-radius: 15px 15px 0 0;
+}
+
+.owner-navbar .notification-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #92400e;
+}
+
+.owner-navbar .mark-all-read {
+    background: none;
+    border: none;
+    color: #d97706;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.owner-navbar .notification-list {
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.owner-navbar .notification-item {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f3f4f6;
+    display: flex;
+    gap: 15px;
+    transition: all 0.2s ease;
+}
+
+.owner-navbar .notification-item:hover {
+    background: #fef3c7;
+}
+
+.owner-navbar .notification-item.unread {
+    background: linear-gradient(135deg, #fffbeb, #fef3c7);
+    border-left: 4px solid #f59e0b;
+}
+
+.owner-navbar .notification-item.urgent {
+    background: linear-gradient(135deg, #fef2f2, #fee2e2);
+    border-left: 4px solid #ef4444;
+}
+
+.owner-navbar .notification-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.owner-navbar .notification-content {
+    flex: 1;
+}
+
+.owner-navbar .notification-title {
+    font-weight: 700;
+    color: #232a34;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+}
+
+.owner-navbar .notification-text {
+    color: #6b7280;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+    line-height: 1.4;
+}
+
+.owner-navbar .notification-time {
+    color: #9ca3af;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.owner-navbar .notification-footer {
+    padding: 15px 20px;
+    border-top: 1px solid #e5e7eb;
+    text-align: center;
+    background: #fafafa;
+    border-radius: 0 0 15px 15px;
+}
+
+.owner-navbar .view-all-notifications {
+    color: #d97706;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+/* User Menu */
+.owner-navbar .user-menu-dropdown {
+    position: relative;
+}
+
+.owner-navbar .user-menu-trigger {
+    background: #f3f4f6;
+    border: 2px solid #e5e7eb;
+    border-radius: 30px;
+    padding: 8px 14px 8px 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.owner-navbar .user-menu-trigger:hover {
+    background: #e5e7eb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.owner-navbar .user-avatar.owner-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1f2937, #374151);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    color: white;
+    border: 3px solid #e5e7eb;
+    font-size: 1.1rem;
+}
+
+.owner-navbar .user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.owner-navbar .user-name {
+    font-weight: 800;
+    color: #1f2937;
+    font-size: 0.95rem;
+}
+
+.owner-navbar .user-role {
+    font-size: 0.75rem;
+    color: #6b7280;
+    font-weight: 600;
+}
+
+.owner-navbar .dropdown-arrow {
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin-left: 6px;
+    transition: transform 0.3s ease;
+}
+
+.owner-navbar .user-menu-dropdown.show .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.owner-navbar .user-menu-content {
+    position: absolute;
+    top: 120%;
+    right: 0;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    width: 300px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 1001;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.owner-navbar .user-menu-content.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.owner-navbar .menu-header {
+    padding: 20px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    gap: 15px;
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border-radius: 15px 15px 0 0;
+}
+
+.owner-navbar .menu-avatar.owner-menu-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 1.4rem;
+    border: 3px solid rgba(255, 255, 255, 0.8);
+}
+
+.owner-navbar .menu-user-info {
+    flex: 1;
+}
+
+.owner-navbar .menu-user-name {
+    font-weight: 800;
+    color: #92400e;
+    font-size: 1.1rem;
+    margin-bottom: 2px;
+}
+
+.owner-navbar .menu-user-email {
+    color: #a16207;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+}
+
+.owner-navbar .menu-user-badge {
+    background: linear-gradient(135deg, #d97706, #b45309);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: inline-block;
+}
+
+.owner-navbar .menu-divider {
+    height: 1px;
+    background: #e5e7eb;
+    margin: 8px 0;
+}
+
+.owner-navbar .menu-items {
+    padding: 8px 0;
+}
+
+.owner-navbar .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 14px 20px;
+    text-decoration: none;
+    color: #374151;
+    transition: all 0.2s ease;
+    font-weight: 600;
+    position: relative;
+}
+
+.owner-navbar .menu-item:hover {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.owner-navbar .menu-icon {
+    width: 22px;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.owner-navbar .menu-text {
+    flex: 1;
+    font-size: 0.9rem;
+}
+
+.owner-navbar .menu-badge {
+    background: #ef4444;
+    color: white;
+    border-radius: 12px;
+    padding: 2px 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.owner-navbar .logout-item {
+    color: #ef4444;
+}
+
+.owner-navbar .logout-item:hover {
+    background: #fef2f2;
+}
+
+/* Mobile Menu */
+.owner-navbar .mobile-menu-toggle {
+    display: none;
+}
+
+.owner-navbar .hamburger-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.owner-navbar .hamburger-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.owner-navbar .hamburger-line {
+    width: 20px;
+    height: 2px;
+    background: white;
+    border-radius: 1px;
+    transition: all 0.3s ease;
+}
+
+.owner-navbar .mobile-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 2000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.owner-navbar .mobile-menu-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.owner-navbar .mobile-menu-content {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 320px;
+    height: 100%;
+    background: white;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+}
+
+.owner-navbar .mobile-menu-overlay.show .mobile-menu-content {
+    transform: translateX(0);
+}
+
+.owner-navbar .mobile-menu-header {
+    padding: 20px;
+    background: linear-gradient(135deg, #1f2937, #374151);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.owner-navbar .mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 900;
+    font-size: 1.3rem;
+}
+
+.owner-navbar .mobile-close-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 1.6rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.mobile-user-info {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #f3f4f6;
+}
+
+.mobile-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1f2937, #374151);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 1.3rem;
+}
+
+.mobile-user-details {
+    flex: 1;
+}
+
+.mobile-user-name {
+    font-weight: 800;
+    color: #1f2937;
+    font-size: 1.1rem;
+    margin-bottom: 2px;
+}
+
+.mobile-user-role {
+    color: #6b7280;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.mobile-revenue {
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f9fafb;
+}
+
+.mobile-revenue-icon {
+    font-size: 1.4rem;
+    color: #059669;
+}
+
+.mobile-revenue-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.mobile-revenue-amount {
+    font-weight: 900;
+    color: #1f2937;
+    font-size: 1.1rem;
+}
+
+.mobile-revenue-label {
+    color: #6b7280;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.owner-navbar .mobile-menu-items {
+    padding: 20px 0;
+}
+
+.owner-navbar .mobile-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 16px 20px;
+    text-decoration: none;
+    color: #374151;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.owner-navbar .mobile-nav-item:hover {
+    background: #f3f4f6;
+    color: #1f2937;
+}
+
+.owner-navbar .mobile-nav-item.highlight {
+    background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+    color: #1f2937;
+    font-weight: 800;
+}
+
+.owner-navbar .mobile-nav-item.logout {
+    color: #ef4444;
+}
+
+.owner-navbar .mobile-badge {
+    background: #ef4444;
+    color: white;
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-left: auto;
+}
+
+.owner-navbar .mobile-divider {
+    height: 1px;
+    background: #e5e7eb;
+    margin: 10px 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .navbar-revenue {
+        margin-right: 15px;
+    }
+    
+    .revenue-display {
+        padding: 8px 12px;
+    }
+    
+    .revenue-amount {
+        font-size: 1rem;
+    }
+    
+    .revenue-label {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 1024px) {
+    .owner-navbar .navbar-container {
+        padding: 0 15px;
+    }
+    
+    .owner-navbar .navbar-nav {
+        gap: 8px;
+    }
+    
+    .owner-navbar .nav-item {
+        padding: 12px 14px;
+        font-size: 0.9rem;
+    }
+    
+    .revenue-display {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .owner-navbar .navbar-menu {
+        display: none;
+    }
+    
+    .owner-navbar .mobile-menu-toggle {
+        display: block;
+    }
+    
+    .navbar-revenue {
+        display: none;
+    }
+    
+    .owner-navbar .notification-bell {
+        display: none;
+    }
+    
+    .owner-navbar .user-menu-dropdown {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .owner-navbar .navbar-container {
+        height: 65px;
+        padding: 0 10px;
+    }
+    
+    .owner-navbar .logo-text {
+        font-size: 1.4rem;
+    }
+    
+    .owner-navbar .brand-subtitle {
+        font-size: 0.75rem;
+    }
+    
+    .owner-navbar .mobile-menu-content {
+        width: 300px;
+    }
+}
+
+/* Scroll Effect */
+.owner-navbar.scrolled {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 249, 250, 0.95) 100%);
+    backdrop-filter: blur(10px);
+}
+
+/* Special Animations */
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-3px); }
+    60% { transform: translateY(-2px); }
+}
+
+.owner-navbar .notification-bell.urgent .bell-icon {
+    animation: bellRing 1.5s infinite;
+    color: #fbbf24;
+}
+
+@keyframes bellRing {
+    0%, 50%, 100% { transform: rotate(0deg); }
+    10%, 30% { transform: rotate(-15deg); }
+    20%, 40% { transform: rotate(15deg); }
+}
+
+/* Loading states */
+.owner-navbar .nav-item.loading {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.owner-navbar .nav-item.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Success states */
+.owner-navbar .quick-action-btn.success {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: rgba(16, 185, 129, 0.3);
+    color: #10b981;
+}
+
+.owner-navbar .revenue-display.positive .revenue-amount {
+    color: #10b981;
+}
+
+.owner-navbar .revenue-display.negative .revenue-amount {
+    color: #ef4444;
+} 

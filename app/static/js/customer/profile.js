@@ -1,452 +1,355 @@
-// Sports-Themed Profile Management
+// Profile JavaScript
+
 document.addEventListener('DOMContentLoaded', function() {
-    initializeProfileTabs();
-    initializeFilters();
-    initializeSportsAnimations();
-    initializeParticleEffect();
-    
-    // Add welcome animation
-    setTimeout(() => {
-        addWelcomeAnimation();
-    }, 500);
+    initializeProfile();
 });
 
-// Enhanced Tab Switching with Sports Energy
-function initializeProfileTabs() {
-    const navItems = document.querySelectorAll('.profile-nav-item');
-    const tabContents = document.querySelectorAll('.profile-tab-content');
+function initializeProfile() {
+    // Initialize modals
+    setupModals();
     
-    navItems.forEach((navItem, index) => {
-        navItem.addEventListener('click', function() {
-            const targetTab = this.dataset.tab;
-            
-            // Add click animation
-            this.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-                this.style.transform = '';
-            }, 150);
-            
-            // Remove active class from all nav items and tab contents
-            navItems.forEach(item => item.classList.remove('active'));
-            tabContents.forEach(content => content.classList.remove('active'));
-            
-            // Add active class to clicked nav item
-            this.classList.add('active');
-            
-            // Show corresponding tab content with staggered animation
-            const targetContent = document.getElementById(targetTab);
-            if (targetContent) {
-                setTimeout(() => {
-                    targetContent.classList.add('active');
-                    animateTabContent(targetContent);
-                }, 200);
-            }
-            
+    console.log('👤 Profile initialized!');
+}
 
+// Modal functionality
+function setupModals() {
+    // Close modals when clicking outside
+    window.addEventListener('click', function(event) {
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
         });
     });
-}
-
-// Animate tab content with sports energy
-function animateTabContent(content) {
-    const sections = content.querySelectorAll('.profile-section');
-    sections.forEach((section, index) => {
-        section.style.opacity = '0';
-        section.style.transform = 'translateY(30px)';
-        
-        setTimeout(() => {
-            section.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
-            section.style.opacity = '1';
-            section.style.transform = 'translateY(0)';
-        }, index * 150);
-    });
-}
-
-// Enhanced Filter Functionality with Sports Feedback
-function initializeFilters() {
-    const filterButtons = document.querySelectorAll('.filter-btn');
     
-    filterButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            // Add dynamic click effect
-            this.style.transform = 'scale(0.9)';
-            setTimeout(() => {
-                this.style.transform = '';
-            }, 150);
-            
-            // Get the parent filters container
-            const filtersContainer = this.closest('.simple-filters');
-            const inputs = filtersContainer.querySelectorAll('.filter-input');
-            
-            // Collect filter values
-            let filterData = {};
-            inputs.forEach(input => {
-                if (input.value.trim()) {
-                    filterData[input.previousElementSibling.textContent.trim()] = input.value.trim();
-                }
+    // Close modals with escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                modal.style.display = 'none';
             });
-            
-            // Show energetic feedback
-            if (Object.keys(filterData).length > 0) {
-        
-                addFilterAnimation(filtersContainer);
-                
-                // Animate table rows
-                const table = filtersContainer.parentElement.querySelector('.simple-table');
-                if (table) {
-                    animateTableRows(table);
-                }
-            } else {
-        
-                shakeAnimation(this);
-            }
-        });
-    });
-}
-
-// Sports-themed animations
-function initializeSportsAnimations() {
-    // Hover effects for cards
-    const profileSections = document.querySelectorAll('.profile-section');
-    profileSections.forEach(section => {
-        section.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-5px) scale(1.01)';
-        });
-        
-        section.addEventListener('mouseleave', function() {
-            this.style.transform = '';
-        });
-    });
-    
-    // Bouncing effect for status badges
-    const statusBadges = document.querySelectorAll('.status-badge');
-    statusBadges.forEach(badge => {
-        badge.addEventListener('click', function() {
-            this.style.animation = 'bounce 0.6s ease-in-out';
-            setTimeout(() => {
-                this.style.animation = '';
-            }, 600);
-        });
-    });
-    
-    // Table row sports hover effect
-    const tableRows = document.querySelectorAll('.simple-table tbody tr');
-    tableRows.forEach(row => {
-        row.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateX(10px) scale(1.01)';
-            this.style.boxShadow = '0 8px 25px rgba(0, 191, 99, 0.1)';
-        });
-        
-        row.addEventListener('mouseleave', function() {
-            this.style.transform = '';
-            this.style.boxShadow = '';
-        });
-    });
-}
-
-// Particle effect for sports energy
-function initializeParticleEffect() {
-    const container = document.querySelector('.profile-container');
-    
-    // Create floating sports icons
-    const sportsIcons = ['⚽', '🏀', '🎾', '🏐', '⚾', '🏓'];
-    
-    setInterval(() => {
-        if (Math.random() > 0.97) { // 3% chance every interval
-            createFloatingIcon(container, sportsIcons[Math.floor(Math.random() * sportsIcons.length)]);
         }
-    }, 100);
+    });
 }
 
-function createFloatingIcon(container, icon) {
-    const floating = document.createElement('div');
-    floating.textContent = icon;
-    floating.style.cssText = `
-        position: fixed;
-        font-size: 20px;
-        pointer-events: none;
-        z-index: 100;
-        opacity: 0.3;
-        animation: floatUp 3s ease-out forwards;
-        left: ${Math.random() * window.innerWidth}px;
-        top: ${window.innerHeight + 20}px;
+// Edit profile functions
+function editProfile() {
+    const modal = document.getElementById('edit-profile-modal');
+    modal.style.display = 'block';
+}
+
+function editPersonalInfo() {
+    const modal = document.getElementById('edit-profile-modal');
+    modal.style.display = 'block';
+}
+
+function closeEditModal() {
+    const modal = document.getElementById('edit-profile-modal');
+    modal.style.display = 'none';
+}
+
+function saveProfile() {
+    // Get form data
+    const form = document.getElementById('edit-profile-form');
+    const formData = new FormData(form);
+    
+    // Show loading state
+    const saveBtn = document.querySelector('.btn-primary');
+    const originalText = saveBtn.textContent;
+    saveBtn.textContent = 'Đang lưu...';
+    saveBtn.disabled = true;
+    
+    // Simulate API call
+    setTimeout(() => {
+        // Update UI with new data
+        updateProfileDisplay(formData);
+        
+        // Show success notification
+        showNotification('Cập nhật thông tin thành công!', 'success');
+        
+        // Reset button
+        saveBtn.textContent = originalText;
+        saveBtn.disabled = false;
+        
+        // Close modal
+        closeEditModal();
+    }, 1500);
+}
+
+function updateProfileDisplay(formData) {
+    // Update profile name
+    const fullName = formData.get('full_name');
+    if (fullName) {
+        const profileName = document.querySelector('.profile-name');
+        if (profileName) {
+            profileName.textContent = fullName;
+        }
+        
+        // Update avatar initial
+        const avatarCircle = document.querySelector('.avatar-circle');
+        if (avatarCircle) {
+            avatarCircle.textContent = fullName[0].toUpperCase();
+        }
+    }
+    
+    // Update info items
+    const phone = formData.get('phone');
+    if (phone) {
+        updateInfoItem('phone', phone);
+    }
+    
+    const address = formData.get('address');
+    if (address) {
+        updateInfoItem('address', address);
+    }
+    
+    const birthday = formData.get('birthday');
+    if (birthday) {
+        updateInfoItem('birthday', formatDate(birthday));
+    }
+    
+    const gender = formData.get('gender');
+    if (gender) {
+        updateInfoItem('gender', getGenderText(gender));
+    }
+}
+
+function updateInfoItem(field, value) {
+    const infoItems = document.querySelectorAll('.info-item');
+    infoItems.forEach(item => {
+        const label = item.querySelector('.info-label');
+        if (label && label.textContent.toLowerCase().includes(field)) {
+            const valueElement = item.querySelector('.info-value');
+            if (valueElement) {
+                valueElement.textContent = value;
+            }
+        }
+    });
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN');
+}
+
+function getGenderText(gender) {
+    const genderMap = {
+        'male': 'Nam',
+        'female': 'Nữ',
+        'other': 'Khác'
+    };
+    return genderMap[gender] || 'Chưa cập nhật';
+}
+
+// Notification system
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+            <span>${message}</span>
+        </div>
     `;
     
-    container.appendChild(floating);
+    // Add styles
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        z-index: 10000;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        max-width: 300px;
+    `;
     
-    // Remove after animation
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Animate in
     setTimeout(() => {
-        if (floating.parentNode) {
-            floating.parentNode.removeChild(floating);
-        }
+        notification.style.transform = 'translateX(0)';
+    }, 10);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
     }, 3000);
 }
 
-// Welcome animation
-function addWelcomeAnimation() {
-    const title = document.querySelector('.profile-section-title');
-    if (title) {
-        title.style.transform = 'scale(1.1)';
-        title.style.transition = 'transform 0.6s ease';
-        setTimeout(() => {
-            title.style.transform = 'scale(1)';
-        }, 600);
-    }
-}
-
-// Enhanced Voucher Button Functionality
-document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('voucher-btn') && e.target.classList.contains('apply')) {
-        e.preventDefault();
-        const voucherCard = e.target.closest('.voucher-card');
-        const voucherCode = voucherCard.querySelector('.voucher-info span').textContent;
-        
-        // Add celebration animation
-        celebrateVoucherApplication(voucherCard);
-        
-    }
-});
-
-// Member Type Button with Sports Energy
-document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('member-type-btn')) {
-        e.preventDefault();
-        
-        // Add pulsing effect
-        e.target.style.animation = 'pulse 0.6s ease-in-out';
-        setTimeout(() => {
-            e.target.style.animation = '';
-        }, 600);
-        
-    
-    }
-});
-
-// Celebration animation for voucher
-function celebrateVoucherApplication(card) {
-    // Create celebration particles
-    for (let i = 0; i < 10; i++) {
-        setTimeout(() => {
-            createCelebrationParticle(card);
-        }, i * 50);
+// Add some CSS for notifications
+const notificationStyles = document.createElement('style');
+notificationStyles.textContent = `
+    .notification-content {
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
     
-    // Card bounce effect
-    card.style.animation = 'bounce 0.8s ease-in-out';
-    setTimeout(() => {
-        card.style.animation = '';
-    }, 800);
-}
+    .notification-content i {
+        font-size: 1.2rem;
+    }
+`;
+document.head.appendChild(notificationStyles);
 
-function createCelebrationParticle(parent) {
-    const particle = document.createElement('div');
-    particle.textContent = ['🎉', '⭐', '💫', '✨'][Math.floor(Math.random() * 4)];
-    particle.style.cssText = `
-        position: absolute;
-        font-size: 16px;
-        pointer-events: none;
-        z-index: 1000;
-        animation: celebrate 1s ease-out forwards;
-        left: ${Math.random() * 100}%;
-        top: ${Math.random() * 100}%;
-    `;
+// Profile stats animation
+function animateStats() {
+    const statValues = document.querySelectorAll('.stat-value');
     
-    parent.style.position = 'relative';
-    parent.appendChild(particle);
-    
-    setTimeout(() => {
-        if (particle.parentNode) {
-            particle.parentNode.removeChild(particle);
+    statValues.forEach(stat => {
+        const finalValue = stat.textContent;
+        const numericValue = parseInt(finalValue.replace(/[^\d]/g, ''));
+        
+        if (!isNaN(numericValue)) {
+            animateNumber(stat, 0, numericValue, 1000);
         }
-    }, 1000);
-}
-
-// Filter animation
-function addFilterAnimation(container) {
-    container.style.transform = 'scale(1.02)';
-    container.style.transition = 'transform 0.3s ease';
-    setTimeout(() => {
-        container.style.transform = 'scale(1)';
-    }, 300);
-}
-
-// Table rows animation
-function animateTableRows(table) {
-    const rows = table.querySelectorAll('tbody tr');
-    rows.forEach((row, index) => {
-        setTimeout(() => {
-            row.style.transform = 'translateX(-10px)';
-            row.style.transition = 'transform 0.3s ease';
-            setTimeout(() => {
-                row.style.transform = 'translateX(0)';
-            }, 100);
-        }, index * 50);
     });
 }
 
-// Shake animation for errors
-function shakeAnimation(element) {
-    element.style.animation = 'shake 0.5s ease-in-out';
-    setTimeout(() => {
-        element.style.animation = '';
-    }, 500);
+function animateNumber(element, start, end, duration) {
+    const startTime = performance.now();
+    
+    function updateNumber(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        const current = Math.floor(start + (end - start) * progress);
+        element.textContent = current.toLocaleString();
+        
+        if (progress < 1) {
+            requestAnimationFrame(updateNumber);
+        }
+    }
+    
+    requestAnimationFrame(updateNumber);
 }
 
-
-
-// Color adjustment utility
-function adjustColor(color, amount) {
-    return '#' + color.replace(/^#/, '').replace(/../g, color => ('0'+Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substr(-2));
-}
-
-// Enhanced CSS animations
-const sportsStyle = document.createElement('style');
-sportsStyle.textContent = `
-    @keyframes slideInSports {
-        from {
-            transform: translateX(100%) rotate(5deg);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0) rotate(0deg);
-            opacity: 1;
-        }
-    }
-    
-    @keyframes slideOutSports {
-        from {
-            transform: translateX(0) rotate(0deg);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(100%) rotate(-5deg);
-            opacity: 0;
-        }
-    }
-    
-    @keyframes floatUp {
-        0% {
-            transform: translateY(0) rotate(0deg);
-            opacity: 0.3;
-        }
-        50% {
-            opacity: 0.6;
-        }
-        100% {
-            transform: translateY(-100vh) rotate(360deg);
-            opacity: 0;
-        }
-    }
-    
-    @keyframes celebrate {
-        0% {
-            transform: scale(0) rotate(0deg);
-            opacity: 1;
-        }
-        50% {
-            transform: scale(1.2) rotate(180deg);
-            opacity: 0.8;
-        }
-        100% {
-            transform: scale(0) rotate(360deg);
-            opacity: 0;
-        }
-    }
-    
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-        20%, 40%, 60%, 80% { transform: translateX(5px); }
-    }
-    
-
-`;
-document.head.appendChild(sportsStyle);
-
-// Table Row Click Handlers with Sports Energy
-document.addEventListener('click', function(e) {
-    const row = e.target.closest('tr');
-    if (row && row.closest('.simple-table')) {
-        // Only handle if not clicking on a button
-        if (!e.target.closest('button')) {
-            const table = row.closest('.simple-table');
-            const isBookingTable = table.closest('#booking-history');
-            const isTransactionTable = table.closest('#transaction-history');
-            
-            // Add click animation
-            row.style.transform = 'scale(0.98)';
-            setTimeout(() => {
-                row.style.transform = '';
-            }, 150);
-            
-            if (isBookingTable) {
-                const bookingId = row.cells[1]?.textContent;
-                if (bookingId && bookingId.startsWith('#')) {
-                
-                }
-            } else if (isTransactionTable) {
-                const transactionId = row.cells[1]?.textContent;
-                if (transactionId && transactionId.startsWith('#')) {
-                
-                }
-            }
-        }
-    }
+// Initialize animations when page loads
+window.addEventListener('load', function() {
+    // Animate stats after a short delay
+    setTimeout(animateStats, 500);
 });
 
-// Enhanced Mobile Experience
-function initializeMobileSports() {
-    if (window.innerWidth <= 768) {
-        // Create mobile sports toggle
-        const toggleButton = document.createElement('button');
-        toggleButton.innerHTML = '🏆';
-        toggleButton.className = 'mobile-sports-toggle';
-        toggleButton.style.cssText = `
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: linear-gradient(135deg, #00BF63 0%, #1E40AF 100%);
-            color: white;
-            border: none;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            font-size: 24px;
-            cursor: pointer;
-            z-index: 1001;
-            box-shadow: 0 8px 25px rgba(0, 191, 99, 0.3);
-            animation: pulse 2s infinite;
-        `;
-        
-        document.body.appendChild(toggleButton);
-        
-        toggleButton.addEventListener('click', function() {
-            const sidebar = document.querySelector('.profile-sidebar');
-            const isVisible = sidebar.style.transform === 'translateX(0px)';
-            
-            sidebar.style.transform = isVisible ? 'translateX(-100%)' : 'translateX(0px)';
-            sidebar.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
-            
-            // Animate button
-            this.style.transform = 'scale(0.9) rotate(180deg)';
-            setTimeout(() => {
-                this.style.transform = '';
-            }, 200);
+// Navigation functions
+function goToBookingHistory() {
+    // Get URL from data attribute
+    const bookingStat = document.querySelector('.clickable-stat[data-booking-url]');
+    const bookingUrl = bookingStat ? bookingStat.getAttribute('data-booking-url') : '/customer/booking-history';
+    
+    // Redirect to booking history page immediately
+    window.location.href = bookingUrl;
+}
+
+function scrollToPoints() {
+    const pointsSection = document.getElementById('points-section');
+    if (pointsSection) {
+        // Smooth scroll to points section
+        pointsSection.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
         });
+        
+        // Add a subtle highlight effect
+        pointsSection.style.animation = 'highlightSection 2s ease-in-out';
+        setTimeout(() => {
+            pointsSection.style.animation = '';
+        }, 2000);
     }
 }
 
-// Initialize mobile features
-window.addEventListener('resize', initializeMobileSports);
-if (window.innerWidth <= 768) {
-    initializeMobileSports();
-}
+// Add highlight animation CSS
+const highlightStyles = document.createElement('style');
+highlightStyles.textContent = `
+    @keyframes highlightSection {
+        0% { box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        50% { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3), 0 2px 10px rgba(0,0,0,0.1); }
+        100% { box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    }
+`;
+document.head.appendChild(highlightStyles);
 
-// Initialize success message
-setTimeout(() => {
+// Smooth scrolling for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
+});
 
-}, 1000);
+// Add hover effects to stat cards
+document.addEventListener('DOMContentLoaded', function() {
+    const statCards = document.querySelectorAll('.stat-card');
+    
+    statCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+});
 
-console.log('🏆 Sports Profile initialized with maximum energy!');
+// Add click effects to action buttons
+document.addEventListener('DOMContentLoaded', function() {
+    const actionButtons = document.querySelectorAll('.action-btn, .edit-info-btn');
+    
+    actionButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Add ripple effect
+            const ripple = document.createElement('span');
+            ripple.classList.add('ripple');
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+});
+
+// Add ripple effect CSS
+const rippleStyles = document.createElement('style');
+rippleStyles.textContent = `
+    .action-btn, .edit-info-btn {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.6);
+        transform: scale(0);
+        animation: ripple-animation 0.6s linear;
+        pointer-events: none;
+    }
+    
+    @keyframes ripple-animation {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(rippleStyles);

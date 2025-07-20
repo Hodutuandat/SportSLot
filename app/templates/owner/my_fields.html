@@ -1,1 +1,381 @@
- 
+{% extends 'base.html' %}
+{% block title %}Sân của tôi | SportSlot Owner{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/owner/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/owner/my_fields.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="owner-fields-container">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="header-content">
+                <h1>Sân của tôi</h1>
+                <div class="header-actions">
+                    <a href="{{ url_for('owner.add_field') }}" class="add-field-btn">
+                        <span class="btn-icon">➕</span>
+                        Thêm sân mới
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Fields Content -->
+        <div class="fields-content">
+            <!-- Stats Overview -->
+            <div class="fields-stats">
+                <div class="stat-item">
+                    <div class="stat-number">{{ fields|length }}</div>
+                    <div class="stat-label">Tổng số sân</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ fields|selectattr("status", "equalto", "active")|list|length }}</div>
+                    <div class="stat-label">Đang hoạt động</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ (fields|sum(attribute='total_bookings') / fields|length)|round(0)|int if fields else 0 }}</div>
+                    <div class="stat-label">Booking TB/sân</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ "{:,.0f}".format(fields|sum(attribute='monthly_revenue')) }}đ</div>
+                    <div class="stat-label">Doanh thu tháng</div>
+                </div>
+            </div>
+
+            <!-- Fields Grid -->
+            <div class="fields-grid">
+                {% for field in fields %}
+                <div class="field-card" data-field-id="{{ field.id }}">
+                    <div class="field-header">
+                        <div class="field-image">
+                            {% if field.image %}
+                                <img src="{{ field.image }}" alt="{{ field.name }}">
+                            {% else %}
+                                <div class="field-placeholder">
+                                    <span class="sport-icon">
+                                        {% if field.sport_type == 'football' %}⚽
+                                        {% elif field.sport_type == 'basketball' %}🏀
+                                        {% elif field.sport_type == 'tennis' %}🎾
+                                        {% elif field.sport_type == 'volleyball' %}🏐
+                                        {% elif field.sport_type == 'badminton' %}🏸
+                                        {% else %}🏟️{% endif %}
+                                    </span>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="field-status {{ field.status }}">
+                            {% if field.status == 'active' %}✅ Hoạt động
+                            {% else %}⏸️ Tạm dừng{% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="field-info">
+                        <h3 class="field-name">{{ field.name }}</h3>
+                        <p class="field-type">{{ field.type }}</p>
+                        <p class="field-address">📍 {{ field.address }}</p>
+                        
+                        <div class="field-stats">
+                            <div class="field-stat">
+                                <span class="stat-value">{{ "{:,.0f}".format(field.price) }}đ</span>
+                                <span class="stat-label">Giá/giờ</span>
+                            </div>
+                            <div class="field-stat">
+                                <span class="stat-value">{{ field.total_bookings }}</span>
+                                <span class="stat-label">Lượt đặt</span>
+                            </div>
+                            <div class="field-stat">
+                                <span class="stat-value">{{ "{:,.0f}".format(field.monthly_revenue) }}đ</span>
+                                <span class="stat-label">Doanh thu</span>
+                            </div>
+                        </div>
+                        
+                        <div class="field-actions">
+                            <button class="action-btn edit-btn" data-field-id="{{ field.id }}">
+                                Chỉnh sửa
+                            </button>
+                            <button class="action-btn view-bookings-btn" data-field-id="{{ field.id }}">
+                                Lịch đặt
+                            </button>
+                            <button class="action-btn toggle-status-btn" data-field-id="{{ field.id }}" data-status="{{ field.status }}">
+                                <span class="btn-icon">{% if field.status == 'active' %}⏸️{% else %}▶️{% endif %}</span>
+                                {% if field.status == 'active' %}Tạm dừng{% else %}Kích hoạt{% endif %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">🏟️</div>
+                    <h3>Chưa có sân nào</h3>
+                    <p>Hãy thêm sân đầu tiên của bạn để bắt đầu kinh doanh</p>
+                    <a href="{{ url_for('owner.add_field') }}" class="add-first-field-btn">
+                        <span class="btn-icon">➕</span>
+                        Thêm sân đầu tiên
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+</div>
+
+<!-- Booking Modal -->
+<div id="bookingModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Lịch đặt sân</h3>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="bookingCalendar">
+                <!-- Calendar will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Field Modal -->
+<div id="editFieldModal" class="modal">
+    <div class="modal-content edit-field-modal">
+        <div class="modal-header">
+            <h3>Chỉnh sửa sân</h3>
+            <button class="close-btn" onclick="closeEditModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="editFieldForm" class="edit-field-form">
+                <div class="form-section">
+                    <h4>Thông tin cơ bản</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editFieldName">Tên sân *</label>
+                            <input type="text" id="editFieldName" name="fieldName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editFieldType">Loại sân *</label>
+                            <select id="editFieldType" name="fieldType" required>
+                                <option value="football">Bóng đá</option>
+                                <option value="basketball">Bóng rổ</option>
+                                <option value="tennis">Tennis</option>
+                                <option value="badminton">Cầu lông</option>
+                                <option value="volleyball">Bóng chuyền</option>
+                                <option value="futsal">Futsal</option>
+                                <option value="ping-pong">Ping Pong</option>
+                                <option value="other">Khác</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editFieldDescription">Mô tả</label>
+                        <textarea id="editFieldDescription" name="fieldDescription" rows="3" placeholder="Mô tả chi tiết về sân..."></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editCapacity">Sức chứa</label>
+                            <input type="number" id="editCapacity" name="capacity" min="1" placeholder="Số người tối đa">
+                        </div>
+                        <div class="form-group">
+                            <label for="editFieldSize">Kích thước sân</label>
+                            <input type="text" id="editFieldSize" name="fieldSize" placeholder="VD: 40m x 20m">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h4>Địa chỉ</h4>
+                    <div class="form-group">
+                        <label for="editAddress">Địa chỉ chi tiết *</label>
+                        <input type="text" id="editAddress" name="address" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editDistrict">Quận/Huyện *</label>
+                            <input type="text" id="editDistrict" name="district" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editCity">Thành phố *</label>
+                            <input type="text" id="editCity" name="city" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h4>Tiện ích</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editParking">Bãi đỗ xe</label>
+                            <select id="editParking" name="parking">
+                                <option value="free">Miễn phí</option>
+                                <option value="paid">Có phí</option>
+                                <option value="none">Không có</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="editTransportation">Giao thông</label>
+                            <select id="editTransportation" name="transportation">
+                                <option value="bus">Xe buýt</option>
+                                <option value="metro">Tàu điện</option>
+                                <option value="taxi">Taxi</option>
+                                <option value="motorbike">Xe máy</option>
+                                <option value="car">Ô tô</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Tiện ích khác</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="amenities" value="lighting">
+                                <span class="checkmark"></span>
+                                Đèn chiếu sáng
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="amenities" value="changing_room">
+                                <span class="checkmark"></span>
+                                Phòng thay đồ
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="amenities" value="shower">
+                                <span class="checkmark"></span>
+                                Vòi tắm
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="amenities" value="equipment">
+                                <span class="checkmark"></span>
+                                Trang thiết bị
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="amenities" value="cafe">
+                                <span class="checkmark"></span>
+                                Quán cafe
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="amenities" value="wifi">
+                                <span class="checkmark"></span>
+                                WiFi
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h4>Giá cả</h4>
+                    <div class="pricing-grid">
+                        <div class="pricing-header">
+                            <div class="time-slot">Khung giờ</div>
+                            <div class="weekday">Ngày thường</div>
+                            <div class="weekend">Cuối tuần</div>
+                        </div>
+                        
+                        <div class="pricing-row">
+                            <div class="time-slot">Sáng (05:00-12:00)</div>
+                            <div class="weekday">
+                                <input type="number" name="morning_weekday" placeholder="VNĐ" min="0">
+                            </div>
+                            <div class="weekend">
+                                <input type="number" name="morning_weekend" placeholder="VNĐ" min="0">
+                            </div>
+                        </div>
+                        
+                        <div class="pricing-row">
+                            <div class="time-slot">Trưa (12:00-17:00)</div>
+                            <div class="weekday">
+                                <input type="number" name="afternoon_weekday" placeholder="VNĐ" min="0">
+                            </div>
+                            <div class="weekend">
+                                <input type="number" name="afternoon_weekend" placeholder="VNĐ" min="0">
+                            </div>
+                        </div>
+                        
+                        <div class="pricing-row">
+                            <div class="time-slot">Tối (17:00-23:00)</div>
+                            <div class="weekday">
+                                <input type="number" name="evening_weekday" placeholder="VNĐ" min="0">
+                            </div>
+                            <div class="weekend">
+                                <input type="number" name="evening_weekend" placeholder="VNĐ" min="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h4>Giờ hoạt động</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editWeekdayStart">Ngày thường - Bắt đầu</label>
+                            <input type="time" id="editWeekdayStart" name="weekday_start">
+                        </div>
+                        <div class="form-group">
+                            <label for="editWeekdayEnd">Ngày thường - Kết thúc</label>
+                            <input type="time" id="editWeekdayEnd" name="weekday_end">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editWeekendStart">Cuối tuần - Bắt đầu</label>
+                            <input type="time" id="editWeekendStart" name="weekend_start">
+                        </div>
+                        <div class="form-group">
+                            <label for="editWeekendEnd">Cuối tuần - Kết thúc</label>
+                            <input type="time" id="editWeekendEnd" name="weekend_end">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h4>Chính sách</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editDeposit">Đặt cọc</label>
+                            <input type="number" id="editDeposit" name="deposit" placeholder="VNĐ" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="editCancellation">Hủy đặt sân</label>
+                            <select id="editCancellation" name="cancellation">
+                                <option value="free">Miễn phí</option>
+                                <option value="partial">Một phần</option>
+                                <option value="full">Toàn bộ</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editRules">Quy định sử dụng</label>
+                        <textarea id="editRules" name="rules" rows="3" placeholder="Các quy định khi sử dụng sân..."></textarea>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn secondary" onclick="closeEditModal()">Hủy</button>
+            <button class="btn primary" onclick="saveFieldChanges()">Lưu thay đổi</button>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Xác nhận</h3>
+            <button class="close-btn" onclick="closeConfirmModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p id="confirmMessage"></p>
+            <div class="modal-actions">
+                <button class="action-btn cancel-btn" onclick="closeConfirmModal()">Hủy</button>
+                <button class="action-btn confirm-btn" id="confirmBtn">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/owner/my_fields.js') }}"></script>
+{% endblock %} 

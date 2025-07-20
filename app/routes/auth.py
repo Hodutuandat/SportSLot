@@ -10,11 +10,28 @@ def login():
         email = request.form.get('email') or request.args.get('email')
         username = request.form.get('username') or request.args.get('username')
         # Ưu tiên username, nếu không có thì lấy email
-        user_id = 1
         user_name = username or email or 'testuser'
-        user = User(user_id, user_name)
-        login_user(user)
-        return redirect(url_for('common.home'))
+        
+        # Xác định user type và redirect tương ứng
+        if user_name == 'owner123':
+            user_id = 2
+            user_type = 'owner'
+            user = User(user_id, user_name, user_type)
+            login_user(user)
+            return redirect(url_for('owner.dashboard'))
+        elif user_name == 'admin123':
+            user_id = 3
+            user_type = 'admin'
+            user = User(user_id, user_name, user_type)
+            login_user(user)
+            return redirect(url_for('admin.dashboard'))
+        else:
+            # Mặc định là customer
+            user_id = 1
+            user_type = 'customer'
+            user = User(user_id, user_name, user_type)
+            login_user(user)
+            return redirect(url_for('common.home'))
     return render_template('auth/login.html')
 
 @auth_bp.route('/logout')

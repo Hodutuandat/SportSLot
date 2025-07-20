@@ -1,0 +1,328 @@
+<!-- Owner Navigation Bar -->
+<nav class="owner-navbar">
+    <div class="navbar-container">
+        <!-- Brand/Logo -->
+        <div class="navbar-brand">
+            <a href="{{ url_for('owner.dashboard') }}" class="brand-link">
+                <div class="brand-logo">
+                    <span class="logo-text">SportSlot</span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Main Navigation -->
+        <div class="navbar-menu">
+            <div class="navbar-nav">
+                <a href="{{ url_for('owner.dashboard') }}" class="nav-item {% if request.endpoint == 'owner.dashboard' %}active{% endif %}">
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                
+                <a href="{{ url_for('owner.my_fields') }}" class="nav-item {% if request.endpoint == 'owner.my_fields' %}active{% endif %}">
+                    <span class="nav-text">Sân của tôi</span>
+                </a>
+                
+                <a href="{{ url_for('owner.add_field') }}" class="nav-item {% if request.endpoint == 'owner.add_field' %}active{% endif %}">
+                    <span class="nav-text">Thêm sân</span>
+                </a>
+                
+                <a href="{{ url_for('owner.booking_schedule') }}" class="nav-item {% if request.endpoint == 'owner.booking_schedule' %}active{% endif %}">
+                    <span class="nav-text">Lịch đặt</span>
+                </a>
+                
+                <a href="{{ url_for('owner.transaction_history') }}" class="nav-item {% if request.endpoint == 'owner.transaction_history' %}active{% endif %}">
+                    <span class="nav-text">Doanh thu</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Revenue Display -->
+        <div class="navbar-revenue">
+            <div class="revenue-display">
+                <div class="revenue-info">
+                    <div class="revenue-amount">2.4M</div>
+                    <div class="revenue-label">VNĐ hôm nay</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Actions -->
+        <div class="navbar-actions">
+            <!-- Notifications Bell -->
+            <div class="notification-bell">
+                <button class="bell-button" onclick="toggleOwnerNotifications()">
+                    <span class="bell-icon">🔔</span>
+                    <span class="notification-badge">5</span>
+                </button>
+                
+                <div class="notification-dropdown" id="ownerNotificationDropdown">
+                    <div class="notification-header">
+                        <h3>Thông báo</h3>
+                        <button class="mark-all-read">Đánh dấu đã đọc</button>
+                    </div>
+                    
+                    <div class="notification-list">
+                        <div class="notification-item unread urgent">
+                            <div class="notification-content">
+                                <div class="notification-title">Booking cần duyệt</div>
+                                <div class="notification-text">Sân bóng đá A - 21/12/2024 15:00</div>
+                                <div class="notification-time">5 phút trước</div>
+                            </div>
+                        </div>
+                        
+                        <div class="notification-item unread">
+                            <div class="notification-content">
+                                <div class="notification-title">Thanh toán thành công</div>
+                                <div class="notification-text">400.000đ - Booking #BK003</div>
+                                <div class="notification-time">30 phút trước</div>
+                            </div>
+                        </div>
+                        
+                        <div class="notification-item unread">
+                            <div class="notification-content">
+                                <div class="notification-title">Đánh giá mới</div>
+                                <div class="notification-text">5 sao - "Sân đẹp, chất lượng tốt"</div>
+                                <div class="notification-time">1 giờ trước</div>
+                            </div>
+                        </div>
+                        
+                        <div class="notification-item">
+                            <div class="notification-content">
+                                <div class="notification-title">Báo cáo tuần</div>
+                                <div class="notification-text">Doanh thu tuần này: 15.2M VNĐ</div>
+                                <div class="notification-time">2 giờ trước</div>
+                            </div>
+                        </div>
+                        
+                        <div class="notification-item">
+                            <div class="notification-content">
+                                <div class="notification-title">Sân mới được duyệt</div>
+                                <div class="notification-text">Sân Tennis Elite đã được phê duyệt</div>
+                                <div class="notification-time">1 ngày trước</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="notification-footer">
+                        <a href="{{ url_for('owner.notifications') }}" class="view-all-notifications">Xem tất cả</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- User Menu Dropdown -->
+            <div class="user-menu-dropdown">
+                <button class="user-menu-trigger" onclick="toggleOwnerUserMenu()">
+                    <div class="user-avatar owner-avatar">
+                        <span class="avatar-text">{{ current_user.username[0].upper() }}</span>
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name">{{ current_user.username }}</span>
+                        <span class="user-role">Chủ sân</span>
+                    </div>
+                    <span class="dropdown-arrow">⌄</span>
+                </button>
+                
+                <div class="user-menu-content" id="ownerUserMenuContent">
+                    <div class="menu-header">
+                        <div class="menu-avatar owner-menu-avatar">{{ current_user.username[0].upper() }}</div>
+                        <div class="menu-user-info">
+                            <div class="menu-user-name">{{ current_user.username }}</div>
+                            <div class="menu-user-email">{{ current_user.username }}@sportslot.vn</div>
+                            <div class="menu-user-badge">Owner Premium</div>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-divider"></div>
+                    
+                    <div class="menu-items">
+                        <a href="{{ url_for('owner.profile') }}" class="menu-item">
+                            <span class="menu-text">Hồ sơ cá nhân</span>
+                        </a>
+                        
+                        <a href="{{ url_for('owner.notifications') }}" class="menu-item">
+                            <span class="menu-text">Thông báo</span>
+                            <span class="menu-badge">5</span>
+                        </a>
+                        
+                        <a href="#" class="menu-item">
+                            <span class="menu-text">Cài đặt</span>
+                        </a>
+                        
+                        <a href="#" class="menu-item">
+                            <span class="menu-text">Báo cáo chi tiết</span>
+                        </a>
+                        
+                        <a href="#" class="menu-item">
+                            <span class="menu-text">Thanh toán & Hóa đơn</span>
+                        </a>
+                        
+                        <a href="#" class="menu-item">
+                            <span class="menu-text">Hướng dẫn sử dụng</span>
+                        </a>
+                    </div>
+                    
+                    <div class="menu-divider"></div>
+                    
+                    <div class="menu-footer">
+                        <a href="#" class="menu-item">
+                            <span class="menu-text">Hỗ trợ</span>
+                        </a>
+                        
+                        <a href="{{ url_for('auth.logout') }}" class="menu-item logout-item">
+                            <span class="menu-text">Đăng xuất</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Toggle -->
+        <div class="mobile-menu-toggle">
+            <button class="hamburger-btn" onclick="toggleOwnerMobileMenu()">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-menu-overlay" id="ownerMobileMenuOverlay">
+        <div class="mobile-menu-content">
+            <div class="mobile-menu-header">
+                <div class="mobile-brand">
+                    <span class="logo-text">SportSlot Owner</span>
+                </div>
+                <button class="mobile-close-btn" onclick="toggleOwnerMobileMenu()">×</button>
+            </div>
+            
+            <!-- User Info on Mobile -->
+            <div class="mobile-user-info">
+                <div class="mobile-avatar">{{ current_user.username[0].upper() }}</div>
+                <div class="mobile-user-details">
+                    <div class="mobile-user-name">{{ current_user.username }}</div>
+                    <div class="mobile-user-role">Chủ sân thể thao</div>
+                </div>
+            </div>
+            
+            <div class="mobile-divider"></div>
+            
+            <!-- Revenue Display Mobile -->
+            <div class="mobile-revenue">
+                <div class="mobile-revenue-text">
+                    <span class="mobile-revenue-amount">2.4M VNĐ</span>
+                    <span class="mobile-revenue-label">Doanh thu hôm nay</span>
+                </div>
+            </div>
+            
+            <div class="mobile-divider"></div>
+            
+            <div class="mobile-menu-items">
+                <a href="{{ url_for('owner.dashboard') }}" class="mobile-nav-item">
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                
+                <a href="{{ url_for('owner.my_fields') }}" class="mobile-nav-item">
+                    <span class="nav-text">Sân của tôi</span>
+                </a>
+                
+                <a href="{{ url_for('owner.add_field') }}" class="mobile-nav-item highlight">
+                    <span class="nav-text">Thêm sân</span>
+                </a>
+                
+                <a href="{{ url_for('owner.booking_schedule') }}" class="mobile-nav-item">
+                    <span class="nav-text">Lịch đặt sân</span>
+                </a>
+                
+                <a href="{{ url_for('owner.transaction_history') }}" class="mobile-nav-item">
+                    <span class="nav-text">Doanh thu</span>
+                </a>
+                
+                <a href="{{ url_for('owner.notifications') }}" class="mobile-nav-item">
+                    <span class="nav-text">Thông báo</span>
+                    <span class="mobile-badge">5</span>
+                </a>
+                
+                <div class="mobile-divider"></div>
+                
+                <a href="{{ url_for('owner.profile') }}" class="mobile-nav-item">
+                    <span class="nav-text">Hồ sơ cá nhân</span>
+                </a>
+                
+                <a href="#" class="mobile-nav-item">
+                    <span class="nav-text">Cài đặt</span>
+                </a>
+                
+                <a href="#" class="mobile-nav-item">
+                    <span class="nav-text">Hỗ trợ</span>
+                </a>
+                
+                <a href="{{ url_for('auth.logout') }}" class="mobile-nav-item logout">
+                    <span class="nav-text">Đăng xuất</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Owner Navbar JavaScript -->
+<script>
+function toggleOwnerUserMenu() {
+    const menu = document.getElementById('ownerUserMenuContent');
+    menu.classList.toggle('show');
+    
+    // Close notification dropdown if open
+    const notificationDropdown = document.getElementById('ownerNotificationDropdown');
+    notificationDropdown.classList.remove('show');
+}
+
+function toggleOwnerNotifications() {
+    const dropdown = document.getElementById('ownerNotificationDropdown');
+    dropdown.classList.toggle('show');
+    
+    // Close user menu if open
+    const userMenu = document.getElementById('ownerUserMenuContent');
+    userMenu.classList.remove('show');
+}
+
+function toggleOwnerMobileMenu() {
+    const overlay = document.getElementById('ownerMobileMenuOverlay');
+    overlay.classList.toggle('show');
+    document.body.classList.toggle('mobile-menu-open');
+}
+
+
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(event) {
+    const userMenu = document.querySelector('.owner-navbar .user-menu-dropdown');
+    const notificationBell = document.querySelector('.owner-navbar .notification-bell');
+    
+    if (userMenu && !userMenu.contains(event.target)) {
+        document.getElementById('ownerUserMenuContent').classList.remove('show');
+    }
+    
+    if (notificationBell && !notificationBell.contains(event.target)) {
+        document.getElementById('ownerNotificationDropdown').classList.remove('show');
+    }
+});
+
+// Update revenue display (simulated)
+function updateRevenueDisplay() {
+    const revenueAmount = document.querySelector('.revenue-amount');
+    const mobileRevenueAmount = document.querySelector('.mobile-revenue-amount');
+    
+    // Simulate real-time revenue updates
+    setInterval(() => {
+        const currentAmount = parseFloat(revenueAmount.textContent.replace('M', ''));
+        const newAmount = (currentAmount + Math.random() * 0.1).toFixed(1);
+        
+        revenueAmount.textContent = newAmount + 'M';
+        if (mobileRevenueAmount) {
+            mobileRevenueAmount.textContent = newAmount + 'M VNĐ';
+        }
+    }, 30000); // Update every 30 seconds
+}
+
+// Initialize revenue updates
+document.addEventListener('DOMContentLoaded', updateRevenueDisplay);
+</script> 

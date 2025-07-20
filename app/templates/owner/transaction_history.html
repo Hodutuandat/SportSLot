@@ -1,1 +1,378 @@
- 
+{% extends 'base.html' %}
+{% block title %}Doanh thu | SportSlot Owner{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/owner/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/owner/transaction_history.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="owner-revenue-container">
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-content">
+            <h1>Doanh thu</h1>
+            <div class="header-actions">
+                <div class="date-filter">
+                    <select id="timeRange" onchange="updateRevenueData()">
+                        <option value="today">Hôm nay</option>
+                        <option value="week" selected>Tuần này</option>
+                        <option value="month">Tháng này</option>
+                        <option value="quarter">Quý này</option>
+                        <option value="year">Năm nay</option>
+                        <option value="custom">Tùy chọn</option>
+                    </select>
+                </div>
+                <button class="export-btn" onclick="exportRevenueReport()">
+                    Xuất báo cáo
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Revenue Overview Cards -->
+    <div class="revenue-overview">
+        <div class="revenue-card total-revenue">
+            <div class="card-icon">💰</div>
+            <div class="card-content">
+                <div class="card-value">15.8M</div>
+                <div class="card-label">Tổng doanh thu</div>
+                <div class="card-change positive">
+                    <span class="change-icon">↗️</span>
+                    <span class="change-value">+12.5%</span>
+                    <span class="change-period">so với tuần trước</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="revenue-card total-bookings">
+            <div class="card-icon">📅</div>
+            <div class="card-content">
+                <div class="card-value">127</div>
+                <div class="card-label">Tổng đặt sân</div>
+                <div class="card-change positive">
+                    <span class="change-icon">↗️</span>
+                    <span class="change-value">+8.3%</span>
+                    <span class="change-period">so với tuần trước</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="revenue-card avg-revenue">
+            <div class="card-icon">📈</div>
+            <div class="card-content">
+                <div class="card-value">124K</div>
+                <div class="card-label">Doanh thu TB/đặt</div>
+                <div class="card-change positive">
+                    <span class="change-icon">↗️</span>
+                    <span class="change-value">+3.8%</span>
+                    <span class="change-period">so với tuần trước</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="revenue-card conversion-rate">
+            <div class="card-icon">🎯</div>
+            <div class="card-content">
+                <div class="card-value">94.2%</div>
+                <div class="card-label">Tỷ lệ hoàn thành</div>
+                <div class="card-change positive">
+                    <span class="change-icon">↗️</span>
+                    <span class="change-value">+2.1%</span>
+                    <span class="change-period">so với tuần trước</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-section">
+        <!-- Revenue Chart -->
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3>Biểu đồ doanh thu</h3>
+                <div class="chart-controls">
+                    <button class="chart-btn active" onclick="switchChartType('revenue')">Doanh thu</button>
+                    <button class="chart-btn" onclick="switchChartType('bookings')">Đặt sân</button>
+                </div>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Field Performance -->
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3>Hiệu suất theo sân</h3>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="fieldChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Details -->
+    <div class="revenue-details">
+        <!-- Top Customers -->
+        <div class="detail-section">
+            <div class="section-header">
+                <h3>Top khách hàng</h3>
+                <a href="#" class="view-all-link">Xem tất cả</a>
+            </div>
+            <div class="top-customers">
+                <div class="customer-item">
+                    <div class="customer-rank">1</div>
+                    <div class="customer-info">
+                        <div class="customer-name">Nguyễn Văn Nam</div>
+                        <div class="customer-stats">
+                            <span class="booking-count">15 đặt sân</span>
+                            <span class="total-spent">2.8M VNĐ</span>
+                        </div>
+                    </div>
+                    <div class="customer-avatar">NV</div>
+                </div>
+
+                <div class="customer-item">
+                    <div class="customer-rank">2</div>
+                    <div class="customer-info">
+                        <div class="customer-name">Trần Minh Tuấn</div>
+                        <div class="customer-stats">
+                            <span class="booking-count">12 đặt sân</span>
+                            <span class="total-spent">2.1M VNĐ</span>
+                        </div>
+                    </div>
+                    <div class="customer-avatar">TM</div>
+                </div>
+
+                <div class="customer-item">
+                    <div class="customer-rank">3</div>
+                    <div class="customer-info">
+                        <div class="customer-name">Lê Hoàng Anh</div>
+                        <div class="customer-stats">
+                            <span class="booking-count">10 đặt sân</span>
+                            <span class="total-spent">1.9M VNĐ</span>
+                        </div>
+                    </div>
+                    <div class="customer-avatar">LH</div>
+                </div>
+
+                <div class="customer-item">
+                    <div class="customer-rank">4</div>
+                    <div class="customer-info">
+                        <div class="customer-name">Phạm Thị Mai</div>
+                        <div class="customer-stats">
+                            <span class="booking-count">8 đặt sân</span>
+                            <span class="total-spent">1.5M VNĐ</span>
+                        </div>
+                    </div>
+                    <div class="customer-avatar">PM</div>
+                </div>
+
+                <div class="customer-item">
+                    <div class="customer-rank">5</div>
+                    <div class="customer-info">
+                        <div class="customer-name">Vũ Đức Hùng</div>
+                        <div class="customer-stats">
+                            <span class="booking-count">7 đặt sân</span>
+                            <span class="total-spent">1.3M VNĐ</span>
+                        </div>
+                    </div>
+                    <div class="customer-avatar">VH</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="detail-section">
+            <div class="section-header">
+                <h3>Giao dịch gần đây</h3>
+                <div class="transaction-filters">
+                    <input type="text" id="searchTransaction" placeholder="Tìm kiếm giao dịch..." onkeyup="filterTransactions()">
+                    <select id="statusFilter" onchange="filterTransactions()">
+                        <option value="all">Tất cả</option>
+                        <option value="completed">Hoàn thành</option>
+                        <option value="pending">Chờ xử lý</option>
+                        <option value="cancelled">Đã hủy</option>
+                    </select>
+                </div>
+            </div>
+            <div class="transactions-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Mã GD</th>
+                            <th>Khách hàng</th>
+                            <th>Sân</th>
+                            <th>Ngày</th>
+                            <th>Thời gian</th>
+                            <th>Số tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionsTableBody">
+                        <tr>
+                            <td>#TX001</td>
+                            <td>Nguyễn Văn Nam</td>
+                            <td>Sân A</td>
+                            <td>18/12/2024</td>
+                            <td>18:00-20:00</td>
+                            <td class="amount">400.000đ</td>
+                            <td><span class="status completed">Hoàn thành</span></td>
+                            <td>
+                                <button class="action-btn" onclick="viewTransaction('TX001')">Xem</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>#TX002</td>
+                            <td>Trần Minh Tuấn</td>
+                            <td>Sân B</td>
+                            <td>19/12/2024</td>
+                            <td>14:00-16:00</td>
+                            <td class="amount">360.000đ</td>
+                            <td><span class="status completed">Hoàn thành</span></td>
+                            <td>
+                                <button class="action-btn" onclick="viewTransaction('TX002')">Xem</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>#TX003</td>
+                            <td>Lê Hoàng Anh</td>
+                            <td>Sân C</td>
+                            <td>20/12/2024</td>
+                            <td>20:00-22:00</td>
+                            <td class="amount">450.000đ</td>
+                            <td><span class="status pending">Chờ xử lý</span></td>
+                            <td>
+                                <button class="action-btn" onclick="viewTransaction('TX003')">Xem</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>#TX004</td>
+                            <td>Phạm Thị Mai</td>
+                            <td>Sân A</td>
+                            <td>21/12/2024</td>
+                            <td>19:00-21:00</td>
+                            <td class="amount">400.000đ</td>
+                            <td><span class="status completed">Hoàn thành</span></td>
+                            <td>
+                                <button class="action-btn" onclick="viewTransaction('TX004')">Xem</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>#TX005</td>
+                            <td>Vũ Đức Hùng</td>
+                            <td>Sân B</td>
+                            <td>22/12/2024</td>
+                            <td>15:00-17:00</td>
+                            <td class="amount">360.000đ</td>
+                            <td><span class="status cancelled">Đã hủy</span></td>
+                            <td>
+                                <button class="action-btn" onclick="viewTransaction('TX005')">Xem</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Insights -->
+    <div class="revenue-insights">
+        <div class="insight-card">
+            <div class="insight-icon">📊</div>
+            <div class="insight-content">
+                <h4>Thời gian cao điểm</h4>
+                <p>18:00-22:00 là khung giờ có doanh thu cao nhất, chiếm 65% tổng doanh thu</p>
+            </div>
+        </div>
+
+        <div class="insight-card">
+            <div class="insight-icon">🎯</div>
+            <div class="insight-content">
+                <h4>Sân phổ biến nhất</h4>
+                <p>Sân A được đặt nhiều nhất với 45% tổng số đặt sân</p>
+            </div>
+        </div>
+
+        <div class="insight-card">
+            <div class="insight-icon">📈</div>
+            <div class="insight-content">
+                <h4>Xu hướng tăng trưởng</h4>
+                <p>Doanh thu tăng 12.5% so với tuần trước, chủ yếu từ cuối tuần</p>
+            </div>
+        </div>
+
+        <div class="insight-card">
+            <div class="insight-icon">💰</div>
+            <div class="insight-content">
+                <h4>Khách hàng VIP</h4>
+                <p>20% khách hàng đóng góp 80% doanh thu, cần tập trung chăm sóc</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Transaction Detail Modal -->
+<div id="transactionModal" class="modal">
+    <div class="modal-content transaction-modal">
+        <div class="modal-header">
+            <h3>Chi tiết giao dịch</h3>
+            <button class="close-btn" onclick="closeTransactionModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="transaction-detail">
+                <div class="detail-row">
+                    <div class="detail-label">Mã giao dịch:</div>
+                    <div class="detail-value" id="modalTxId">#TX001</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Khách hàng:</div>
+                    <div class="detail-value" id="modalCustomer">Nguyễn Văn Nam</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Sân:</div>
+                    <div class="detail-value" id="modalField">Sân A</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Ngày đặt:</div>
+                    <div class="detail-value" id="modalDate">18/12/2024</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Thời gian:</div>
+                    <div class="detail-value" id="modalTime">18:00-20:00</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Số tiền:</div>
+                    <div class="detail-value amount" id="modalAmount">400.000đ</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Phương thức:</div>
+                    <div class="detail-value" id="modalPayment">Chuyển khoản</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Trạng thái:</div>
+                    <div class="detail-value">
+                        <span class="status completed" id="modalStatus">Hoàn thành</span>
+                    </div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Ghi chú:</div>
+                    <div class="detail-value" id="modalNotes">Không có</div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn secondary" onclick="closeTransactionModal()">Đóng</button>
+            <button class="btn primary" onclick="printTransaction()">In hóa đơn</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/owner/transaction_history.js') }}"></script>
+{% endblock %} 

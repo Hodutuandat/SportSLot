@@ -15,19 +15,32 @@
     
     <!-- Stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/shared/main.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/shared/navbar.css') }}">
+    {% if current_user.is_authenticated %}
+        {% if current_user.is_owner() %}
+            <link rel="stylesheet" href="{{ url_for('static', filename='css/shared/owner_navbar.css') }}">
+        {% else %}
+            <link rel="stylesheet" href="{{ url_for('static', filename='css/shared/customer_navbar.css') }}">
+        {% endif %}
+    {% else %}
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/shared/public_navbar.css') }}">
+    {% endif %}
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    {% include 'shared/navbar.html' %}
-    <hr class="divider divider--nav">
-    <main>
+    {% if current_user.is_authenticated %}
+        {% if current_user.is_owner() %}
+            {% include 'shared/owner_navbar.html' %}
+        {% else %}
+            {% include 'shared/customer_navbar.html' %}
+        {% endif %}
+    {% else %}
+        {% include 'shared/public_navbar.html' %}
+    {% endif %}
+    <main class="main-content">
         {% block content %}{% endblock %}
     </main>
-    <hr class="divider divider--footer">
     {% include 'shared/footer.html' %}
     <script src="{{ url_for('static', filename='js/shared/main.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/shared/navbar.js') }}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html> 
