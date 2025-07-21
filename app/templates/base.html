@@ -15,20 +15,23 @@
     
     <!-- Stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/shared/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shared/public_navbar.css') }}">
     {% if current_user.is_authenticated %}
-        {% if current_user.is_owner() %}
+        {% if current_user.is_admin() %}
+            <link rel="stylesheet" href="{{ url_for('static', filename='css/shared/admin_navbar.css') }}">
+        {% elif current_user.is_owner() %}
             <link rel="stylesheet" href="{{ url_for('static', filename='css/shared/owner_navbar.css') }}">
-        {% else %}
+        {% elif not current_user.is_admin() %}
             <link rel="stylesheet" href="{{ url_for('static', filename='css/shared/customer_navbar.css') }}">
         {% endif %}
-    {% else %}
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/shared/public_navbar.css') }}">
     {% endif %}
     {% block extra_css %}{% endblock %}
 </head>
 <body>
     {% if current_user.is_authenticated %}
-        {% if current_user.is_owner() %}
+        {% if current_user.is_admin() %}
+            {% include 'shared/admin_navbar.html' %}
+        {% elif current_user.is_owner() %}
             {% include 'shared/owner_navbar.html' %}
         {% else %}
             {% include 'shared/customer_navbar.html' %}

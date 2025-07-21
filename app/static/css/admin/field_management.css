@@ -1,1 +1,224 @@
- 
+/* Field Management Admin Styles */
+.admin-field-management {
+    margin-top: 80px;
+    padding: 30px 20px;
+    background: #f8fafc;
+    min-height: calc(100vh - 80px);
+}
+.afm-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 20px;
+}
+.afm-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+.afm-filters {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.afm-filters input[type="text"],
+.afm-filters select {
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 14px;
+    background: #fff;
+    color: #1e293b;
+}
+.afm-filters button {
+    padding: 8px 18px;
+    background: #1e3a8a;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.afm-filters button:hover {
+    background: #2563eb;
+}
+.afm-stats {
+    display: flex;
+    gap: 25px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    color: #475569;
+}
+.afm-stats b {
+    color: #1e3a8a;
+}
+.afm-table-wrapper {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    padding: 0 0 10px 0;
+    overflow-x: auto;
+}
+.afm-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1100px;
+}
+.afm-table th, .afm-table td {
+    padding: 12px 10px;
+    text-align: left;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 14px;
+}
+.afm-table th {
+    background: #f1f5f9;
+    font-weight: 700;
+    color: #1e293b;
+}
+.afm-table tr:hover {
+    background: #f8fafc;
+}
+.afm-status {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+}
+.afm-status.active {
+    background: #d1fae5;
+    color: #059669;
+}
+.afm-status.pending {
+    background: #fef9c3;
+    color: #eab308;
+}
+.afm-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    margin-right: 5px;
+    transition: background 0.2s, color 0.2s;
+    border: none;
+    cursor: pointer;
+    display: inline-block;
+}
+.afm-btn.view {
+    background: #f1f5f9;
+    color: #1e3a8a;
+}
+.afm-btn.view:hover {
+    background: #dbeafe;
+}
+.afm-btn.approve {
+    background: #d1fae5;
+    color: #059669;
+}
+.afm-btn.approve:hover {
+    background: #bbf7d0;
+}
+.afm-btn.reject {
+    background: #fee2e2;
+    color: #dc2626;
+}
+.afm-btn.reject:hover {
+    background: #fecaca;
+}
+.afm-rating {
+    color: #f59e0b;
+    font-weight: 700;
+    font-size: 13px;
+}
+.afm-reviews {
+    color: #64748b;
+    font-size: 12px;
+    margin-left: 2px;
+}
+.afm-empty {
+    padding: 30px;
+    text-align: center;
+    color: #64748b;
+    font-size: 16px;
+}
+@media (max-width: 1100px) {
+    .afm-table {
+        min-width: 800px;
+    }
+}
+@media (max-width: 700px) {
+    .afm-header h1 {
+        font-size: 18px;
+    }
+    .afm-table {
+        min-width: 500px;
+    }
+    .afm-stats {
+        flex-direction: column;
+        gap: 8px;
+    }
+} 
+/* Modal chi tiết sân */
+.afm-modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: auto;
+    background: rgba(30, 41, 59, 0.4);
+    justify-content: center;
+    align-items: center;
+}
+.afm-modal.show {
+    display: flex;
+}
+.afm-modal-content {
+    background: #fff;
+    margin: auto;
+    padding: 30px 30px 20px 30px;
+    border-radius: 14px;
+    box-shadow: 0 8px 40px rgba(30,41,59,0.18);
+    min-width: 340px;
+    max-width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    animation: afmModalIn 0.2s;
+}
+@keyframes afmModalIn {
+    from { transform: translateY(-40px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+.afm-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 18px;
+    font-size: 28px;
+    color: #64748b;
+    cursor: pointer;
+    font-weight: 700;
+    transition: color 0.2s;
+}
+.afm-modal-close:hover {
+    color: #ef4444;
+}
+.afm-modal-body {
+    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 15px;
+    color: #334155;
+}
+.afm-modal-body b {
+    color: #1e3a8a;
+} 

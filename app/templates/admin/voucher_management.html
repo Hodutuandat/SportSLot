@@ -1,1 +1,142 @@
- 
+{% extends "base.html" %}
+{% block title %}Quản lý voucher - SportSlot Admin{% endblock %}
+{% block navbar %}
+    {% include 'shared/admin_navbar.html' %}
+{% endblock %}
+{% block content %}
+<div class="admin-voucher-management">
+    <div class="avm-header">
+        <h1>Quản lý voucher</h1>
+        <button id="addVoucherBtn" class="avm-btn add">+ Thêm voucher</button>
+        <form class="avm-filters" method="get">
+            <input type="text" name="search" placeholder="Tìm kiếm mã, tên voucher..." value="{{ request.args.get('search', '') }}">
+            <select name="status">
+                <option value="all" {% if request.args.get('status', 'all') == 'all' %}selected{% endif %}>Tất cả trạng thái</option>
+                <option value="active" {% if request.args.get('status') == 'active' %}selected{% endif %}>Đang hoạt động</option>
+                <option value="expired" {% if request.args.get('status') == 'expired' %}selected{% endif %}>Đã hết hạn</option>
+            </select>
+            <select name="type">
+                <option value="all" {% if request.args.get('type', 'all') == 'all' %}selected{% endif %}>Tất cả loại</option>
+                <option value="percentage" {% if request.args.get('type') == 'percentage' %}selected{% endif %}>Phần trăm</option>
+                <option value="fixed" {% if request.args.get('type') == 'fixed' %}selected{% endif %}>Giảm tiền</option>
+            </select>
+            <button type="submit">Lọc</button>
+        </form>
+    </div>
+    <div class="avm-stats">
+        <span>Tổng voucher: <b>{{ total_vouchers }}</b></span>
+        <span>Đang hoạt động: <b>{{ active_vouchers }}</b></span>
+        <span>Tổng lượt sử dụng: <b>{{ total_usage }}</b></span>
+        <span>Tổng giá trị giảm: <b>{{ "{:,}".format(total_discount) }}đ</b></span>
+    </div>
+    <div class="avm-table-wrapper">
+        <table class="avm-table">
+            <thead>
+                <tr>
+                    <th>Mã</th>
+                    <th>Tên voucher</th>
+                    <th>Loại</th>
+                    <th>Giá trị</th>
+                    <th>Trạng thái</th>
+                    <th>Lượt sử dụng</th>
+                    <th>Ngày bắt đầu</th>
+                    <th>Ngày kết thúc</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for v in vouchers %}
+                <tr>
+                    <td>{{ v.code }}</td>
+                    <td>{{ v.name }}</td>
+                    <td>{% if v.type == 'percentage' %}Phần trăm{% elif v.type == 'fixed' %}Giảm tiền{% else %}Khác{% endif %}</td>
+                    <td>
+                        {% if v.type == 'percentage' %}
+                            {{ v.value }}% {% if v.max_discount %}(Tối đa {{ v.max_discount }}k){% endif %}
+                        {% elif v.type == 'fixed' %}
+                            {{ "{:,}".format(v.value) }}đ
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if v.status == 'active' %}
+                            <span class="avm-status active">Đang hoạt động</span>
+                        {% elif v.status == 'expired' %}
+                            <span class="avm-status expired">Đã hết hạn</span>
+                        {% else %}
+                            <span class="avm-status">Khác</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ v.used_count }}</td>
+                    <td>{{ v.start_date }}</td>
+                    <td>{{ v.end_date }}</td>
+                    <td>
+                        <a href="#" class="avm-btn view">Xem</a>
+                        <a href="#" class="avm-btn edit">Sửa</a>
+                        <a href="#" class="avm-btn delete">Xóa</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if vouchers|length == 0 %}
+            <div class="avm-empty">Không có voucher phù hợp.</div>
+        {% endif %}
+    </div>
+</div>
+<!-- Modal chi tiết voucher -->
+<div id="voucherDetailModal" class="avm-modal">
+    <div class="avm-modal-content">
+        <span class="avm-modal-close" id="closeVoucherModal">&times;</span>
+        <h2>Chi tiết voucher</h2>
+        <div class="avm-modal-body">
+            <div><b>Mã:</b> <span id="modalVoucherCode"></span></div>
+            <div><b>Tên voucher:</b> <span id="modalVoucherName"></span></div>
+            <div><b>Loại:</b> <span id="modalVoucherType"></span></div>
+            <div><b>Giá trị:</b> <span id="modalVoucherValue"></span></div>
+            <div><b>Trạng thái:</b> <span id="modalVoucherStatus"></span></div>
+            <div><b>Lượt sử dụng:</b> <span id="modalVoucherUsed"></span></div>
+            <div><b>Ngày bắt đầu:</b> <span id="modalVoucherStart"></span></div>
+            <div><b>Ngày kết thúc:</b> <span id="modalVoucherEnd"></span></div>
+            <div><b>Người tạo:</b> <span id="modalVoucherCreator"></span></div>
+        </div>
+    </div>
+</div>
+<!-- Modal thêm/sửa voucher -->
+<div id="voucherEditModal" class="avm-modal">
+    <div class="avm-modal-content">
+        <span class="avm-modal-close" id="closeVoucherEditModal">&times;</span>
+        <h2 id="voucherEditTitle">Thêm voucher</h2>
+        <form id="voucherEditForm" class="avm-modal-body">
+            <div><b>Mã:</b> <input type="text" id="editVoucherCode" required></div>
+            <div><b>Tên voucher:</b> <input type="text" id="editVoucherName" required></div>
+            <div><b>Loại:</b>
+                <select id="editVoucherType">
+                    <option value="percentage">Phần trăm</option>
+                    <option value="fixed">Giảm tiền</option>
+                </select>
+            </div>
+            <div><b>Giá trị:</b> <input type="number" id="editVoucherValue" required style="width:100px;"> <span id="editVoucherValueUnit">%</span></div>
+            <div id="editVoucherMaxDiscountWrap" style="display:none;"><b>Tối đa giảm:</b> <input type="number" id="editVoucherMaxDiscount" style="width:100px;"> k</div>
+            <div><b>Trạng thái:</b>
+                <select id="editVoucherStatus">
+                    <option value="active">Đang hoạt động</option>
+                    <option value="expired">Đã hết hạn</option>
+                </select>
+            </div>
+            <div><b>Lượt sử dụng:</b> <input type="number" id="editVoucherUsed" min="0" value="0" style="width:100px;"></div>
+            <div><b>Ngày bắt đầu:</b> <input type="date" id="editVoucherStart" required></div>
+            <div><b>Ngày kết thúc:</b> <input type="date" id="editVoucherEnd" required></div>
+            <div><b>Người tạo:</b> <input type="text" id="editVoucherCreator" value="admin" required></div>
+            <div style="margin-top:16px;">
+                <button type="submit" class="avm-btn confirm" id="saveVoucherBtn">Lưu</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/voucher_management.css') }}">
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin/voucher_management.js') }}"></script>
+{% endblock %} 

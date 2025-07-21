@@ -1,1 +1,55 @@
- 
+{% extends "base.html" %}
+{% block title %}Cài đặt hệ thống - SportSlot Admin{% endblock %}
+{% block navbar %}
+    {% include 'shared/admin_navbar.html' %}
+{% endblock %}
+{% block content %}
+<div class="admin-system-setting">
+    <div class="ass-header">
+        <h1>Cài đặt hệ thống</h1>
+        <div class="ass-status">
+            <span class="ass-dot {{ 'online' if not settings.maintenance else 'offline' }}"></span>
+            <span class="ass-status-text">{{ 'Đang hoạt động' if not settings.maintenance else 'Bảo trì' }}</span>
+        </div>
+    </div>
+    <form class="ass-form" id="systemSettingForm">
+        <div class="ass-group">
+            <label for="systemName">Tên hệ thống</label>
+            <input type="text" id="systemName" name="systemName" value="{{ settings.system_name }}">
+        </div>
+        <div class="ass-group">
+            <label for="supportEmail">Email hỗ trợ</label>
+            <input type="email" id="supportEmail" name="supportEmail" value="{{ settings.support_email }}">
+        </div>
+        <div class="ass-group">
+            <label for="version">Phiên bản</label>
+            <input type="text" id="version" name="version" value="{{ settings.version }}" readonly>
+        </div>
+        <div class="ass-group">
+            <label for="maintenance">Trạng thái bảo trì</label>
+            <select id="maintenance" name="maintenance">
+                <option value="0" {% if not settings.maintenance %}selected{% endif %}>Đang hoạt động</option>
+                <option value="1" {% if settings.maintenance %}selected{% endif %}>Bảo trì</option>
+            </select>
+        </div>
+        <div class="ass-group">
+            <label for="maintenanceTime">Thời gian bảo trì (nếu có)</label>
+            <input type="text" id="maintenanceTime" name="maintenanceTime" value="{{ settings.maintenance_time }}" placeholder="VD: 22:00 - 23:00 01/06/2024">
+        </div>
+        <div class="ass-group">
+            <label for="systemNotice">Thông báo hệ thống</label>
+            <textarea id="systemNotice" name="systemNotice" rows="3">{{ settings.system_notice }}</textarea>
+        </div>
+        <div class="ass-actions">
+            <button type="submit" class="ass-btn save">Lưu thay đổi</button>
+            <button type="reset" class="ass-btn reset">Đặt lại</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/system_setting.css') }}">
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin/system_setting.js') }}"></script>
+{% endblock %} 

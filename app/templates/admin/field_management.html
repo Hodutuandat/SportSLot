@@ -1,1 +1,119 @@
- 
+{% extends "base.html" %}
+{% block title %}Quản lý sân - SportSlot Admin{% endblock %}
+{% block navbar %}
+    {% include 'shared/admin_navbar.html' %}
+{% endblock %}
+{% block content %}
+<div class="admin-field-management">
+    <div class="afm-header">
+        <h1>Quản lý sân thể thao</h1>
+        <form class="afm-filters" method="get">
+            <input type="text" name="search" placeholder="Tìm kiếm tên sân..." value="{{ request.args.get('search', '') }}">
+            <select name="sport">
+                <option value="all" {% if request.args.get('sport', 'all') == 'all' %}selected{% endif %}>Tất cả loại sân</option>
+                <option value="football" {% if request.args.get('sport') == 'football' %}selected{% endif %}>Bóng đá</option>
+                <option value="tennis" {% if request.args.get('sport') == 'tennis' %}selected{% endif %}>Tennis</option>
+                <option value="badminton" {% if request.args.get('sport') == 'badminton' %}selected{% endif %}>Cầu lông</option>
+                <option value="basketball" {% if request.args.get('sport') == 'basketball' %}selected{% endif %}>Bóng rổ</option>
+                <option value="volleyball" {% if request.args.get('sport') == 'volleyball' %}selected{% endif %}>Bóng chuyền</option>
+            </select>
+            <select name="status">
+                <option value="all" {% if request.args.get('status', 'all') == 'all' %}selected{% endif %}>Tất cả trạng thái</option>
+                <option value="active" {% if request.args.get('status') == 'active' %}selected{% endif %}>Đang hoạt động</option>
+                <option value="pending" {% if request.args.get('status') == 'pending' %}selected{% endif %}>Chờ duyệt</option>
+            </select>
+            <button type="submit">Lọc</button>
+        </form>
+    </div>
+    <div class="afm-stats">
+        <span>Tổng sân: <b>{{ total_fields }}</b></span>
+        <span>Đang hoạt động: <b>{{ active_fields }}</b></span>
+        <span>Chờ duyệt: <b>{{ pending_fields }}</b></span>
+        <span>Tổng doanh thu: <b>{{ "{:,}".format(total_revenue) }}đ</b></span>
+    </div>
+    <div class="afm-table-wrapper">
+        <table class="afm-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tên sân</th>
+                    <th>Chủ sân</th>
+                    <th>Loại sân</th>
+                    <th>Địa chỉ</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày tạo</th>
+                    <th>Tổng đặt</th>
+                    <th>Doanh thu tháng</th>
+                    <th>Đánh giá</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for field in fields %}
+                <tr>
+                    <td>{{ field.id }}</td>
+                    <td>{{ field.name }}</td>
+                    <td>{{ field.owner_name }}</td>
+                    <td>{{ field.sport_type|capitalize }}</td>
+                    <td>{{ field.address }}</td>
+                    <td>
+                        {% if field.status == 'active' %}
+                            <span class="afm-status active">Đang hoạt động</span>
+                        {% elif field.status == 'pending' %}
+                            <span class="afm-status pending">Chờ duyệt</span>
+                        {% else %}
+                            <span class="afm-status">Khác</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ field.created_date }}</td>
+                    <td>{{ field.total_bookings }}</td>
+                    <td>{{ "{:,}".format(field.monthly_revenue) }}đ</td>
+                    <td>
+                        <span class="afm-rating">{{ field.rating }}/5</span>
+                        <span class="afm-reviews">({{ field.reviews_count }})</span>
+                    </td>
+                    <td>
+                        <a href="#" class="afm-btn view">Xem</a>
+                        {% if field.status == 'pending' %}
+                            <a href="#" class="afm-btn approve">Duyệt</a>
+                            <a href="#" class="afm-btn reject">Từ chối</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if fields|length == 0 %}
+            <div class="afm-empty">Không có sân phù hợp.</div>
+        {% endif %}
+    </div>
+</div>
+<!-- Modal chi tiết sân -->
+<div id="fieldDetailModal" class="afm-modal">
+    <div class="afm-modal-content">
+        <span class="afm-modal-close" id="closeFieldModal">&times;</span>
+        <h2>Chi tiết sân thể thao</h2>
+        <div class="afm-modal-body">
+            <div><b>ID:</b> <span id="modalFieldId"></span></div>
+            <div><b>Tên sân:</b> <span id="modalFieldName"></span></div>
+            <div><b>Chủ sân:</b> <span id="modalFieldOwner"></span></div>
+            <div><b>Loại sân:</b> <span id="modalFieldType"></span></div>
+            <div><b>Địa chỉ:</b> <span id="modalFieldAddress"></span></div>
+            <div><b>Trạng thái:</b> <span id="modalFieldStatus"></span></div>
+            <div><b>Ngày tạo:</b> <span id="modalFieldCreated"></span></div>
+            <div><b>Tổng đặt:</b> <span id="modalFieldBookings"></span></div>
+            <div><b>Doanh thu tháng:</b> <span id="modalFieldRevenue"></span></div>
+            <div><b>Đánh giá:</b> <span id="modalFieldRating"></span> <span id="modalFieldReviews"></span>
+            </div>
+            <!-- Có thể bổ sung thêm các trường khác nếu cần -->
+        </div>
+    </div>
+</div>
+<!-- XÓA modal review đánh giá khách hàng -->
+{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/field_management.css') }}">
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin/field_management.js') }}"></script>
+{% endblock %} 

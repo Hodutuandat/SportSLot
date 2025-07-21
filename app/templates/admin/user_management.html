@@ -1,1 +1,121 @@
- 
+{% extends "base.html" %}
+{% block title %}Quản lý người dùng - SportSlot Admin{% endblock %}
+{% block navbar %}
+    {% include 'shared/admin_navbar.html' %}
+{% endblock %}
+{% block content %}
+<div class="admin-user-management">
+    <div class="aum-header">
+        <h1>Quản lý người dùng</h1>
+        <form class="aum-filters" method="get">
+            <input type="text" name="search" placeholder="Tìm kiếm tên, username..." value="{{ request.args.get('search', '') }}">
+            <select name="role">
+                <option value="all" {% if request.args.get('role', 'all') == 'all' %}selected{% endif %}>Tất cả vai trò</option>
+                <option value="customer" {% if request.args.get('role') == 'customer' %}selected{% endif %}>Khách hàng</option>
+                <option value="owner" {% if request.args.get('role') == 'owner' %}selected{% endif %}>Chủ sân</option>
+            </select>
+            <select name="status">
+                <option value="all" {% if request.args.get('status', 'all') == 'all' %}selected{% endif %}>Tất cả trạng thái</option>
+                <option value="active" {% if request.args.get('status') == 'active' %}selected{% endif %}>Đang hoạt động</option>
+                <option value="suspended" {% if request.args.get('status') == 'suspended' %}selected{% endif %}>Tạm khóa</option>
+            </select>
+            <button type="submit">Lọc</button>
+        </form>
+    </div>
+    <div class="aum-stats">
+        <span>Tổng: <b>{{ total_users }}</b></span>
+        <span>Đang hoạt động: <b>{{ active_users }}</b></span>
+        <span>Tạm khóa: <b>{{ suspended_users }}</b></span>
+        <span>Khách hàng: <b>{{ customers }}</b></span>
+        <span>Chủ sân: <b>{{ owners }}</b></span>
+    </div>
+    <div class="aum-table-wrapper">
+        <table class="aum-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Họ tên</th>
+                    <th>Email</th>
+                    <th>Điện thoại</th>
+                    <th>Vai trò</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày tham gia</th>
+                    <th>Lần đăng nhập cuối</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.full_name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.phone }}</td>
+                    <td>{% if user.role == 'customer' %}Khách hàng{% elif user.role == 'owner' %}Chủ sân{% else %}Khác{% endif %}</td>
+                    <td>
+                        {% if user.status == 'active' %}
+                            <span class="aum-status active">Đang hoạt động</span>
+                        {% else %}
+                            <span class="aum-status suspended">Tạm khóa</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ user.join_date }}</td>
+                    <td>{{ user.last_login }}</td>
+                    <td>
+                        <a href="#" class="aum-btn view">Xem</a>
+                        {% if user.status == 'active' %}
+                            <a href="#" class="aum-btn suspend">Tạm khóa</a>
+                        {% else %}
+                            <a href="#" class="aum-btn activate">Mở khóa</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if users|length == 0 %}
+            <div class="aum-empty">Không có người dùng phù hợp.</div>
+        {% endif %}
+    </div>
+</div>
+<!-- Modal chi tiết user -->
+<div id="userDetailModal" class="aum-modal">
+    <div class="aum-modal-content">
+        <span class="aum-modal-close" id="closeUserModal">&times;</span>
+        <h2>Chi tiết khách hàng</h2>
+        <div class="aum-modal-body">
+            <div><b>ID:</b> <span id="modalUserId"></span></div>
+            <div><b>Username:</b> <span id="modalUserUsername"></span></div>
+            <div><b>Họ tên:</b> <span id="modalUserFullName"></span></div>
+            <div><b>Email:</b> <span id="modalUserEmail"></span></div>
+            <div><b>Điện thoại:</b> <span id="modalUserPhone"></span></div>
+            <div><b>Địa chỉ:</b> <span id="modalUserAddress"></span></div>
+            <div><b>Ngày sinh:</b> <span id="modalUserBirthday"></span></div>
+            <div><b>Giới tính:</b> <span id="modalUserGender"></span></div>
+            <div><b>Vai trò:</b> <span id="modalUserRole"></span></div>
+            <div><b>Trạng thái:</b> <span id="modalUserStatus"></span></div>
+            <div><b>Ngày tham gia:</b> <span id="modalUserJoin"></span></div>
+            <div><b>Lần đăng nhập cuối:</b> <span id="modalUserLastLogin"></span></div>
+            <div><b>Tổng số lần đặt sân:</b> <span id="modalUserTotalBookings"></span></div>
+            <div><b>Tổng điểm tích lũy:</b> <span id="modalUserTotalPoints"></span></div>
+            <div><b>Số voucher đang có:</b> <span id="modalUserActiveVouchers"></span></div>
+            <div><b>Tổng chi tiêu:</b> <span id="modalUserTotalSpent"></span></div>
+            <hr>
+            <div><b>Lịch sử điểm thưởng:</b>
+                <ul id="modalUserPointsHistory"></ul>
+            </div>
+            <div><b>Hoạt động gần đây:</b>
+                <ul id="modalUserRecentActivities"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/user_management.css') }}">
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin/user_management.js') }}"></script>
+{% endblock %} 

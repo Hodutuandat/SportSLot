@@ -1,1 +1,104 @@
- 
+{% extends "base.html" %}
+{% block title %}Quản lý giao dịch - SportSlot Admin{% endblock %}
+{% block navbar %}
+    {% include 'shared/admin_navbar.html' %}
+{% endblock %}
+{% block content %}
+<div class="admin-transaction-management">
+    <div class="atm-header">
+        <h1>Quản lý giao dịch</h1>
+        <form class="atm-filters" method="get">
+            <input type="text" name="search" placeholder="Tìm kiếm mã giao dịch, booking..." value="{{ request.args.get('search', '') }}">
+            <select name="status">
+                <option value="all" {% if request.args.get('status', 'all') == 'all' %}selected{% endif %}>Tất cả trạng thái</option>
+                <option value="completed" {% if request.args.get('status') == 'completed' %}selected{% endif %}>Hoàn thành</option>
+                <option value="pending" {% if request.args.get('status') == 'pending' %}selected{% endif %}>Đang chờ</option>
+                <option value="cancelled" {% if request.args.get('status') == 'cancelled' %}selected{% endif %}>Đã hủy</option>
+            </select>
+            <input type="date" name="date" value="{{ request.args.get('date', '') }}">
+            <button type="submit">Lọc</button>
+        </form>
+    </div>
+    <div class="atm-stats">
+        <span>Tổng giao dịch: <b>{{ total_transactions }}</b></span>
+        <span>Hoàn thành: <b>{{ completed_transactions }}</b></span>
+        <span>Đang chờ: <b>{{ pending_transactions }}</b></span>
+        <span>Tổng doanh thu: <b>{{ "{:,}".format(total_revenue) }}đ</b></span>
+        <span>Tổng hoa hồng: <b>{{ "{:,}".format(total_commission) }}đ</b></span>
+    </div>
+    <div class="atm-table-wrapper">
+        <table class="atm-table">
+            <thead>
+                <tr>
+                    <th>Mã giao dịch</th>
+                    <th>Booking</th>
+                    <th>Khách hàng</th>
+                    <th>Chủ sân</th>
+                    <th>Số tiền</th>
+                    <th>Hoa hồng</th>
+                    <th>Trạng thái</th>
+                    <th>Phương thức</th>
+                    <th>Ngày</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tx in transactions %}
+                <tr>
+                    <td>{{ tx.transaction_code }}</td>
+                    <td>{{ tx.booking_code }}</td>
+                    <td>{{ tx.customer }}</td>
+                    <td>{{ tx.field_owner }}</td>
+                    <td>{{ "{:,}".format(tx.amount) }}đ</td>
+                    <td>{{ "{:,}".format(tx.commission) }}đ</td>
+                    <td>
+                        {% if tx.status == 'completed' %}
+                            <span class="atm-status completed">Hoàn thành</span>
+                        {% elif tx.status == 'pending' %}
+                            <span class="atm-status pending">Đang chờ</span>
+                        {% elif tx.status == 'cancelled' %}
+                            <span class="atm-status cancelled">Đã hủy</span>
+                        {% else %}
+                            <span class="atm-status">Khác</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ tx.payment_method }}</td>
+                    <td>{{ tx.date }}</td>
+                    <td>
+                        <a href="#" class="atm-btn view">Xem</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if transactions|length == 0 %}
+            <div class="atm-empty">Không có giao dịch phù hợp.</div>
+        {% endif %}
+    </div>
+</div>
+<!-- Modal chi tiết giao dịch -->
+<div id="transactionDetailModal" class="atm-modal">
+    <div class="atm-modal-content">
+        <span class="atm-modal-close" id="closeTransactionModal">&times;</span>
+        <h2>Chi tiết giao dịch</h2>
+        <div class="atm-modal-body">
+            <div><b>Mã giao dịch:</b> <span id="modalTxCode"></span></div>
+            <div><b>Booking:</b> <span id="modalTxBooking"></span></div>
+            <div><b>Khách hàng:</b> <span id="modalTxCustomer"></span></div>
+            <div><b>Chủ sân:</b> <span id="modalTxOwner"></span></div>
+            <div><b>Số tiền:</b> <span id="modalTxAmount"></span></div>
+            <div><b>Hoa hồng:</b> <span id="modalTxCommission"></span></div>
+            <div><b>Trạng thái:</b> <span id="modalTxStatus"></span></div>
+            <div><b>Phương thức:</b> <span id="modalTxPayment"></span></div>
+            <div><b>Ngày:</b> <span id="modalTxDate"></span></div>
+            <div><b>Ghi chú:</b> <span id="modalTxNote"></span></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/transaction_management.css') }}">
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin/transaction_management.js') }}"></script>
+{% endblock %} 

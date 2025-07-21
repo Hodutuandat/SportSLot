@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Nhật ký hoạt động - SportSlot Admin{% endblock %}
+{% block navbar %}
+    {% include 'shared/admin_navbar.html' %}
+{% endblock %}
+{% block content %}
+<div class="admin-activity-log">
+    <div class="aal-header">
+        <h1>Nhật ký hoạt động</h1>
+        <form class="aal-filters" method="get">
+            <input type="text" name="search" placeholder="Tìm kiếm hoạt động..." value="{{ request.args.get('search', '') }}">
+            <select name="type">
+                <option value="all" {% if request.args.get('type', 'all') == 'all' %}selected{% endif %}>Tất cả loại</option>
+                <option value="register" {% if request.args.get('type') == 'register' %}selected{% endif %}>Đăng ký</option>
+                <option value="booking" {% if request.args.get('type') == 'booking' %}selected{% endif %}>Đặt sân</option>
+                <option value="payment" {% if request.args.get('type') == 'payment' %}selected{% endif %}>Thanh toán</option>
+                <option value="system" {% if request.args.get('type') == 'system' %}selected{% endif %}>Hệ thống</option>
+            </select>
+            <button type="submit">Lọc</button>
+        </form>
+    </div>
+    <div class="aal-list-wrapper">
+        <ul class="aal-list">
+            {% for activity in activities %}
+            <li class="aal-item">
+                <div class="aal-icon">{{ activity.icon }}</div>
+                <div class="aal-content">
+                    <div class="aal-title">{{ activity.title }}</div>
+                    <div class="aal-description">{{ activity.description }}</div>
+                    <div class="aal-time">{{ activity.time }}</div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% if activities|length == 0 %}
+            <div class="aal-empty">Không có hoạt động phù hợp.</div>
+        {% endif %}
+    </div>
+    <div class="aal-pagination">
+        <!-- Phân trang mock -->
+        <a href="#" class="aal-page prev">&laquo;</a>
+        <a href="#" class="aal-page active">1</a>
+        <a href="#" class="aal-page">2</a>
+        <a href="#" class="aal-page">3</a>
+        <a href="#" class="aal-page next">&raquo;</a>
+    </div>
+</div>
+{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/activity_log.css') }}">
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin/activity_log.js') }}"></script>
+{% endblock %} 

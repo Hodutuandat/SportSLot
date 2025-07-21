@@ -1,1 +1,133 @@
- 
+{% extends "base.html" %}
+{% block title %}Quản lý đặt sân - SportSlot Admin{% endblock %}
+{% block navbar %}
+    {% include 'shared/admin_navbar.html' %}
+{% endblock %}
+{% block content %}
+<div class="admin-booking-management">
+    <div class="abm-header">
+        <h1>Quản lý đặt sân</h1>
+        <form class="abm-filters" method="get">
+            <input type="text" name="search" placeholder="Tìm kiếm mã booking, tên khách hàng..." value="{{ request.args.get('search', '') }}">
+            <select name="status">
+                <option value="all" {% if request.args.get('status', 'all') == 'all' %}selected{% endif %}>Tất cả trạng thái</option>
+                <option value="pending" {% if request.args.get('status') == 'pending' %}selected{% endif %}>Chờ xác nhận</option>
+                <option value="confirmed" {% if request.args.get('status') == 'confirmed' %}selected{% endif %}>Đã xác nhận</option>
+                <option value="completed" {% if request.args.get('status') == 'completed' %}selected{% endif %}>Hoàn thành</option>
+                <option value="cancelled" {% if request.args.get('status') == 'cancelled' %}selected{% endif %}>Đã hủy</option>
+            </select>
+            <input type="date" name="date" value="{{ request.args.get('date', '') }}">
+            <button type="submit">Lọc</button>
+        </form>
+    </div>
+    <div class="abm-stats">
+        <span>Tổng booking: <b>{{ total_bookings }}</b></span>
+        <span>Chờ xác nhận: <b>{{ pending_bookings }}</b></span>
+        <span>Đã xác nhận: <b>{{ confirmed_bookings }}</b></span>
+        <span>Tổng doanh thu: <b>{{ "{:,}".format(total_revenue) }}đ</b></span>
+    </div>
+    <div class="abm-table-wrapper">
+        <table class="abm-table">
+            <thead>
+                <tr>
+                    <th>Mã booking</th>
+                    <th>Khách hàng</th>
+                    <th>Sân</th>
+                    <th>Chủ sân</th>
+                    <th>Ngày</th>
+                    <th>Giờ</th>
+                    <th>Trạng thái</th>
+                    <th>Thanh toán</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr>
+                    <td>{{ booking.booking_code }}</td>
+                    <td>{{ booking.customer_name }}</td>
+                    <td>{{ booking.field }}</td>
+                    <td>{{ booking.field_owner }}</td>
+                    <td>{{ booking.date }}</td>
+                    <td>{{ booking.time }}</td>
+                    <td>
+                        {% if booking.status == 'pending' %}
+                            <span class="abm-status pending">Chờ xác nhận</span>
+                        {% elif booking.status == 'confirmed' %}
+                            <span class="abm-status confirmed">Đã xác nhận</span>
+                        {% elif booking.status == 'completed' %}
+                            <span class="abm-status completed">Hoàn thành</span>
+                        {% elif booking.status == 'cancelled' %}
+                            <span class="abm-status cancelled">Đã hủy</span>
+                        {% elif booking.status == 'error' %}
+                            <span class="abm-status error">Lỗi</span>
+                        {% elif booking.status == 'dispute' %}
+                            <span class="abm-status dispute">Tranh chấp</span>
+                        {% else %}
+                            <span class="abm-status">Khác</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ booking.payment_method }}</td>
+                    <td>
+                        <a href="#" class="abm-btn view">Xem</a>
+                        {% if booking.status in ['error', 'dispute'] %}
+                            <a href="#" class="abm-btn support">Hỗ trợ</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if bookings|length == 0 %}
+            <div class="abm-empty">Không có booking phù hợp.</div>
+        {% endif %}
+    </div>
+</div>
+<!-- Modal chi tiết booking -->
+<div id="bookingDetailModal" class="abm-modal">
+    <div class="abm-modal-content">
+        <span class="abm-modal-close" id="closeBookingModal">&times;</span>
+        <h2>Chi tiết booking</h2>
+        <div class="abm-modal-body">
+            <div><b>Mã booking:</b> <span id="modalBookingCode"></span></div>
+            <div><b>Khách hàng:</b> <span id="modalBookingCustomer"></span></div>
+            <div><b>Sân:</b> <span id="modalBookingField"></span></div>
+            <div><b>Chủ sân:</b> <span id="modalBookingOwner"></span></div>
+            <div><b>Ngày:</b> <span id="modalBookingDate"></span></div>
+            <div><b>Giờ:</b> <span id="modalBookingTime"></span></div>
+            <div><b>Trạng thái:</b> <span id="modalBookingStatus"></span></div>
+            <div><b>Thanh toán:</b> <span id="modalBookingPayment"></span></div>
+            <div><b>Tổng tiền:</b> <span id="modalBookingTotal"></span></div>
+            <div><b>Ghi chú:</b> <span id="modalBookingNote"></span></div>
+            <div><b>Lịch sử trạng thái:</b>
+                <ul id="modalBookingHistory"></ul>
+            </div>
+            <div id="modalBookingSupportSection" style="display:none;">
+                <hr>
+                <div><b>Ghi chú lỗi/tranh chấp:</b> <span id="modalBookingSupportNote"></span></div>
+                <button id="openSupportModal" class="abm-btn support">Hỗ trợ xử lý</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal hỗ trợ xử lý booking -->
+<div id="supportBookingModal" class="abm-modal">
+    <div class="abm-modal-content">
+        <span class="abm-modal-close" id="closeSupportModal">&times;</span>
+        <h2>Hỗ trợ xử lý booking</h2>
+        <div class="abm-modal-body">
+            <div><b>Mã booking:</b> <span id="supportModalBookingCode"></span></div>
+            <div><b>Khách hàng:</b> <span id="supportModalBookingCustomer"></span></div>
+            <div><b>Ghi chú hỗ trợ:</b></div>
+            <textarea id="supportNoteInput" rows="4" style="width:100%;border-radius:6px;border:1px solid #e2e8f0;padding:8px;"></textarea>
+            <button id="saveSupportNote" class="abm-btn confirm" style="margin-top:12px;">Lưu ghi chú</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/booking_management.css') }}">
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin/booking_management.js') }}"></script>
+{% endblock %} 

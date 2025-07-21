@@ -1,10 +1,356 @@
-{% extends 'base.html' %}
-{% block title %}Admin Dashboard | SportSlot{% endblock %}
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - SportSlot{% endblock %}
 
 {% block content %}
 <div class="admin-dashboard">
-    <h1>Admin Dashboard</h1>
-    <p>Welcome, {{ current_user.username }}!</p>
-    <p>This is the admin dashboard.</p>
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div class="header-content">
+            <h1 class="dashboard-title">Dashboard</h1>
+            <p class="dashboard-subtitle">Tổng quan hệ thống SportSlot</p>
+        </div>
+        <div class="header-actions">
+            <div class="current-time">
+                <span class="time-icon">🕐</span>
+                <span class="time-text" id="currentTime"></span>
+            </div>
+            <div class="system-status">
+                <span class="status-dot online"></span>
+                <span class="status-text">Hệ thống hoạt động</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon users-icon">👥</div>
+            <div class="stat-content">
+                <div class="stat-value">{{ "{:,}".format(stats.total_users) }}</div>
+                <div class="stat-label">Tổng người dùng</div>
+                <div class="stat-growth positive">
+                    <span class="growth-icon">↗</span>
+                    <span class="growth-text">+{{ growth_stats.users_growth }}%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon owners-icon">🏢</div>
+            <div class="stat-content">
+                <div class="stat-value">{{ stats.total_owners }}</div>
+                <div class="stat-label">Chủ sân</div>
+                <div class="stat-growth positive">
+                    <span class="growth-icon">↗</span>
+                    <span class="growth-text">+{{ growth_stats.fields_growth }}%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon fields-icon">⚽</div>
+            <div class="stat-content">
+                <div class="stat-value">{{ stats.total_fields }}</div>
+                <div class="stat-label">Sân thể thao</div>
+                <div class="stat-growth positive">
+                    <span class="growth-icon">↗</span>
+                    <span class="growth-text">+{{ growth_stats.fields_growth }}%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon bookings-icon">📅</div>
+            <div class="stat-content">
+                <div class="stat-value">{{ "{:,}".format(stats.total_bookings) }}</div>
+                <div class="stat-label">Đặt sân</div>
+                <div class="stat-growth positive">
+                    <span class="growth-icon">↗</span>
+                    <span class="growth-text">+{{ growth_stats.bookings_growth }}%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon revenue-icon">💰</div>
+            <div class="stat-content">
+                <div class="stat-value">{{ "{:,}".format(stats.total_revenue) }}đ</div>
+                <div class="stat-label">Doanh thu</div>
+                <div class="stat-growth positive">
+                    <span class="growth-icon">↗</span>
+                    <span class="growth-text">+{{ growth_stats.revenue_growth }}%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon pending-icon">⏳</div>
+            <div class="stat-content">
+                <div class="stat-value">{{ stats.pending_approvals }}</div>
+                <div class="stat-label">Chờ duyệt</div>
+                <div class="stat-growth neutral">
+                    <span class="growth-icon">→</span>
+                    <span class="growth-text">Cần xử lý</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon health-icon">💚</div>
+            <div class="stat-content">
+                <div class="stat-value">{{ stats.system_health }}%</div>
+                <div class="stat-label">Sức khỏe hệ thống</div>
+                <div class="stat-growth positive">
+                    <span class="growth-icon">↗</span>
+                    <span class="growth-text">Tốt</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon sessions-icon">👤</div>
+            <div class="stat-content">
+                <div class="stat-value">{{ stats.active_sessions }}</div>
+                <div class="stat-label">Phiên hoạt động</div>
+                <div class="stat-growth neutral">
+                    <span class="growth-icon">→</span>
+                    <span class="growth-text">Hiện tại</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="dashboard-grid">
+        <!-- Revenue Chart -->
+        <div class="dashboard-card revenue-chart">
+            <div class="card-header">
+                <h3 class="card-title">Doanh thu theo tháng</h3>
+                <div class="card-actions">
+                    <button class="chart-filter active" data-period="month">Tháng</button>
+                    <button class="chart-filter" data-period="quarter">Quý</button>
+                    <button class="chart-filter" data-period="year">Năm</button>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="chart-container">
+                    <canvas id="revenueChart" width="400" height="200"></canvas>
+                </div>
+                <div class="chart-stats">
+                    <div class="chart-stat">
+                        <span class="stat-label">Tổng doanh thu</span>
+                        <span class="stat-value">45.6M VNĐ</span>
+                    </div>
+                    <div class="chart-stat">
+                        <span class="stat-label">Tăng trưởng</span>
+                        <span class="stat-value positive">+8.3%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div class="dashboard-card recent-activities">
+            <div class="card-header">
+                <h3 class="card-title">Hoạt động gần đây</h3>
+                <a href="{{ url_for('admin.activity_log') }}" class="view-all-link">Xem tất cả</a>
+            </div>
+            <div class="card-content">
+                <div class="activities-list">
+                    {% for activity in recent_activities %}
+                    <div class="activity-item">
+                        <div class="activity-icon">{{ activity.icon }}</div>
+                        <div class="activity-content">
+                            <div class="activity-title">{{ activity.title }}</div>
+                            <div class="activity-description">{{ activity.description }}</div>
+                            <div class="activity-time">{{ activity.time }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="dashboard-card quick-actions">
+            <div class="card-header">
+                <h3 class="card-title">Thao tác nhanh</h3>
+            </div>
+            <div class="card-content">
+                <div class="actions-grid">
+                    <a href="{{ url_for('admin.user_management') }}" class="action-item">
+                        <div class="action-icon">👥</div>
+                        <div class="action-text">Quản lý người dùng</div>
+                    </a>
+                    <a href="{{ url_for('admin.field_management') }}" class="action-item">
+                        <div class="action-icon">⚽</div>
+                        <div class="action-text">Quản lý sân</div>
+                    </a>
+                    <a href="{{ url_for('admin.booking_management') }}" class="action-item">
+                        <div class="action-icon">📅</div>
+                        <div class="action-text">Quản lý đặt sân</div>
+                    </a>
+                    <a href="{{ url_for('admin.transaction_management') }}" class="action-item">
+                        <div class="action-icon">💰</div>
+                        <div class="action-text">Quản lý giao dịch</div>
+                    </a>
+                    <a href="{{ url_for('admin.voucher_management') }}" class="action-item">
+                        <div class="action-icon">🎫</div>
+                        <div class="action-text">Quản lý voucher</div>
+                    </a>
+                    <a href="{{ url_for('admin.system_setting') }}" class="action-item">
+                        <div class="action-icon">⚙️</div>
+                        <div class="action-text">Cài đặt hệ thống</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Health -->
+        <div class="dashboard-card system-health">
+            <div class="card-header">
+                <h3 class="card-title">Sức khỏe hệ thống</h3>
+                <div class="health-status">
+                    <span class="health-dot online"></span>
+                    <span class="health-text">Tốt</span>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="health-metrics">
+                    <div class="health-metric">
+                        <div class="metric-label">CPU Usage</div>
+                        <div class="metric-bar">
+                            <div class="metric-fill" style="width: 45%"></div>
+                        </div>
+                        <div class="metric-value">45%</div>
+                    </div>
+                    <div class="health-metric">
+                        <div class="metric-label">Memory Usage</div>
+                        <div class="metric-bar">
+                            <div class="metric-fill" style="width: 62%"></div>
+                        </div>
+                        <div class="metric-value">62%</div>
+                    </div>
+                    <div class="health-metric">
+                        <div class="metric-label">Disk Usage</div>
+                        <div class="metric-bar">
+                            <div class="metric-fill" style="width: 38%"></div>
+                        </div>
+                        <div class="metric-value">38%</div>
+                    </div>
+                    <div class="health-metric">
+                        <div class="metric-label">Network</div>
+                        <div class="metric-bar">
+                            <div class="metric-fill" style="width: 78%"></div>
+                        </div>
+                        <div class="metric-value">78%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Performers -->
+        <div class="dashboard-card top-performers">
+            <div class="card-header">
+                <h3 class="card-title">Top sân thể thao</h3>
+                <div class="card-actions">
+                    <button class="performer-filter active" data-type="revenue">Doanh thu</button>
+                    <button class="performer-filter" data-type="bookings">Đặt sân</button>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="performers-list">
+                    <div class="performer-item">
+                        <div class="performer-rank">1</div>
+                        <div class="performer-info">
+                            <div class="performer-name">Sân Bóng Đá A</div>
+                            <div class="performer-owner">Chủ sân: Trần Thị Bình</div>
+                        </div>
+                        <div class="performer-stats">
+                            <div class="performer-value">9.0M VNĐ</div>
+                            <div class="performer-label">Doanh thu tháng</div>
+                        </div>
+                    </div>
+                    <div class="performer-item">
+                        <div class="performer-rank">2</div>
+                        <div class="performer-info">
+                            <div class="performer-name">Sân Tennis Elite</div>
+                            <div class="performer-owner">Chủ sân: Phạm Văn Dũng</div>
+                        </div>
+                        <div class="performer-stats">
+                            <div class="performer-value">7.5M VNĐ</div>
+                            <div class="performer-label">Doanh thu tháng</div>
+                        </div>
+                    </div>
+                    <div class="performer-item">
+                        <div class="performer-rank">3</div>
+                        <div class="performer-info">
+                            <div class="performer-name">Sân Cầu Lông Vip</div>
+                            <div class="performer-owner">Chủ sân: Lê Hoàng Anh</div>
+                        </div>
+                        <div class="performer-stats">
+                            <div class="performer-value">6.8M VNĐ</div>
+                            <div class="performer-label">Doanh thu tháng</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts & Notifications -->
+        <div class="dashboard-card alerts-notifications">
+            <div class="card-header">
+                <h3 class="card-title">Cảnh báo & Thông báo</h3>
+                <div class="alerts-count">
+                    <span class="count-badge">3</span>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="alerts-list">
+                    <div class="alert-item urgent">
+                        <div class="alert-icon">⚠️</div>
+                        <div class="alert-content">
+                            <div class="alert-title">Sân mới cần duyệt</div>
+                            <div class="alert-description">Sân Tennis Elite chờ phê duyệt từ 2 giờ trước</div>
+                            <div class="alert-time">2 giờ trước</div>
+                        </div>
+                        <div class="alert-actions">
+                            <button class="alert-btn approve">Duyệt</button>
+                            <button class="alert-btn reject">Từ chối</button>
+                        </div>
+                    </div>
+                    <div class="alert-item warning">
+                        <div class="alert-icon">⚠️</div>
+                        <div class="alert-content">
+                            <div class="alert-title">Báo cáo vi phạm</div>
+                            <div class="alert-description">Khách hàng báo cáo sân bóng đá A</div>
+                            <div class="alert-time">3 giờ trước</div>
+                        </div>
+                        <div class="alert-actions">
+                            <button class="alert-btn view">Xem chi tiết</button>
+                        </div>
+                    </div>
+                    <div class="alert-item info">
+                        <div class="alert-icon">ℹ️</div>
+                        <div class="alert-content">
+                            <div class="alert-title">Cập nhật hệ thống</div>
+                            <div class="alert-description">Phiên bản 2.1.0 đã được triển khai</div>
+                            <div class="alert-time">5 giờ trước</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/dashboard.css') }}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/admin/dashboard.js') }}"></script>
 {% endblock %} 

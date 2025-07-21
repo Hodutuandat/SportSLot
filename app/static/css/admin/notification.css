@@ -1,1 +1,220 @@
- 
+/* Notification Management Admin Styles */
+.admin-notification-management {
+    margin-top: 80px;
+    padding: 30px 20px;
+    background: #f8fafc;
+    min-height: calc(100vh - 80px);
+}
+.anm-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 20px;
+}
+.anm-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+.anm-filters {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.anm-filters input[type="text"],
+.anm-filters select {
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 14px;
+    background: #fff;
+    color: #1e293b;
+}
+.anm-filters button {
+    padding: 8px 18px;
+    background: #1e3a8a;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.anm-filters button:hover {
+    background: #2563eb;
+}
+.anm-stats {
+    display: flex;
+    gap: 25px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    color: #475569;
+}
+.anm-stats b {
+    color: #1e3a8a;
+}
+.anm-table-wrapper {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    padding: 0 0 10px 0;
+    overflow-x: auto;
+}
+.anm-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+}
+.anm-table th, .anm-table td {
+    padding: 12px 10px;
+    text-align: left;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 14px;
+}
+.anm-table th {
+    background: #f1f5f9;
+    font-weight: 700;
+    color: #1e293b;
+}
+.anm-table tr.unread {
+    background: #fef9c3;
+}
+.anm-table tr.urgent {
+    border-left: 4px solid #ef4444;
+}
+.anm-table tr:hover {
+    background: #f8fafc;
+}
+.anm-status {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+}
+.anm-status.unread {
+    background: #fef9c3;
+    color: #eab308;
+}
+.anm-status.read {
+    background: #d1fae5;
+    color: #059669;
+}
+.anm-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    margin-right: 5px;
+    transition: background 0.2s, color 0.2s;
+    border: none;
+    cursor: pointer;
+    display: inline-block;
+}
+.anm-btn.view {
+    background: #f1f5f9;
+    color: #1e3a8a;
+}
+.anm-btn.view:hover {
+    background: #dbeafe;
+}
+.anm-btn.mark-read {
+    background: #d1fae5;
+    color: #059669;
+}
+.anm-btn.mark-read:hover {
+    background: #bbf7d0;
+}
+.anm-btn.delete {
+    background: #fee2e2;
+    color: #dc2626;
+}
+.anm-btn.delete:hover {
+    background: #fecaca;
+}
+.anm-empty {
+    padding: 30px;
+    text-align: center;
+    color: #64748b;
+    font-size: 16px;
+}
+/* Modal chi tiết thông báo */
+.anm-modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: auto;
+    background: rgba(30, 41, 59, 0.4);
+    justify-content: center;
+    align-items: center;
+}
+.anm-modal.show {
+    display: flex;
+}
+.anm-modal-content {
+    background: #fff;
+    margin: auto;
+    padding: 30px 30px 20px 30px;
+    border-radius: 14px;
+    box-shadow: 0 8px 40px rgba(30,41,59,0.18);
+    min-width: 340px;
+    max-width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    animation: anmModalIn 0.2s;
+}
+@keyframes anmModalIn {
+    from { transform: translateY(-40px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+.anm-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 18px;
+    font-size: 28px;
+    color: #64748b;
+    cursor: pointer;
+    font-weight: 700;
+    transition: color 0.2s;
+}
+.anm-modal-close:hover {
+    color: #ef4444;
+}
+.anm-modal-body {
+    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 15px;
+    color: #334155;
+}
+.anm-modal-body b {
+    color: #1e3a8a;
+}
+@media (max-width: 900px) {
+    .anm-table {
+        min-width: 700px;
+    }
+}
+@media (max-width: 600px) {
+    .anm-header h1 {
+        font-size: 18px;
+    }
+    .anm-table {
+        min-width: 500px;
+    }
+    .anm-stats {
+        flex-direction: column;
+        gap: 8px;
+    }
+} 

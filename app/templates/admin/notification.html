@@ -1,1 +1,88 @@
- 
+{% extends "base.html" %}
+{% block title %}Quản lý thông báo - SportSlot Admin{% endblock %}
+{% block navbar %}
+    {% include 'shared/admin_navbar.html' %}
+{% endblock %}
+{% block content %}
+<div class="admin-notification-management">
+    <div class="anm-header">
+        <h1>Quản lý thông báo</h1>
+        <form class="anm-filters" method="get">
+            <input type="text" name="search" placeholder="Tìm kiếm tiêu đề, nội dung..." value="{{ request.args.get('search', '') }}">
+            <select name="type">
+                <option value="all" {% if request.args.get('type', 'all') == 'all' %}selected{% endif %}>Tất cả loại</option>
+                <option value="system" {% if request.args.get('type') == 'system' %}selected{% endif %}>Hệ thống</option>
+                <option value="booking" {% if request.args.get('type') == 'booking' %}selected{% endif %}>Booking</option>
+                <option value="error" {% if request.args.get('type') == 'error' %}selected{% endif %}>Lỗi</option>
+                <option value="warning" {% if request.args.get('type') == 'warning' %}selected{% endif %}>Cảnh báo</option>
+                <option value="user" {% if request.args.get('type') == 'user' %}selected{% endif %}>Người dùng</option>
+            </select>
+            <select name="status">
+                <option value="all" {% if request.args.get('status', 'all') == 'all' %}selected{% endif %}>Tất cả trạng thái</option>
+                <option value="unread" {% if request.args.get('status') == 'unread' %}selected{% endif %}>Chưa đọc</option>
+                <option value="read" {% if request.args.get('status') == 'read' %}selected{% endif %}>Đã đọc</option>
+            </select>
+            <button type="submit">Lọc</button>
+        </form>
+    </div>
+    <div class="anm-stats">
+        <span>Tổng thông báo: <b>{{ total_notifications }}</b></span>
+        <span>Chưa đọc: <b>{{ unread_notifications }}</b></span>
+        <span>Cảnh báo/lỗi: <b>{{ urgent_notifications }}</b></span>
+    </div>
+    <div class="anm-table-wrapper">
+        <table class="anm-table">
+            <thead>
+                <tr>
+                    <th>Loại</th>
+                    <th>Tiêu đề</th>
+                    <th>Nội dung</th>
+                    <th>Thời gian</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for n in notifications %}
+                <tr class="{{ 'unread' if not n.read else '' }} {{ 'urgent' if n.urgent else '' }}">
+                    <td>{{ n.type|capitalize }}</td>
+                    <td>{{ n.title }}</td>
+                    <td>{{ n.message }}</td>
+                    <td>{{ n.date }}</td>
+                    <td>{% if not n.read %}<span class="anm-status unread">Chưa đọc</span>{% else %}<span class="anm-status read">Đã đọc</span>{% endif %}</td>
+                    <td>
+                        <a href="#" class="anm-btn view">Xem</a>
+                        {% if not n.read %}<a href="#" class="anm-btn mark-read">Đánh dấu đã đọc</a>{% endif %}
+                        <a href="#" class="anm-btn delete">Xóa</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if notifications|length == 0 %}
+            <div class="anm-empty">Không có thông báo phù hợp.</div>
+        {% endif %}
+    </div>
+</div>
+<!-- Modal chi tiết thông báo -->
+<div id="notificationDetailModal" class="anm-modal">
+    <div class="anm-modal-content">
+        <span class="anm-modal-close" id="closeNotificationModal">&times;</span>
+        <h2>Chi tiết thông báo</h2>
+        <div class="anm-modal-body">
+            <div><b>Loại:</b> <span id="modalNotiType"></span></div>
+            <div><b>Tiêu đề:</b> <span id="modalNotiTitle"></span></div>
+            <div><b>Nội dung:</b> <span id="modalNotiMessage"></span></div>
+            <div><b>Thời gian:</b> <span id="modalNotiDate"></span></div>
+            <div><b>Trạng thái:</b> <span id="modalNotiStatus"></span></div>
+            <div><b>Chi tiết:</b> <span id="modalNotiDetails"></span></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/notification.css') }}">
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin/notification.js') }}"></script>
+{% endblock %} 

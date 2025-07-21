@@ -1,0 +1,16 @@
+<nav class="admin-navbar-simple">
+    <div class="admin-navbar-container">
+        <div class="admin-navbar-brand">
+            <a href="{{ url_for('admin.dashboard') }}" class="admin-brand-link">
+                <span class="admin-brand-text">SportSlot</span>
+            </a>
+        </div>
+        <div class="admin-navbar-status">
+            <span class="admin-status-dot online"></span>
+            <span class="admin-status-text">Hệ thống hoạt động</span>
+        </div>
+        <div class="admin-navbar-logout">
+            <a href="{{ url_for('auth.logout') }}" class="admin-logout-btn">Đăng xuất</a>
+        </div>
+    </div>
+</nav> 
