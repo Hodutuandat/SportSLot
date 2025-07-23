@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_login import LoginManager
+from app.extensions import mail
 from app.routes.common import common_bp
 from app.routes.auth import auth_bp
 from app.routes.customer import customer_bp
@@ -26,6 +27,7 @@ def load_user(user_id):
 
 def create_app():
     app = Flask(__name__)
+    app.config.from_object('app.config')
     app.secret_key = 'your_secret_key_here_make_it_long_and_random_12345'
     app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
     app.config['SESSION_COOKIE_HTTPONLY'] = True
@@ -43,5 +45,7 @@ def create_app():
     login_manager.login_message = 'Vui lòng đăng nhập để truy cập trang này.'
     login_manager.login_message_category = 'info'
     login_manager.session_protection = None  # Disable session protection for development
+
+    mail.init_app(app)
     
     return app 

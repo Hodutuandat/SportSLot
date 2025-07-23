@@ -1,6 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for, request, session
 from flask_login import login_user, logout_user, login_required, current_user
 from app.models.user import User
+from flask_mail import Message
+from app.extensions import mail
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -63,7 +65,11 @@ def logout():
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
-    # Chỉ render giao diện, chưa xử lý đăng ký thực tế
+    if request.method == 'POST':
+        # Xử lý đăng ký ở đây (giả lập thành công)
+        # ...
+        return render_template('auth/register.html', success=True)
+    # GET
     return render_template('auth/register.html')
 
 @auth_bp.route('/profile')
@@ -74,3 +80,30 @@ def profile():
 @auth_bp.route('/test-session')
 def test_session():
     return f"Session: {session}, Current User: {current_user.is_authenticated if current_user else 'None'}" 
+
+@auth_bp.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        return render_template('auth/forgot_password.html', sent=True, email=email)
+    return render_template('auth/forgot_password.html') 
+
+@auth_bp.route('/reset-password', methods=['GET', 'POST'])
+def reset_password():
+    error = None
+    success = False
+    if request.method == 'POST':
+        email = request.form.get('email')
+        old_password = request.form.get('old_password')
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+        # Giả lập kiểm tra hợp lệ
+        if not email or not old_password or not new_password or not confirm_password:
+            error = 'Vui lòng nhập đầy đủ thông tin.'
+        elif new_password != confirm_password:
+            error = 'Mật khẩu mới và xác nhận không khớp.'
+        elif old_password == new_password:
+            error = 'Mật khẩu mới phải khác mật khẩu cũ.'
+        else:
+            success = True
+    return render_template('auth/reset_password.html', error=error, success=success) 

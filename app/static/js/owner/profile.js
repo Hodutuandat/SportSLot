@@ -7,6 +7,15 @@ document.addEventListener('DOMContentLoaded', function() {
     updateCurrentTime();
     setupSecurityActions();
     
+    // Gắn sự kiện xác nhận popup cho nút đăng xuất ở drop box
+    const ownerLogoutBtn = document.getElementById('owner-logout-btn');
+    if (ownerLogoutBtn) {
+        ownerLogoutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            confirmLogout();
+        });
+    }
+    
     console.log('Owner profile page loaded successfully');
 });
 
@@ -77,19 +86,27 @@ function setupLogoutModal() {
     // Confirm button
     const confirmBtn = document.querySelector('#logoutModal .confirm-btn');
     if (confirmBtn) {
-        confirmBtn.addEventListener('click', performLogout);
+        confirmBtn.addEventListener('click', confirmLogout);
     }
 }
 
 function confirmLogout() {
-    const modal = document.getElementById('logoutModal');
-    if (modal) {
-        modal.style.display = 'block';
-        
-        // Add animation
-        const modalContent = modal.querySelector('.modal-content');
-        modalContent.style.animation = 'slideDown 0.3s ease';
-    }
+    showModal(
+        'Xác nhận đăng xuất',
+        `<div class="logout-confirm-content" style="text-align:center;">
+            <div class="logout-icon" style="font-size:48px;">🚪</div>
+            <p style="margin: 20px 0 16px 0; font-size:1.1rem;">Bạn có chắc chắn muốn đăng xuất khỏi tài khoản không?</p>
+            <div class="logout-options" style="margin-bottom: 18px;">
+                <label class="checkbox-container" style="font-size:0.98rem; color:#6b7280;">
+                    <input type="checkbox" id="rememberMe">
+                    <span class="checkmark"></span>
+                    Ghi nhớ phiên đăng nhập lần sau
+                </label>
+            </div>
+        </div>`,
+        'Đăng xuất',
+        performLogout
+    );
 }
 
 function logoutAllDevices() {

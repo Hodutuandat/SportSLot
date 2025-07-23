@@ -49,13 +49,28 @@
                 <button type="button" class="register-type-btn active" id="btn-customer">Khách hàng</button>
                 <button type="button" class="register-type-btn" id="btn-owner">Chủ sân</button>
             </div>
-            <button type="submit" class="register-btn">Đăng ký</button>
+            <button type="submit" class="form-register-btn">Đăng ký</button>
         </div>
     </form>
     <div class="register-login">
         Đã có tài khoản? <a href="/login"><b>Đăng nhập</b></a>
     </div>
 </section>
+{% if success %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    showModal(
+        'Đăng ký thành công!',
+        `<div style=\"text-align:center;\">
+            <div style=\"font-size:48px;margin-bottom:16px;\">🎉</div>
+            <p style=\"font-size:1.1rem;\">Bạn đã đăng ký tài khoản thành công!\nHãy đăng nhập để sử dụng dịch vụ.</p>
+        </div>`,
+        'Đăng nhập',
+        function() { window.location.href = '/login'; }
+    );
+});
+</script>
+{% endif %}
 {% endblock %}
 
 {% block extra_js %}

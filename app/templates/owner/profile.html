@@ -206,33 +206,6 @@
             </div>
         </div>
 </div>
-
-<!-- Logout Confirmation Modal -->
-<div id="logoutModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Xác nhận đăng xuất</h3>
-            <button class="close-btn" onclick="closeLogoutModal()">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="logout-confirm-content">
-                <div class="logout-icon">🚪</div>
-                <p>Bạn có chắc chắn muốn đăng xuất khỏi tài khoản không?</p>
-                <div class="logout-options">
-                    <label class="checkbox-container">
-                        <input type="checkbox" id="rememberMe">
-                        <span class="checkmark"></span>
-                        Ghi nhớ phiên đăng nhập lần sau
-                    </label>
-                </div>
-            </div>
-            <div class="modal-actions">
-                <button class="action-btn cancel-btn" onclick="closeLogoutModal()">Hủy</button>
-                <button class="action-btn confirm-btn" onclick="performLogout()">Đăng xuất</button>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}
 
 {% block extra_js %}
