@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, jsonify, request
 from flask_login import login_required, current_user
 
 customer_bp = Blueprint('customer', __name__)
@@ -23,6 +23,8 @@ def field_detail(field_id):
     if not field:
         return "Không tìm thấy sân", 404
     return render_template('customer/field_detail.html', field=field)
+
+# XÓA route booking page riêng biệt, chỉ giữ lại booking popup/modal như ban đầu
 
 @customer_bp.route('/booking-history')
 @customer_bp.route('/booking-history/<int:page>')
@@ -347,3 +349,26 @@ def my_vouchers():
                          total_vouchers=total_vouchers,
                          active_vouchers=active_vouchers,
                          expired_vouchers=expired_vouchers) 
+
+# API giả lập: trả về danh sách slot đã đặt cho từng sân theo ngày
+def get_mock_bookings(field_id, date):
+    # Dữ liệu mẫu: mỗi sân có thể có các slot đã đặt khác nhau
+    # Định dạng: [{'start': '18:00', 'duration': 2}, ...]
+    mock = {
+        1: [{'date': '2025-07-24', 'start': '18:00', 'duration': 2}, {'date': '2025-07-24', 'start': '20:00', 'duration': 1}],
+        2: [{'date': '2025-07-24', 'start': '19:00', 'duration': 2}],
+        3: [],
+        4: [{'date': '2025-07-24', 'start': '17:00', 'duration': 1}],
+        5: [],
+        6: [],
+    }
+    bookings = [b for b in mock.get(field_id, []) if b['date'] == date]
+    return bookings
+
+@customer_bp.route('/api/fields/<int:field_id>/bookings')
+def api_field_bookings(field_id):
+    date = request.args.get('date')
+    if not date:
+        return jsonify({'error': 'Missing date'}), 400
+    bookings = get_mock_bookings(field_id, date)
+    return jsonify({'bookings': bookings}) 

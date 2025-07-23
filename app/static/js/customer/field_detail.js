@@ -115,7 +115,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Form elements
     const bookingForm = document.getElementById('bookingForm');
     const bookingDate = document.getElementById('bookingDate');
-    const bookingStartTime = document.getElementById('bookingStartTime');
     const bookingDuration = document.getElementById('bookingDuration');
     const confirmBookingBtn = document.getElementById('confirmBookingBtn');
 
@@ -124,25 +123,13 @@ document.addEventListener('DOMContentLoaded', function() {
     bookingDate.min = today;
     bookingDate.value = today;
 
-    // Giá sân từ template (sử dụng biến global hoặc parse từ DOM)
-    const fieldPriceText = document.querySelector('.price-value').textContent;
-    const fieldPrice = parseInt(fieldPriceText.replace(/[^\d]/g, ''));
-
-    // Mở popup đặt sân
-    openBookingBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        bookingModal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-        
-        // Load voucher đã chọn (nếu có)
-        loadSelectedVoucher();
-        updateBookingSummary();
-        
-        // Cập nhật voucher info khi mở modal
-        setTimeout(() => {
-            loadSelectedVoucher();
-        }, 100);
-    });
+    // Giá sân từ template (chỉ lấy từ .price-value trong popup/modal)
+    const priceEl = document.querySelector('.price-value');
+    let fieldPrice = 0;
+    if (priceEl) {
+        const match = priceEl.textContent.match(/([\d,]+)\s*VNĐ/);
+        if (match) fieldPrice = parseInt(match[1].replace(/,/g, ''));
+    }
 
     // Đóng popup đặt sân
     function closeBookingModal() {
@@ -171,6 +158,15 @@ document.addEventListener('DOMContentLoaded', function() {
         changeVoucherBtn.addEventListener('click', function() {
             voucherModal.classList.add('active');
             voucherModal.classList.add('voucher-from-booking');
+        });
+    }
+
+    // Mở popup đặt sân khi click nút Đặt Sân
+    if (openBookingBtn && bookingModal) {
+        openBookingBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            bookingModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
         });
     }
 
@@ -322,6 +318,81 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // ========== THỜI KHÓA BIỂU ĐẶT SÂN (Booking Page) =============
+    if (document.getElementById('timetable')) {
+        const timetable = document.getElementById('timetable');
+        const bookingStartTime = document.getElementById('bookingStartTime');
+        const bookingDate = document.getElementById('bookingDate');
+        const bookingDuration = document.getElementById('bookingDuration');
+        let bookedSlots = [];
+        let selectedSlot = null;
+        // Tạo các slot giờ từ 06:00 đến 22:00
+        const hours = [];
+        for (let h = 6; h <= 22; h++) {
+            hours.push(h.toString().padStart(2, '0') + ':00');
+        }
+        function renderTimetable() {
+            timetable.innerHTML = '';
+            const duration = parseInt(bookingDuration.value) || 1;
+            for (let i = 0; i < hours.length; i++) {
+                const slotStart = hours[i];
+                const slotEndHour = parseInt(slotStart.split(':')[0]) + duration;
+                if (slotEndHour > 23) break;
+                // Kiểm tra trùng với slot đã đặt
+                let isBooked = false;
+                for (const b of bookedSlots) {
+                    const bStart = parseInt(b.start.split(':')[0]);
+                    const bEnd = bStart + b.duration;
+                    const sStart = parseInt(slotStart.split(':')[0]);
+                    const sEnd = slotEndHour;
+                    if (!(sEnd <= bStart || sStart >= bEnd)) {
+                        isBooked = true;
+                        break;
+                    }
+                }
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'timetable-slot' + (isBooked ? ' booked' : '');
+                btn.textContent = slotStart + ' - ' + slotEndHour.toString().padStart(2, '0') + ':00';
+                btn.disabled = isBooked;
+                if (selectedSlot === slotStart) btn.classList.add('selected');
+                btn.addEventListener('click', function() {
+                    if (isBooked) return;
+                    selectedSlot = slotStart;
+                    bookingStartTime.value = slotStart;
+                    renderTimetable();
+                });
+                timetable.appendChild(btn);
+            }
+        }
+        function fetchAndRenderTimetable() {
+            const date = bookingDate.value;
+            const fieldId = window.location.pathname.split('/').filter(Boolean).pop();
+            if (!date) return;
+            fetch(`/api/fields/${fieldId}/bookings?date=${date}`)
+                .then(res => res.json())
+                .then(data => {
+                    bookedSlots = data.bookings || [];
+                    selectedSlot = null;
+                    bookingStartTime.value = '';
+                    renderTimetable();
+                });
+        }
+        bookingDate.addEventListener('change', fetchAndRenderTimetable);
+        bookingDuration.addEventListener('change', renderTimetable);
+        // Khi vào trang, tự động render timetable cho ngày hôm nay
+        if (bookingDate.value) fetchAndRenderTimetable();
+    }
+
+    // Validate form: bắt buộc phải chọn slot
+    bookingForm.addEventListener('submit', function(e) {
+        if (!bookingStartTime.value) {
+            alert('Vui lòng chọn khung giờ trên thời khóa biểu!');
+            e.preventDefault();
+            return;
+        }
+    });
+
     // Xử lý submit form đặt sân
     bookingForm.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -358,15 +429,12 @@ document.addEventListener('DOMContentLoaded', function() {
             
             closeBookingModal();
             
-            // Chuyển đến trang thanh toán (simulate)
-            setTimeout(() => {
-                console.log('Redirect to payment page with data:', bookingData);
-                // window.location.href = '/payment';
-            }, 2000);
+            // Hiển thị popup thanh toán
+            showPaymentModal(bookingData.paymentMethod);
             
             confirmBookingBtn.textContent = 'Xác nhận đặt sân';
             confirmBookingBtn.disabled = false;
-        }, 2000);
+        }, 1200);
     });
 
     function validateBookingTime(date, startTime, duration) {
@@ -388,7 +456,143 @@ document.addEventListener('DOMContentLoaded', function() {
         return selectedDate >= today;
     }
 
+    // ========== TÍNH TỔNG TIỀN TRANG BOOKING PAGE =============
+    if (document.getElementById('bookingForm')) {
+        const bookingForm = document.getElementById('bookingForm');
+        const bookingStartTime = document.getElementById('bookingStartTime');
+        const bookingDuration = document.getElementById('bookingDuration');
+        const subtotalAmount = document.getElementById('subtotalAmount');
+        const discountRow = document.getElementById('discountRow');
+        const discountAmount = document.getElementById('discountAmount');
+        const totalAmount = document.getElementById('totalAmount');
+        const durationDisplay = document.getElementById('durationDisplay');
+        const confirmBookingBtn = document.getElementById('confirmBookingBtn');
+        // Lấy giá sân từ DOM
+        let fieldPrice = 0;
+        const priceEl = document.querySelector('.price-value');
+        if (priceEl) {
+            const match = priceEl.textContent.match(/([\d,]+)\s*VNĐ/);
+            if (match) fieldPrice = parseInt(match[1].replace(/,/g, ''));
+        }
+        function updateBookingSummary() {
+            const duration = parseInt(bookingDuration.value) || 0;
+            const subtotal = fieldPrice * duration;
+            durationDisplay.textContent = duration;
+            subtotalAmount.textContent = subtotal.toLocaleString() + ' VNĐ';
+            // Tính giảm giá từ voucher
+            let discount = 0;
+            let discountLabel = '';
+            const selectedVoucher = sessionStorage.getItem('selectedVoucher');
+            if (selectedVoucher && subtotal > 0) {
+                const voucher = JSON.parse(selectedVoucher);
+                if (voucher.code === 'PERCENT20') {
+                    discount = Math.min(subtotal * 0.2, 150000);
+                    discountLabel = `Giảm giá (20% - ${voucher.code})`;
+                } else {
+                    discount = Math.min(parseInt(voucher.discount), subtotal);
+                    discountLabel = `Giảm giá (${voucher.code})`;
+                }
+            }
+            const total = Math.max(0, subtotal - discount);
+            if (discount > 0 && selectedVoucher) {
+                discountRow.style.display = 'flex';
+                discountRow.querySelector('span:first-child').textContent = discountLabel;
+                discountAmount.textContent = '-' + discount.toLocaleString() + ' VNĐ';
+            } else {
+                discountRow.style.display = 'none';
+            }
+            totalAmount.textContent = total.toLocaleString() + ' VNĐ';
+            confirmBookingBtn.disabled = total === 0;
+        }
+        bookingStartTime.addEventListener('change', updateBookingSummary);
+        bookingDuration.addEventListener('change', updateBookingSummary);
+        // Khi chọn voucher
+        window.updateBookingSummary = updateBookingSummary;
+        // Gọi khi load trang
+        updateBookingSummary();
+    }
+    // Đảm bảo gọi updateBookingSummary sau khi chọn voucher
+    if (document.getElementById('changeVoucherBtn')) {
+        document.getElementById('changeVoucherBtn').addEventListener('click', function() {
+            setTimeout(function() {
+                if (window.updateBookingSummary) window.updateBookingSummary();
+            }, 300);
+        });
+    }
 
+    // ========== VOUCHER POPUP FOR BOOKING PAGE =============
+    if (document.getElementById('voucherModal')) {
+        const voucherModal = document.getElementById('voucherModal');
+        const closeVoucherBtn = document.getElementById('closeVoucherBtn');
+        const cancelVoucherBtn = document.getElementById('cancelVoucherBtn');
+        const voucherOverlay = document.getElementById('voucherOverlay');
+        const voucherApplyBtns = document.querySelectorAll('.voucher-apply-btn');
+        const changeVoucherBtn = document.getElementById('changeVoucherBtn');
+        // Mở popup
+        changeVoucherBtn.addEventListener('click', function() {
+            voucherModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        });
+        // Đóng popup
+        function closeVoucherModal() {
+            voucherModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        closeVoucherBtn.addEventListener('click', closeVoucherModal);
+        cancelVoucherBtn.addEventListener('click', closeVoucherModal);
+        voucherOverlay.addEventListener('click', closeVoucherModal);
+        // Chọn voucher
+        voucherApplyBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const voucherItem = this.closest('.voucher-item');
+                const voucherCode = voucherItem.getAttribute('data-code');
+                const voucherDiscount = voucherItem.getAttribute('data-discount');
+                const voucherTitle = voucherItem.querySelector('.voucher-item-title').textContent;
+                // Lưu voucher đã chọn
+                sessionStorage.setItem('selectedVoucher', JSON.stringify({
+                    code: voucherCode,
+                    discount: voucherDiscount,
+                    title: voucherTitle
+                }));
+                // Cập nhật hiển thị voucher
+                const voucherDisplay = document.getElementById('voucherDisplay');
+                voucherDisplay.innerHTML = `<span class='no-voucher'>${voucherTitle} (Mã: ${voucherCode})</span> <button type='button' class='change-voucher-btn' id='changeVoucherBtn'>Đổi voucher</button>`;
+                closeVoucherModal();
+                if (window.updateBookingSummary) window.updateBookingSummary();
+                // Re-bind event cho nút đổi voucher
+                setTimeout(() => {
+                    document.getElementById('changeVoucherBtn').addEventListener('click', function() {
+                        voucherModal.style.display = 'flex';
+                        document.body.style.overflow = 'hidden';
+                    });
+                }, 100);
+            });
+        });
+    }
+
+    // ======= PAYMENT POPUP LOGIC =======
+    const paymentModal = document.getElementById('paymentModal');
+    const paymentOverlay = document.getElementById('paymentOverlay');
+    const closePaymentBtn = document.getElementById('closePaymentBtn');
+    const closePaymentBtn2 = document.getElementById('closePaymentBtn2');
+    function showPaymentModal(method) {
+        // Hiển thị phương thức thanh toán
+        document.getElementById('paymentMethodInfo').textContent = method === 'momo' ? 'Ví MoMo' : 'Chuyển khoản ngân hàng';
+        // Sinh mã giao dịch giả lập
+        const code = 'TX' + Math.floor(100000 + Math.random() * 900000);
+        document.getElementById('transactionCode').textContent = code;
+        // QR code giả lập (có thể encode thêm thông tin nếu muốn)
+        document.getElementById('paymentQR').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${code}`;
+        paymentModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    function closePaymentModal() {
+        paymentModal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+    closePaymentBtn.addEventListener('click', closePaymentModal);
+    closePaymentBtn2.addEventListener('click', closePaymentModal);
+    paymentOverlay.addEventListener('click', closePaymentModal);
 
 
 }); 

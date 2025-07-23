@@ -819,6 +819,45 @@
     transform: none;
 }
 
+/* Timetable styles for booking */
+.timetable-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 8px 0 4px 0;
+}
+.timetable-slot {
+    min-width: 110px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 2px solid #e1e8ed;
+    background: #f9fafb;
+    color: #232a34;
+    font-weight: 600;
+    font-size: 0.98rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 4px;
+}
+.timetable-slot.selected {
+    background: #6dbf4b;
+    color: #fff;
+    border-color: #4e9c2e;
+    box-shadow: 0 2px 8px rgba(78, 156, 46, 0.15);
+}
+.timetable-slot.booked {
+    background: #232a34;
+    color: #fff;
+    border-color: #232a34;
+    cursor: not-allowed;
+    text-decoration: line-through;
+    opacity: 0.85;
+}
+.timetable-slot:not(.booked):hover {
+    background: #e8f5e8;
+    border-color: #6dbf4b;
+}
+
 @media (max-width: 768px) {
     .voucher-modal-content {
         width: 95%;

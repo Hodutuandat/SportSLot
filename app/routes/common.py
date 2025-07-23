@@ -14,9 +14,7 @@ def contact():
 def about():
     return render_template('about.html')
 
-@common_bp.route('/fields')
-def fields():
-    return render_template('customer/field_list.html')
+# ĐÃ XÓA ROUTE /fields ở đây để tránh trùng với customer_bp
 
 @common_bp.route('/voucher')
 def voucher():

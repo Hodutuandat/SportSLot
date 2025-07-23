@@ -7,6 +7,7 @@
 {% endblock %}
 
 {% block content %}
+{% set booked_times = ['18:00', '19:00'] %} {# Giả lập các khung giờ đã được đặt #}
 <section class="field-detail-page">
     <h1 class="field-detail-title">{{ field.name }}</h1>
     <div class="field-detail-sport">Môn thể thao: {{ field.sport }}</div>
@@ -111,7 +112,7 @@
             <button class="booking-modal-close" id="closeBookingBtn">&times;</button>
         </div>
         <div class="booking-modal-body">
-            <form class="booking-form" id="bookingForm">
+            <form class="booking-form" id="bookingForm" data-price="{{ field.price }}">
                 <!-- Thông tin sân và giá -->
                 <div class="booking-field-info">
                     <div class="booking-field-price">
@@ -133,23 +134,9 @@
                     <label class="booking-label">Giờ bắt đầu <span class="required">*</span></label>
                     <select id="bookingStartTime" name="start_time" class="booking-select" required>
                         <option value="">-- Chọn giờ bắt đầu --</option>
-                        <option value="06:00">06:00</option>
-                        <option value="07:00">07:00</option>
-                        <option value="08:00">08:00</option>
-                        <option value="09:00">09:00</option>
-                        <option value="10:00">10:00</option>
-                        <option value="11:00">11:00</option>
-                        <option value="12:00">12:00</option>
-                        <option value="13:00">13:00</option>
-                        <option value="14:00">14:00</option>
-                        <option value="15:00">15:00</option>
-                        <option value="16:00">16:00</option>
-                        <option value="17:00">17:00</option>
-                        <option value="18:00">18:00</option>
-                        <option value="19:00">19:00</option>
-                        <option value="20:00">20:00</option>
-                        <option value="21:00">21:00</option>
-                        <option value="22:00">22:00</option>
+                        {% for hour in ['06:00','07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00'] %}
+                            <option value="{{ hour }}" {% if hour in booked_times %}class="booked" disabled{% endif %}>{{ hour }}{% if hour in booked_times %} (Đã đặt){% endif %}</option>
+                        {% endfor %}
                     </select>
                 </div>
 
@@ -235,6 +222,44 @@
         </div>
     </div>
 </div>
+
+<!-- Payment Confirmation Popup Modal -->
+<div class="payment-modal" id="paymentModal">
+    <div class="payment-modal-overlay" id="paymentOverlay"></div>
+    <div class="payment-modal-content">
+        <div class="payment-modal-header">
+            <h2 class="payment-modal-title">Thanh toán đặt sân</h2>
+            <button class="payment-modal-close" id="closePaymentBtn">&times;</button>
+        </div>
+        <div class="payment-modal-body">
+            <div class="payment-info-row"><b>Phương thức thanh toán:</b> <span id="paymentMethodInfo"></span></div>
+            <div class="payment-info-row"><b>Mã giao dịch:</b> <span id="transactionCode"></span></div>
+            <div class="payment-qr-section">
+                <img id="paymentQR" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=MOCK_PAYMENT" alt="QR Code thanh toán" style="margin:16px auto;display:block;">
+                <div style="text-align:center;font-size:0.95rem;color:#888;">Quét mã QR để thanh toán</div>
+            </div>
+        </div>
+        <div class="payment-modal-footer">
+            <button class="payment-modal-close" id="closePaymentBtn2">Đóng</button>
+        </div>
+    </div>
+</div>
+<style>
+.payment-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:1200; }
+.payment-modal.active { display:flex; align-items:center; justify-content:center; }
+.payment-modal-overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); }
+.payment-modal-content { position:relative; background:#fff; border-radius:16px; box-shadow:0 4px 24px rgba(30,30,60,0.15); width:95%; max-width:400px; padding:0; overflow:hidden; }
+.payment-modal-header { padding:20px 24px 12px 24px; border-bottom:1px solid #e1e8ed; display:flex; justify-content:space-between; align-items:center; }
+.payment-modal-title { font-size:1.3rem; font-weight:700; margin:0; }
+.payment-modal-close { background:none; border:none; font-size:22px; color:#666; cursor:pointer; padding:4px; border-radius:4px; transition:all 0.2s; }
+.payment-modal-close:hover { background:#f0f0f0; color:#333; }
+.payment-modal-body { padding:20px 24px; }
+.payment-info-row { margin-bottom:12px; font-size:1.05rem; }
+.payment-qr-section { margin:18px 0; }
+.payment-modal-footer { padding:16px 24px; border-top:1px solid #e1e8ed; text-align:center; }
+.payment-modal-footer button { background:#4e9c2e; color:#fff; border:none; padding:10px 32px; border-radius:8px; font-weight:600; cursor:pointer; font-size:1rem; transition:all 0.2s; }
+.payment-modal-footer button:hover { background:#388e1b; }
+</style>
 {% endblock %}
 
 {% block extra_js %}
