@@ -121,7 +121,7 @@ function confirmUseVoucher() {
         
         // Redirect to booking page after a short delay
         setTimeout(() => {
-            window.location.href = '/customer/fields';
+            window.location.href = typeof field_list_url !== 'undefined' ? field_list_url : '/customer/fields';
         }, 1500);
     }, 1000);
 }

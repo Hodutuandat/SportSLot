@@ -163,5 +163,8 @@
 {% endblock %}
 
 {% block extra_js %}
+<script>
+    const field_list_url = "{{ url_for('customer.field_list') }}";
+</script>
 <script src="{{ url_for('static', filename='js/customer/my_vouchers.js') }}"></script>
 {% endblock %} 
