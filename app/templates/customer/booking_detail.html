@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block title %}Chi tiết đặt sân - SportSlot{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/customer/booking_detail.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="booking-detail-container">
+    <!-- Header Section -->
+    <div class="main-header">
+        <div class="header-content">
+            <div class="header-left">
+                <h1>📋 Chi tiết đặt sân</h1>
+                <p class="header-subtitle">Thông tin chi tiết về lần đặt sân của bạn</p>
+            </div>
+            <div class="header-actions">
+                <a href="{{ url_for('customer.booking_history') }}" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Quay lại
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Information Card -->
+    <div class="booking-card">
+        <div class="booking-header">
+            <div class="booking-code">
+                <h2>{{ booking.booking_code }}</h2>
+                <span class="status-badge status-{{ booking.status }}">
+                    {% if booking.status == 'completed' %}
+                        Hoàn thành
+                    {% elif booking.status == 'confirmed' %}
+                        Đã xác nhận
+                    {% elif booking.status == 'pending' %}
+                        Chờ xác nhận
+                    {% elif booking.status == 'cancelled' %}
+                        Đã hủy
+                    {% else %}
+                        {{ booking.status }}
+                    {% endif %}
+                </span>
+            </div>
+            <div class="booking-date">
+                <i class="fas fa-calendar"></i>
+                {{ booking.booking_date }}
+            </div>
+        </div>
+
+        <!-- Field Information -->
+        <div class="field-info">
+            <div class="field-header">
+                <h3>🏟️ Thông tin sân</h3>
+            </div>
+            <div class="field-details">
+                <div class="field-item">
+                    <div class="field-label">
+                        <i class="fas fa-map-marker-alt"></i>
+                        Tên sân
+                    </div>
+                    <div class="field-value">{{ booking.field_name }}</div>
+                </div>
+                <div class="field-item">
+                    <div class="field-label">
+                        <i class="fas fa-location-arrow"></i>
+                        Địa chỉ
+                    </div>
+                    <div class="field-value">{{ booking.field_address }}</div>
+                </div>
+                <div class="field-item">
+                    <div class="field-label">
+                        <i class="fas fa-futbol"></i>
+                        Loại sân
+                    </div>
+                    <div class="field-value">{{ booking.field_type.title() }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Details -->
+        <div class="booking-details">
+            <div class="booking-header">
+                <h3>⏰ Thông tin đặt sân</h3>
+            </div>
+            <div class="booking-grid">
+                <div class="detail-item">
+                    <div class="detail-label">
+                        <i class="fas fa-clock"></i>
+                        Giờ bắt đầu
+                    </div>
+                    <div class="detail-value">{{ booking.start_time }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">
+                        <i class="fas fa-clock"></i>
+                        Giờ kết thúc
+                    </div>
+                    <div class="detail-value">{{ booking.end_time }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">
+                        <i class="fas fa-hourglass-half"></i>
+                        Thời gian
+                    </div>
+                    <div class="detail-value">{{ booking.duration }} giờ</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">
+                        <i class="fas fa-money-bill-wave"></i>
+                        Tổng tiền
+                    </div>
+                    <div class="detail-value price">{{ "{:,}".format(booking.total_price) }} VNĐ</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">
+                        <i class="fas fa-credit-card"></i>
+                        Phương thức thanh toán
+                    </div>
+                    <div class="detail-value">{{ booking.payment_method }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">
+                        <i class="fas fa-calendar-plus"></i>
+                        Ngày đặt
+                    </div>
+                    <div class="detail-value">{{ booking.created_at }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="booking-actions">
+            {% if booking.status == 'pending' %}
+            <div class="action-buttons">
+                <button class="btn-secondary" onclick="cancelBooking('{{ booking.id }}')">
+                    <i class="fas fa-times"></i>
+                    Hủy đặt sân
+                </button>
+                <button class="btn-primary" onclick="contactOwner()">
+                    <i class="fas fa-phone"></i>
+                    Liên hệ chủ sân
+                </button>
+            </div>
+            {% elif booking.status == 'confirmed' %}
+            <div class="action-buttons">
+                <button class="btn-secondary" onclick="cancelBooking('{{ booking.id }}')">
+                    <i class="fas fa-times"></i>
+                    Hủy đặt sân
+                </button>
+                <button class="btn-primary" onclick="contactOwner()">
+                    <i class="fas fa-phone"></i>
+                    Liên hệ chủ sân
+                </button>
+            </div>
+            {% elif booking.status == 'completed' %}
+            <div class="action-buttons">
+                <button class="btn-primary" onclick="rateBooking()">
+                    <i class="fas fa-star"></i>
+                    Đánh giá
+                </button>
+                <button class="btn-secondary" onclick="bookAgain()">
+                    <i class="fas fa-redo"></i>
+                    Đặt lại
+                </button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Additional Information -->
+    <div class="additional-info">
+        <div class="info-card">
+            <h3>📞 Hỗ trợ</h3>
+            <p>Nếu bạn có bất kỳ câu hỏi nào về lần đặt sân này, vui lòng liên hệ:</p>
+            <div class="contact-info">
+                <div class="contact-item">
+                    <i class="fas fa-phone"></i>
+                    <span>Hotline: 1900-1234</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <span>Email: support@sportslot.com</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Booking Modal -->
+<div id="cancel-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Xác nhận hủy đặt sân</h3>
+            <span class="close" onclick="closeCancelModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p>Bạn có chắc chắn muốn hủy lần đặt sân này không?</p>
+            <p><strong>Mã đặt sân:</strong> {{ booking.booking_code }}</p>
+            <p><strong>Sân:</strong> {{ booking.field_name }}</p>
+            <p><strong>Ngày:</strong> {{ booking.booking_date }}</p>
+            <p><strong>Giờ:</strong> {{ booking.start_time }} - {{ booking.end_time }}</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeCancelModal()">Không hủy</button>
+            <button class="btn-danger" onclick="confirmCancel()">Xác nhận hủy</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/customer/booking_detail.js') }}"></script>
+{% endblock %} 

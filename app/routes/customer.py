@@ -1,9 +1,12 @@
-from flask import Blueprint, render_template, jsonify, request
+from flask import Blueprint, render_template, jsonify, request, flash, redirect, url_for
 from flask_login import login_required, current_user
 from app.extensions import mongo
 from app.models.field import Field
 from app.models.booking import Booking
+from app.models.profile import Profile
+from app.models.review import Review
 from bson import ObjectId
+from datetime import datetime, timezone
 
 customer_bp = Blueprint('customer', __name__)
 
@@ -39,6 +42,12 @@ def field_list():
                 "description": field.description
             }
             fields.append(field_dict)
+        
+        # Nếu không có fields trong MongoDB, sử dụng mock data
+        if not fields:
+            print("No fields in MongoDB, using mock data")
+            fields = fields_data
+            
     except Exception as e:
         print(f"Error loading fields: {e}")
         # Fallback to mock data
@@ -46,13 +55,44 @@ def field_list():
     
     return render_template('customer/field_list.html', fields=fields)
 
-@customer_bp.route('/fields/<int:field_id>')
+@customer_bp.route('/fields/<field_id>')
 @login_required
 def field_detail(field_id):
-    field = next((f for f in fields_data if f["id"] == field_id), None)
-    if not field:
-        return "Không tìm thấy sân", 404
-    return render_template('customer/field_detail.html', field=field)
+    try:
+        # Tìm field trong MongoDB
+        if ObjectId.is_valid(field_id):
+            field_data = mongo.db.fields.find_one({'_id': ObjectId(field_id)})
+            if field_data:
+                field = Field.from_dict(field_data)
+                # Convert to format expected by template
+                field_dict = {
+                    "id": field.id,
+                    "name": field.name,
+                    "phone": "0901234567",  # Default phone
+                    "address": field.location,
+                    "image": field.images[0] if field.images else None,
+                    "sport": field.field_type.title(),
+                    "sport_type": field.field_type,
+                    "price": field.price_per_slot,
+                    "owner": "Chủ sân",  # Default owner
+                    "type": f"Sân {field.field_type}",
+                    "description": field.description
+                }
+                return render_template('customer/field_detail.html', field=field_dict)
+        
+        # Fallback to mock data
+        field = next((f for f in fields_data if str(f["id"]) == str(field_id)), None)
+        if not field:
+            return "Không tìm thấy sân", 404
+        return render_template('customer/field_detail.html', field=field)
+        
+    except Exception as e:
+        print(f"Error loading field detail: {e}")
+        # Fallback to mock data
+        field = next((f for f in fields_data if str(f["id"]) == str(field_id)), None)
+        if not field:
+            return "Không tìm thấy sân", 404
+        return render_template('customer/field_detail.html', field=field)
 
 # XÓA route booking page riêng biệt, chỉ giữ lại booking popup/modal như ban đầu
 
@@ -60,8 +100,42 @@ def field_detail(field_id):
 @customer_bp.route('/booking-history/<int:page>')
 @login_required
 def booking_history(page=1):
-    # Mock data for booking history
-    all_bookings_data = [
+    try:
+        # Lấy bookings từ MongoDB cho user hiện tại
+        user_id = current_user.id
+        bookings_cursor = mongo.db.bookings.find({'user_id': ObjectId(user_id)}).sort('created_at', -1)
+        
+        bookings = []
+        for booking_data in bookings_cursor:
+            booking = Booking.from_dict(booking_data)
+            
+            # Lấy thông tin field
+            field_data = mongo.db.fields.find_one({'_id': ObjectId(booking.field_id)})
+            field_name = field_data.get('name', 'Sân không xác định') if field_data else 'Sân không xác định'
+            field_address = field_data.get('location', 'Địa chỉ không xác định') if field_data else 'Địa chỉ không xác định'
+            
+            # Convert to format expected by template
+            booking_dict = {
+                "id": booking.id,
+                "booking_code": f"BK{booking.id[-6:].upper()}",  # Tạo booking code từ ID
+                "field_id": booking.field_id,
+                "field_name": field_name,
+                "field_address": field_address,
+                "booking_date": booking.date.strftime('%Y-%m-%d') if hasattr(booking.date, 'strftime') else str(booking.date),
+                "start_time": booking.start_time,
+                "end_time": booking.end_time,
+                "duration": booking.duration,
+                "total_price": booking.total_price,
+                "payment_method": booking.payment_method or "Chưa thanh toán",
+                "status": booking.status
+            }
+            bookings.append(booking_dict)
+        
+        # Nếu không có bookings trong MongoDB, sử dụng mock data
+        if not bookings:
+            print("No bookings in MongoDB, using mock data")
+            # Mock data for booking history
+            all_bookings_data = [
         {
             "id": 1,
             "booking_code": "BK001",
@@ -160,80 +234,392 @@ def booking_history(page=1):
             "payment_method": "Chuyển khoản",
             "status": "pending"
         }
-    ]
-    
-    # Convert string dates to datetime objects for template
-    from datetime import datetime
-    for booking in all_bookings_data:
-        booking["booking_date"] = datetime.strptime(booking["booking_date"], "%Y-%m-%d")
-    
-    # Pagination logic - 3 items per page
-    items_per_page = 3
-    total_items = len(all_bookings_data)
-    total_pages = (total_items + items_per_page - 1) // items_per_page
-    
-    # Ensure page is within valid range
-    if page < 1:
-        page = 1
-    elif page > total_pages:
-        page = total_pages
-    
-    # Calculate start and end indices for current page
-    start_idx = (page - 1) * items_per_page
-    end_idx = start_idx + items_per_page
-    
-    # Get bookings for current page
-    bookings_data = all_bookings_data[start_idx:end_idx]
-    
-    # Calculate stats
-    total_bookings = total_items
-    active_bookings = len([b for b in all_bookings_data if b["status"] in ["confirmed", "pending"]])
-    
-    # Create pagination object
-    pagination = type('Pagination', (), {
-        'page': page,
-        'pages': total_pages,
-        'has_prev': page > 1,
-        'has_next': page < total_pages,
-        'prev_num': page - 1 if page > 1 else None,
-        'next_num': page + 1 if page < total_pages else None,
-        'total': total_items,
-        'per_page': items_per_page
-    })()
-    
-    return render_template('customer/booking_history.html', 
-                         user=current_user,
-                         bookings=bookings_data,
-                         total_bookings=total_bookings,
-                         active_bookings=active_bookings,
-                         fields=fields_data,
-                         pagination=pagination)
+            ]
+            
+            # Convert string dates to datetime objects for template
+            from datetime import datetime
+            for booking in all_bookings_data:
+                booking["booking_date"] = datetime.strptime(booking["booking_date"], "%Y-%m-%d")
+            
+            bookings = all_bookings_data
+        
+        # Pagination logic - 3 items per page
+        items_per_page = 3
+        total_items = len(bookings)
+        total_pages = (total_items + items_per_page - 1) // items_per_page
+        
+        # Ensure page is within valid range
+        if page < 1:
+            page = 1
+        elif page > total_pages:
+            page = total_pages
+        
+        # Calculate start and end indices for current page
+        start_idx = (page - 1) * items_per_page
+        end_idx = start_idx + items_per_page
+        
+        # Get bookings for current page
+        bookings_data = bookings[start_idx:end_idx]
+        
+        # Calculate stats
+        total_bookings = total_items
+        active_bookings = len([b for b in bookings if b["status"] in ["confirmed", "pending"]])
+        
+        # Create pagination object
+        pagination = type('Pagination', (), {
+            'page': page,
+            'pages': total_pages,
+            'has_prev': page > 1,
+            'has_next': page < total_pages,
+            'prev_num': page - 1 if page > 1 else None,
+            'next_num': page + 1 if page < total_pages else None,
+            'total': total_items,
+            'per_page': items_per_page
+        })()
+        
+        return render_template('customer/booking_history.html', 
+                             user=current_user,
+                             bookings=bookings_data,
+                             total_bookings=total_bookings,
+                             active_bookings=active_bookings,
+                             fields=fields_data,
+                             pagination=pagination)
+                             
+    except Exception as e:
+        print(f"Error loading booking history: {e}")
+        # Fallback to mock data
+        all_bookings_data = [
+            {
+                "id": 1,
+                "booking_code": "BK001",
+                "field_id": 1,
+                "field_name": "Sân Bóng Đá A",
+                "field_address": "Quận 1, TP.HCM",
+                "booking_date": "2024-01-15",
+                "start_time": "18:00",
+                "end_time": "20:00",
+                "duration": 2,
+                "total_price": 400000,
+                "payment_method": "Chuyển khoản",
+                "status": "completed"
+            }
+        ]
+        
+        # Convert string dates to datetime objects for template
+        from datetime import datetime
+        for booking in all_bookings_data:
+            booking["booking_date"] = datetime.strptime(booking["booking_date"], "%Y-%m-%d")
+        
+        # Pagination logic - 3 items per page
+        items_per_page = 3
+        total_items = len(all_bookings_data)
+        total_pages = (total_items + items_per_page - 1) // items_per_page
+        
+        # Ensure page is within valid range
+        if page < 1:
+            page = 1
+        elif page > total_pages:
+            page = total_pages
+        
+        # Calculate start and end indices for current page
+        start_idx = (page - 1) * items_per_page
+        end_idx = start_idx + items_per_page
+        
+        # Get bookings for current page
+        bookings_data = all_bookings_data[start_idx:end_idx]
+        
+        # Calculate stats
+        total_bookings = total_items
+        active_bookings = len([b for b in all_bookings_data if b["status"] in ["confirmed", "pending"]])
+        
+        # Create pagination object
+        pagination = type('Pagination', (), {
+            'page': page,
+            'pages': total_pages,
+            'has_prev': page > 1,
+            'has_next': page < total_pages,
+            'prev_num': page - 1 if page > 1 else None,
+            'next_num': page + 1 if page < total_pages else None,
+            'total': total_items,
+            'per_page': items_per_page
+        })()
+        
+        return render_template('customer/booking_history.html', 
+                             user=current_user,
+                             bookings=bookings_data,
+                             total_bookings=total_bookings,
+                             active_bookings=active_bookings,
+                             fields=fields_data,
+                             pagination=pagination)
+
+@customer_bp.route('/booking-history/<booking_id>/detail')
+@login_required
+def booking_detail(booking_id):
+    """Xem chi tiết booking"""
+    try:
+        # Tìm booking trong MongoDB
+        if ObjectId.is_valid(booking_id):
+            booking_data = mongo.db.bookings.find_one({
+                '_id': ObjectId(booking_id),
+                'user_id': ObjectId(current_user.id)
+            })
+            
+            if booking_data:
+                booking = Booking.from_dict(booking_data)
+                
+                # Lấy thông tin field
+                field_data = mongo.db.fields.find_one({'_id': ObjectId(booking.field_id)})
+                field_name = field_data.get('name', 'Sân không xác định') if field_data else 'Sân không xác định'
+                field_address = field_data.get('location', 'Địa chỉ không xác định') if field_data else 'Địa chỉ không xác định'
+                field_type = field_data.get('field_type', 'Không xác định') if field_data else 'Không xác định'
+                
+                # Convert to format expected by template
+                booking_detail = {
+                    "id": booking.id,
+                    "booking_code": f"BK{booking.id[-6:].upper()}",
+                    "field_id": booking.field_id,
+                    "field_name": field_name,
+                    "field_address": field_address,
+                    "field_type": field_type,
+                    "booking_date": booking.date.strftime('%Y-%m-%d') if hasattr(booking.date, 'strftime') else str(booking.date),
+                    "start_time": booking.start_time,
+                    "end_time": booking.end_time,
+                    "duration": booking.duration,
+                    "total_price": booking.total_price,
+                    "payment_method": booking.payment_method or "Chưa thanh toán",
+                    "status": booking.status,
+                    "created_at": booking.created_at.strftime('%d/%m/%Y %H:%M') if hasattr(booking.created_at, 'strftime') else str(booking.created_at)
+                }
+                
+                return render_template('customer/booking_detail.html', 
+                                     user=current_user, booking=booking_detail)
+        
+        # Nếu không tìm thấy, redirect về booking history
+        flash('Không tìm thấy thông tin đặt sân', 'error')
+        return redirect(url_for('customer.booking_history'))
+        
+    except Exception as e:
+        print(f"Error loading booking detail: {e}")
+        flash('Có lỗi xảy ra khi tải thông tin đặt sân', 'error')
+        return redirect(url_for('customer.booking_history'))
 
 @customer_bp.route('/transaction-history')
 @login_required
 def transaction_history():
     return render_template('customer/transaction_history.html', user=current_user)
 
+@customer_bp.route('/booking/<booking_id>/review', methods=['GET', 'POST'])
+@login_required
+def write_review(booking_id):
+    """Viết đánh giá cho booking"""
+    try:
+        # Kiểm tra booking có tồn tại và thuộc về user hiện tại
+        if not ObjectId.is_valid(booking_id):
+            flash('Mã đặt sân không hợp lệ', 'error')
+            return redirect(url_for('customer.booking_history'))
+        
+        booking_data = mongo.db.bookings.find_one({
+            '_id': ObjectId(booking_id),
+            'user_id': ObjectId(current_user.id),
+            'status': 'completed'
+        })
+        
+        if not booking_data:
+            flash('Không tìm thấy đặt sân hoặc chưa hoàn thành', 'error')
+            return redirect(url_for('customer.booking_history'))
+        
+        booking = Booking.from_dict(booking_data)
+        
+        # Lấy thông tin field
+        field_data = mongo.db.fields.find_one({'_id': ObjectId(booking.field_id)})
+        field_name = field_data.get('name', 'Sân không xác định') if field_data else 'Sân không xác định'
+        
+        if request.method == 'POST':
+            # Xử lý form đánh giá
+            rating = request.form.get('rating', '').strip()
+            comment = request.form.get('comment', '').strip()
+            
+            # Validation
+            errors = []
+            if not rating:
+                errors.append('Vui lòng chọn số sao đánh giá')
+            elif not rating.isdigit() or int(rating) < 1 or int(rating) > 5:
+                errors.append('Số sao phải từ 1-5')
+            
+            if not comment:
+                errors.append('Vui lòng viết nhận xét')
+            elif len(comment.strip()) < 10:
+                errors.append('Nhận xét phải có ít nhất 10 ký tự')
+            
+            if errors:
+                for error in errors:
+                    flash(error, 'error')
+                return render_template('customer/write_review.html', 
+                                     booking=booking, field_name=field_name)
+            
+            # Lưu đánh giá vào database
+            review_data = {
+                'booking_id': ObjectId(booking_id),
+                'user_id': ObjectId(current_user.id),
+                'field_id': ObjectId(booking.field_id),
+                'rating': int(rating),
+                'comment': comment,
+                'created_at': datetime.now(timezone.utc)
+            }
+            
+            # Kiểm tra xem đã đánh giá chưa
+            existing_review = mongo.db.reviews.find_one({
+                'booking_id': ObjectId(booking_id)
+            })
+            
+            if existing_review:
+                # Cập nhật đánh giá
+                mongo.db.reviews.update_one(
+                    {'booking_id': ObjectId(booking_id)},
+                    {'$set': {
+                        'rating': int(rating),
+                        'comment': comment,
+                        'updated_at': datetime.now(timezone.utc)
+                    }}
+                )
+                flash('Cập nhật đánh giá thành công!', 'success')
+            else:
+                # Tạo đánh giá mới
+                mongo.db.reviews.insert_one(review_data)
+                flash('Đánh giá thành công!', 'success')
+            
+            return redirect(url_for('customer.booking_history'))
+        
+        # GET request - hiển thị form đánh giá
+        return render_template('customer/write_review.html', 
+                             booking=booking, field_name=field_name)
+        
+    except Exception as e:
+        print(f"Error in write_review: {e}")
+        flash('Có lỗi xảy ra khi xử lý đánh giá', 'error')
+        return redirect(url_for('customer.booking_history'))
+
+@customer_bp.route('/booking/<booking_id>/cancel', methods=['POST'])
+@login_required
+def cancel_booking(booking_id):
+    """Hủy đặt sân"""
+    try:
+        if not ObjectId.is_valid(booking_id):
+            return jsonify({'success': False, 'message': 'Mã đặt sân không hợp lệ'})
+        
+        booking_data = mongo.db.bookings.find_one({
+            '_id': ObjectId(booking_id),
+            'user_id': ObjectId(current_user.id),
+            'status': 'pending'
+        })
+        
+        if not booking_data:
+            return jsonify({'success': False, 'message': 'Không tìm thấy đặt sân hoặc không thể hủy'})
+        
+        # Cập nhật trạng thái thành cancelled
+        result = mongo.db.bookings.update_one(
+            {'_id': ObjectId(booking_id)},
+            {'$set': {
+                'status': 'cancelled',
+                'cancelled_at': datetime.now(timezone.utc)
+            }}
+        )
+        
+        if result.modified_count > 0:
+            return jsonify({'success': True, 'message': 'Hủy đặt sân thành công'})
+        else:
+            return jsonify({'success': False, 'message': 'Không thể hủy đặt sân'})
+        
+    except Exception as e:
+        print(f"Error cancelling booking: {e}")
+        return jsonify({'success': False, 'message': 'Có lỗi xảy ra khi hủy đặt sân'})
+
 @customer_bp.route('/profile')
 @login_required
 def profile():
-    # Mock data for profile
-    user_data = {
-        'username': current_user.username,
-        'email': current_user.email,
-        'full_name': 'Nguyễn Văn An',
-        'phone': '0123456789',
-        'address': '123 Đường ABC, Quận 1, TP.HCM',
-        'birthday': '1990-05-15',
-        'gender': 'male'
-    }
+    try:
+        # Lấy thông tin user từ MongoDB
+        user_data = mongo.db.users.find_one({'_id': ObjectId(current_user.id)})
+        
+        # Lấy thông tin profile từ collection profiles
+        profile_data = mongo.db.profiles.find_one({'user_id': ObjectId(current_user.id)})
+        
+        if profile_data:
+            # Sử dụng dữ liệu từ collection profiles
+            profile_obj = Profile.from_dict(profile_data)
+            profile_info = {
+                'username': user_data.get('username', current_user.username) if user_data else current_user.username,
+                'email': user_data.get('email', current_user.email) if user_data else current_user.email,
+                'full_name': profile_obj.full_name or 'Chưa cập nhật',
+                'phone': profile_obj.phone or 'Chưa cập nhật',
+                'address': profile_obj.address or 'Chưa cập nhật',
+                'birthday': profile_obj.birthday or 'Chưa cập nhật',
+                'gender': profile_obj.gender or 'Chưa cập nhật',
+                'bio': profile_obj.bio or '',
+                'avatar': profile_obj.avatar or None
+            }
+        else:
+            # Fallback data nếu chưa có profile
+            profile_info = {
+                'username': user_data.get('username', current_user.username) if user_data else current_user.username,
+                'email': user_data.get('email', current_user.email) if user_data else current_user.email,
+                'full_name': 'Chưa cập nhật',
+                'phone': 'Chưa cập nhật',
+                'address': 'Chưa cập nhật',
+                'birthday': 'Chưa cập nhật',
+                'gender': 'Chưa cập nhật',
+                'bio': '',
+                'avatar': None
+            }
+    except Exception as e:
+        print(f"Error loading profile: {e}")
+        # Fallback data
+        profile_info = {
+            'username': current_user.username,
+            'email': current_user.email,
+            'full_name': 'Chưa cập nhật',
+            'phone': 'Chưa cập nhật',
+            'address': 'Chưa cập nhật',
+            'birthday': 'Chưa cập nhật',
+            'gender': 'Chưa cập nhật',
+            'bio': '',
+            'avatar': None
+        }
     
-    # Mock stats
-    total_bookings = 15
-    total_points = 1250
-    active_vouchers = 3
-    total_spent = "2,500,000 VNĐ"
-    join_date = "01/12/2024"
+    # Tính toán stats từ MongoDB
+    try:
+        # Đếm tổng số bookings
+        total_bookings = mongo.db.bookings.count_documents({'user_id': ObjectId(current_user.id)})
+        
+        # Đếm active bookings
+        active_bookings = mongo.db.bookings.count_documents({
+            'user_id': ObjectId(current_user.id),
+            'status': {'$in': ['confirmed', 'pending']}
+        })
+        
+        # Tính tổng tiền đã chi
+        pipeline = [
+            {'$match': {'user_id': ObjectId(current_user.id), 'status': 'completed'}},
+            {'$group': {'_id': None, 'total': {'$sum': '$total_price'}}}
+        ]
+        total_spent_result = list(mongo.db.bookings.aggregate(pipeline))
+        total_spent = f"{total_spent_result[0]['total']:,} VNĐ" if total_spent_result else "0 VNĐ"
+        
+        # Ngày tham gia
+        join_date = current_user.created_at.strftime('%d/%m/%Y') if hasattr(current_user.created_at, 'strftime') else "Chưa xác định"
+        
+        # Mock data cho points và vouchers (có thể mở rộng sau)
+        total_points = 1250
+        active_vouchers = 3
+        
+    except Exception as e:
+        print(f"Error calculating stats: {e}")
+        # Fallback stats
+        total_bookings = 0
+        total_points = 0
+        active_vouchers = 0
+        total_spent = "0 VNĐ"
+        join_date = "Chưa xác định"
     
     # Mock points history
     points_history = [
@@ -296,7 +682,7 @@ def profile():
     ]
     
     return render_template('customer/profile.html', 
-                         user=user_data,
+                         user=profile_info,
                          total_bookings=total_bookings,
                          total_points=total_points,
                          active_vouchers=active_vouchers,
@@ -304,6 +690,92 @@ def profile():
                          join_date=join_date,
                          points_history=points_history,
                          recent_activities=recent_activities)
+
+@customer_bp.route('/profile/update', methods=['POST'])
+@login_required
+def update_profile():
+    """Cập nhật thông tin profile"""
+    try:
+        # Lấy dữ liệu từ form
+        full_name = request.form.get('full_name', '').strip()
+        phone = request.form.get('phone', '').strip()
+        address = request.form.get('address', '').strip()
+        birthday = request.form.get('birthday', '').strip()
+        gender = request.form.get('gender', '').strip()
+        bio = request.form.get('bio', '').strip()
+        
+        # Validation
+        errors = []
+        
+        # Validate full name
+        is_valid, error_msg = Profile.validate_full_name(full_name)
+        if not is_valid:
+            errors.append(error_msg)
+        
+        # Validate phone
+        if phone:
+            is_valid, error_msg = Profile.validate_phone(phone)
+            if not is_valid:
+                errors.append(error_msg)
+        
+        # Validate gender
+        is_valid, error_msg = Profile.validate_gender(gender)
+        if not is_valid:
+            errors.append(error_msg)
+        
+        # Kiểm tra phone đã tồn tại chưa (nếu thay đổi)
+        if phone:
+            # Lấy profile hiện tại để so sánh
+            current_profile = mongo.db.profiles.find_one({'user_id': ObjectId(current_user.id)})
+            current_phone = current_profile.get('phone') if current_profile else None
+            
+            if phone != current_phone:
+                existing_phone = mongo.db.profiles.find_one({
+                    'phone': phone,
+                    'user_id': {'$ne': ObjectId(current_user.id)}
+                })
+                if existing_phone:
+                    errors.append('Số điện thoại đã được sử dụng')
+        
+        if errors:
+            for error in errors:
+                flash(error, 'error')
+            return redirect(url_for('customer.profile'))
+        
+        # Tạo hoặc cập nhật profile
+        profile_data = {
+            'user_id': ObjectId(current_user.id),
+            'full_name': full_name,
+            'phone': phone,
+            'address': address,
+            'birthday': birthday,
+            'gender': gender,
+            'bio': bio,
+            'updated_at': datetime.now(timezone.utc)
+        }
+        
+        # Kiểm tra profile đã tồn tại chưa
+        existing_profile = mongo.db.profiles.find_one({'user_id': ObjectId(current_user.id)})
+        
+        if existing_profile:
+            # Cập nhật profile hiện có
+            mongo.db.profiles.update_one(
+                {'user_id': ObjectId(current_user.id)},
+                {'$set': profile_data}
+            )
+            flash('Cập nhật thông tin thành công!', 'success')
+        else:
+            # Tạo profile mới
+            profile_data['created_at'] = datetime.now(timezone.utc)
+            mongo.db.profiles.insert_one(profile_data)
+            flash('Tạo hồ sơ thành công!', 'success')
+        
+        return redirect(url_for('customer.profile'))
+        
+    except Exception as e:
+        print(f"Error updating profile: {e}")
+        flash('Có lỗi xảy ra khi cập nhật thông tin', 'error')
+        return redirect(url_for('customer.profile'))
 
 @customer_bp.route('/my-vouchers')
 @login_required

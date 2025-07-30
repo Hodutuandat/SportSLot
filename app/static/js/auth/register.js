@@ -18,23 +18,14 @@ document.addEventListener('DOMContentLoaded', function() {
         fieldAddressField.style.display = '';
     });
 
-    // Bắt sự kiện submit form đăng ký
-    const registerForm = document.querySelector('.register-form');
-    if (registerForm) {
-        registerForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            // TODO: Gửi dữ liệu thực tế bằng fetch/ajax nếu cần
-            showModal(
-                'Đăng ký thành công!',
-                `<div style=\"text-align:center;\">
-                    <div style=\"font-size:48px;margin-bottom:16px;\">🎉</div>
-                    <p style=\"font-size:1.1rem;\">Bạn đã đăng ký tài khoản thành công!<br>Hãy đăng nhập để sử dụng dịch vụ.</p>
-                </div>`,
-                'Xác nhận',
-                function() { window.location.href = '/login'; }
-            );
-        });
-    }
+    // Cập nhật user_type khi chọn loại tài khoản
+    btnCustomer.addEventListener('click', function() {
+        document.getElementById('user_type').value = 'customer';
+    });
+
+    btnOwner.addEventListener('click', function() {
+        document.getElementById('user_type').value = 'owner';
+    });
 
     // Quên mật khẩu cho trang đăng nhập
     const forgotLink = document.getElementById('forgot-password-link');

@@ -212,7 +212,7 @@ function confirmCancelBooking() {
     confirmBtn.disabled = true;
     
     // Send cancel request
-    fetch(`/api/bookings/${currentBookingId}/cancel`, {
+    fetch(`/customer/booking/${currentBookingId}/cancel`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -246,17 +246,17 @@ function confirmCancelBooking() {
 // Other action functions
 function viewBookingDetails(bookingId) {
     // Navigate to booking details page
-    window.location.href = `/booking/${bookingId}`;
+    window.location.href = `/customer/booking-history/${bookingId}/detail`;
 }
 
 function writeReview(bookingId) {
     // Navigate to review page
-    window.location.href = `/booking/${bookingId}/review`;
+    window.location.href = `/customer/booking/${bookingId}/review`;
 }
 
 function rebookField(fieldId) {
     // Navigate to field detail page
-    window.location.href = `/field/${fieldId}`;
+    window.location.href = `/customer/fields/${fieldId}`;
 }
 
 // Utility functions

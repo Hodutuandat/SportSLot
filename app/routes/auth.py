@@ -4,7 +4,7 @@ from app.models.user import User
 from app.extensions import mongo, mail
 from flask_mail import Message
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, timezone
 import re
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -181,7 +181,7 @@ def register():
                 phone=phone,
                 full_name=full_name,
                 user_type=user_type,
-                created_at=datetime.utcnow(),
+                created_at=datetime.now(timezone.utc),
                 is_active=True
             )
             

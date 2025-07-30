@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Viết đánh giá - SportSlot{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/customer/write_review.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="review-container">
+    <!-- Header Section -->
+    <div class="main-header">
+        <div class="header-content">
+            <div class="header-left">
+                <h1>⭐ Viết đánh giá</h1>
+                <p class="header-subtitle">Chia sẻ trải nghiệm của bạn về sân {{ field_name }}</p>
+            </div>
+            <div class="header-actions">
+                <a href="{{ url_for('customer.booking_history') }}" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Quay lại
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Info Section -->
+    <div class="booking-info-section">
+        <div class="booking-card">
+            <div class="booking-header">
+                <h3>📅 Thông tin đặt sân</h3>
+            </div>
+            <div class="booking-details">
+                <div class="detail-row">
+                    <div class="detail-item">
+                        <span class="detail-label">Sân:</span>
+                        <span class="detail-value">{{ field_name }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Ngày:</span>
+                        <span class="detail-value">{{ booking.booking_date }}</span>
+                    </div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-item">
+                        <span class="detail-label">Thời gian:</span>
+                        <span class="detail-value">{{ booking.start_time }} - {{ booking.end_time }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Mã đặt sân:</span>
+                        <span class="detail-value">{{ booking.booking_code }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Review Form Section -->
+    <div class="review-form-section">
+        <div class="review-card">
+            <div class="review-header">
+                <h3>💬 Viết đánh giá của bạn</h3>
+                <p>Đánh giá của bạn sẽ giúp người khác có thông tin tốt hơn về sân này</p>
+            </div>
+            
+            <form method="POST" class="review-form">
+                <!-- Rating Section -->
+                <div class="form-group">
+                    <label class="form-label">Đánh giá sao:</label>
+                    <div class="rating-container">
+                        <div class="stars">
+                            <input type="radio" id="star5" name="rating" value="5" class="star-input">
+                            <label for="star5" class="star-label">
+                                <i class="fas fa-star"></i>
+                            </label>
+                            <input type="radio" id="star4" name="rating" value="4" class="star-input">
+                            <label for="star4" class="star-label">
+                                <i class="fas fa-star"></i>
+                            </label>
+                            <input type="radio" id="star3" name="rating" value="3" class="star-input">
+                            <label for="star3" class="star-label">
+                                <i class="fas fa-star"></i>
+                            </label>
+                            <input type="radio" id="star2" name="rating" value="2" class="star-input">
+                            <label for="star2" class="star-label">
+                                <i class="fas fa-star"></i>
+                            </label>
+                            <input type="radio" id="star1" name="rating" value="1" class="star-input">
+                            <label for="star1" class="star-label">
+                                <i class="fas fa-star"></i>
+                            </label>
+                        </div>
+                        <div class="rating-text">
+                            <span id="rating-text">Chọn số sao</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comment Section -->
+                <div class="form-group">
+                    <label for="comment" class="form-label">Nhận xét:</label>
+                    <textarea 
+                        id="comment" 
+                        name="comment" 
+                        rows="6" 
+                        placeholder="Chia sẻ trải nghiệm của bạn về sân này... (tối thiểu 10 ký tự)"
+                        maxlength="500"
+                        required
+                    ></textarea>
+                    <div class="char-count">
+                        <span id="char-count">0</span>/500 ký tự
+                    </div>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="form-actions">
+                    <a href="{{ url_for('customer.booking_history') }}" class="btn-secondary">
+                        <i class="fas fa-times"></i>
+                        Hủy
+                    </a>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                        Gửi đánh giá
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Review Guidelines -->
+    <div class="guidelines-section">
+        <div class="guidelines-card">
+            <h4>📝 Hướng dẫn viết đánh giá</h4>
+            <ul class="guidelines-list">
+                <li>Chia sẻ trải nghiệm thực tế của bạn</li>
+                <li>Mô tả chất lượng sân, dịch vụ và nhân viên</li>
+                <li>Đề xuất cải thiện nếu có</li>
+                <li>Tránh sử dụng ngôn ngữ không phù hợp</li>
+                <li>Đánh giá công bằng và khách quan</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/customer/write_review.js') }}"></script>
+{% endblock %} 

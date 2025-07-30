@@ -3,6 +3,9 @@ let currentFieldId = null;
 
 document.addEventListener('DOMContentLoaded', function() {
     
+    // Load fields from API
+    loadOwnerFields();
+    
     // Setup event listeners
     setupFieldActions();
     setupModals();
@@ -10,6 +13,153 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('My Fields page loaded successfully');
 });
+
+// Load fields from API
+function loadOwnerFields() {
+    const token = localStorage.getItem('jwt_token');
+    if (!token) {
+        showToast('Vui lòng đăng nhập lại!', 'error');
+        return;
+    }
+    
+    fetch('/api/owner/fields', {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            updateFieldsDisplay(data.data);
+        } else {
+            showToast(data.message || 'Có lỗi khi tải danh sách sân!', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Có lỗi xảy ra khi kết nối với server!', 'error');
+    });
+}
+
+function updateFieldsDisplay(fields) {
+    const fieldsGrid = document.querySelector('.fields-grid');
+    const statsContainer = document.querySelector('.fields-stats');
+    
+    if (!fieldsGrid || !statsContainer) return;
+    
+    // Update stats
+    const totalFields = fields.length;
+    const activeFields = fields.filter(f => f.status === 'active').length;
+    const avgBookings = fields.length > 0 ? Math.round(fields.reduce((sum, f) => sum + f.total_bookings, 0) / fields.length) : 0;
+    const totalRevenue = fields.reduce((sum, f) => sum + f.monthly_revenue, 0);
+    
+    statsContainer.innerHTML = `
+        <div class="stat-item">
+            <div class="stat-number">${totalFields}</div>
+            <div class="stat-label">Tổng số sân</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">${activeFields}</div>
+            <div class="stat-label">Đang hoạt động</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">${avgBookings}</div>
+            <div class="stat-label">Booking TB/sân</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">${totalRevenue.toLocaleString()}đ</div>
+            <div class="stat-label">Doanh thu tháng</div>
+        </div>
+    `;
+    
+    // Update fields grid
+    if (fields.length === 0) {
+        fieldsGrid.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">🏟️</div>
+                <h3>Chưa có sân nào</h3>
+                <p>Hãy thêm sân đầu tiên của bạn để bắt đầu kinh doanh</p>
+                <a href="/owner/add-field" class="add-first-field-btn">
+                    <span class="btn-icon">➕</span>
+                    Thêm sân đầu tiên
+                </a>
+            </div>
+        `;
+        return;
+    }
+    
+    fieldsGrid.innerHTML = fields.map(field => `
+        <div class="field-card" data-field-id="${field.id}">
+            <div class="field-header">
+                <div class="field-image">
+                    ${field.images && field.images.length > 0 
+                        ? `<img src="${field.images[0]}" alt="${field.name}">`
+                        : `<div class="field-placeholder">
+                            <span class="sport-icon">
+                                ${getSportIcon(field.sport_type)}
+                            </span>
+                        </div>`
+                    }
+                </div>
+                <div class="field-status ${field.status}">
+                    ${field.status === 'active' ? '✅ Hoạt động' : '⏸️ Tạm dừng'}
+                </div>
+            </div>
+            
+            <div class="field-info">
+                <h3 class="field-name">${field.name}</h3>
+                <p class="field-type">${field.type}</p>
+                <p class="field-address">📍 ${field.address}</p>
+                
+                <div class="field-stats">
+                    <div class="field-stat">
+                        <span class="stat-value">${field.price.toLocaleString()}đ</span>
+                        <span class="stat-label">Giá/giờ</span>
+                    </div>
+                    <div class="field-stat">
+                        <span class="stat-value">${field.total_bookings}</span>
+                        <span class="stat-label">Lượt đặt</span>
+                    </div>
+                    <div class="field-stat">
+                        <span class="stat-value">${field.monthly_revenue.toLocaleString()}đ</span>
+                        <span class="stat-label">Doanh thu</span>
+                    </div>
+                </div>
+                
+                <div class="field-actions">
+                    <button class="action-btn edit-btn" data-field-id="${field.id}">
+                        Chỉnh sửa
+                    </button>
+                    <button class="action-btn view-bookings-btn" data-field-id="${field.id}">
+                        Lịch đặt
+                    </button>
+                    <button class="action-btn toggle-status-btn" data-field-id="${field.id}" data-status="${field.status}">
+                        <span class="btn-icon">${field.status === 'active' ? '⏸️' : '▶️'}</span>
+                        ${field.status === 'active' ? 'Tạm dừng' : 'Kích hoạt'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+    
+    // Re-setup event listeners for new elements
+    setupFieldActions();
+}
+
+function getSportIcon(sportType) {
+    const icons = {
+        'football': '⚽',
+        'basketball': '🏀',
+        'tennis': '🎾',
+        'volleyball': '🏐',
+        'badminton': '🏸',
+        'futsal': '⚽',
+        'ping-pong': '🏓',
+        'other': '🏟️'
+    };
+    return icons[sportType] || '🏟️';
+}
 
 function setupFieldActions() {
     // Edit field buttons
@@ -307,39 +457,59 @@ function toggleStatus(fieldId, currentStatus) {
 }
 
 function updateFieldStatus(fieldId, newStatus) {
-    // Find the field card
-    const fieldCard = document.querySelector(`[data-field-id="${fieldId}"]`);
-    if (!fieldCard) return;
-    
-    // Update status badge
-    const statusBadge = fieldCard.querySelector('.field-status');
-    const toggleBtn = fieldCard.querySelector('.toggle-status-btn');
-    const toggleIcon = toggleBtn.querySelector('.btn-icon');
-    
-    // Update UI
-    if (newStatus === 'active') {
-        statusBadge.className = 'field-status active';
-        statusBadge.innerHTML = '✅ Hoạt động';
-        toggleIcon.textContent = '⏸️';
-        toggleBtn.innerHTML = '<span class="btn-icon">⏸️</span>Tạm dừng';
-    } else {
-        statusBadge.className = 'field-status inactive';
-        statusBadge.innerHTML = '⏸️ Tạm dừng';
-        toggleIcon.textContent = '▶️';
-        toggleBtn.innerHTML = '<span class="btn-icon">▶️</span>Kích hoạt';
+    const token = localStorage.getItem('jwt_token');
+    if (!token) {
+        showToast('Vui lòng đăng nhập lại!', 'error');
+        return;
     }
-    
-    // Update data attribute
-    toggleBtn.setAttribute('data-status', newStatus);
-    
-    // Show success message
-    showToast(`Đã ${newStatus === 'active' ? 'kích hoạt' : 'tạm dừng'} sân thành công!`);
-    
-    // Add animation effect
-    fieldCard.style.transform = 'scale(1.02)';
-    setTimeout(() => {
-        fieldCard.style.transform = 'scale(1)';
-    }, 200);
+
+    fetch(`/api/owner/fields/${fieldId}/status`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ status: newStatus })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update field card in UI
+            const fieldCard = document.querySelector(`[data-field-id="${fieldId}"]`);
+            if (fieldCard) {
+                const statusBadge = fieldCard.querySelector('.field-status');
+                const toggleBtn = fieldCard.querySelector('.toggle-status-btn');
+                const toggleIcon = toggleBtn.querySelector('.btn-icon');
+                
+                if (newStatus === 'active') {
+                    statusBadge.className = 'field-status active';
+                    statusBadge.innerHTML = '✅ Hoạt động';
+                    toggleIcon.textContent = '⏸️';
+                    toggleBtn.innerHTML = '<span class="btn-icon">⏸️</span>Tạm dừng';
+                } else {
+                    statusBadge.className = 'field-status inactive';
+                    statusBadge.innerHTML = '⏸️ Tạm dừng';
+                    toggleIcon.textContent = '▶️';
+                    toggleBtn.innerHTML = '<span class="btn-icon">▶️</span>Kích hoạt';
+                }
+                toggleBtn.setAttribute('data-status', newStatus);
+            }
+                         showToast(`Đã ${newStatus === 'active' ? 'kích hoạt' : 'tạm dừng'} sân thành công!`);
+             // Add animation effect
+             if (fieldCard) {
+                 fieldCard.style.transform = 'scale(1.02)';
+                 setTimeout(() => {
+                     fieldCard.style.transform = 'scale(1)';
+                 }, 200);
+             }
+        } else {
+            showToast(data.message || 'Có lỗi khi cập nhật trạng thái sân!', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Có lỗi xảy ra khi kết nối với server!', 'error');
+    });
 }
 
 function closeModal() {
@@ -377,46 +547,66 @@ function closeEditModal() {
 }
 
 function loadFieldData(fieldId) {
-    // Simulate loading field data from server
-    const fieldData = getFieldData(fieldId);
-    
-    // Populate form fields
-    document.getElementById('editFieldName').value = fieldData.name || '';
-    document.getElementById('editFieldType').value = fieldData.sport_type || 'football';
-    document.getElementById('editFieldDescription').value = fieldData.description || '';
-    document.getElementById('editCapacity').value = fieldData.capacity || '';
-    document.getElementById('editFieldSize').value = fieldData.field_size || '';
-    document.getElementById('editAddress').value = fieldData.address || '';
-    document.getElementById('editDistrict').value = fieldData.district || '';
-    document.getElementById('editCity').value = fieldData.city || '';
-    document.getElementById('editParking').value = fieldData.parking || 'free';
-    document.getElementById('editTransportation').value = fieldData.transportation || 'bus';
-    document.getElementById('editWeekdayStart').value = fieldData.weekday_hours?.start || '';
-    document.getElementById('editWeekdayEnd').value = fieldData.weekday_hours?.end || '';
-    document.getElementById('editWeekendStart').value = fieldData.weekend_hours?.start || '';
-    document.getElementById('editWeekendEnd').value = fieldData.weekend_hours?.end || '';
-    document.getElementById('editDeposit').value = fieldData.deposit || '';
-    document.getElementById('editCancellation').value = fieldData.cancellation || 'free';
-    document.getElementById('editRules').value = fieldData.rules || '';
-    
-    // Set pricing
-    if (fieldData.pricing) {
-        document.querySelector('input[name="morning_weekday"]').value = fieldData.pricing.morning_weekday || '';
-        document.querySelector('input[name="morning_weekend"]').value = fieldData.pricing.morning_weekend || '';
-        document.querySelector('input[name="afternoon_weekday"]').value = fieldData.pricing.afternoon_weekday || '';
-        document.querySelector('input[name="afternoon_weekend"]').value = fieldData.pricing.afternoon_weekend || '';
-        document.querySelector('input[name="evening_weekday"]').value = fieldData.pricing.evening_weekday || '';
-        document.querySelector('input[name="evening_weekend"]').value = fieldData.pricing.evening_weekend || '';
+    const token = localStorage.getItem('jwt_token');
+    if (!token) {
+        showToast('Vui lòng đăng nhập lại!', 'error');
+        return;
     }
-    
-    // Set amenities checkboxes
-    const amenities = fieldData.amenities || [];
-    document.querySelectorAll('input[name="amenities"]').forEach(checkbox => {
-        checkbox.checked = amenities.includes(checkbox.value);
+
+    fetch(`/api/owner/fields/${fieldId}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Populate form fields
+            document.getElementById('editFieldName').value = data.data.name || '';
+            document.getElementById('editFieldType').value = data.data.sport_type || 'football';
+            document.getElementById('editFieldDescription').value = data.data.description || '';
+            document.getElementById('editCapacity').value = data.data.capacity || '';
+            document.getElementById('editFieldSize').value = data.data.field_size || '';
+            document.getElementById('editAddress').value = data.data.address || '';
+            document.getElementById('editDistrict').value = data.data.district || '';
+            document.getElementById('editCity').value = data.data.city || '';
+            document.getElementById('editParking').value = data.data.parking || 'free';
+            document.getElementById('editTransportation').value = data.data.transportation || 'bus';
+            document.getElementById('editWeekdayStart').value = data.data.weekday_hours?.start || '';
+            document.getElementById('editWeekdayEnd').value = data.data.weekday_hours?.end || '';
+            document.getElementById('editWeekendStart').value = data.data.weekend_hours?.start || '';
+            document.getElementById('editWeekendEnd').value = data.data.weekend_hours?.end || '';
+            document.getElementById('editDeposit').value = data.data.deposit || '';
+            document.getElementById('editCancellation').value = data.data.cancellation || 'free';
+            document.getElementById('editRules').value = data.data.rules || '';
+            
+            // Set pricing
+            if (data.data.pricing) {
+                document.querySelector('input[name="morning_weekday"]').value = data.data.pricing.morning_weekday || '';
+                document.querySelector('input[name="morning_weekend"]').value = data.data.pricing.morning_weekend || '';
+                document.querySelector('input[name="afternoon_weekday"]').value = data.data.pricing.afternoon_weekday || '';
+                document.querySelector('input[name="afternoon_weekend"]').value = data.data.pricing.afternoon_weekend || '';
+                document.querySelector('input[name="evening_weekday"]').value = data.data.pricing.evening_weekday || '';
+                document.querySelector('input[name="evening_weekend"]').value = data.data.pricing.evening_weekend || '';
+            }
+            
+            // Set amenities checkboxes
+            const amenities = data.data.amenities || [];
+            document.querySelectorAll('input[name="amenities"]').forEach(checkbox => {
+                checkbox.checked = amenities.includes(checkbox.value);
+            });
+            
+            // Store field ID for saving
+            document.getElementById('editFieldForm').setAttribute('data-field-id', fieldId);
+        } else {
+            showToast(data.message || 'Có lỗi khi tải dữ liệu sân!', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Có lỗi xảy ra khi kết nối với server!', 'error');
     });
-    
-    // Store field ID for saving
-    document.getElementById('editFieldForm').setAttribute('data-field-id', fieldId);
 }
 
 function getFieldData(fieldId) {
@@ -495,6 +685,12 @@ function saveFieldChanges() {
     const form = document.getElementById('editFieldForm');
     const fieldId = form.getAttribute('data-field-id');
     
+    const token = localStorage.getItem('jwt_token');
+    if (!token) {
+        showToast('Vui lòng đăng nhập lại!', 'error');
+        return;
+    }
+    
     // Validate form
     if (!validateEditForm()) {
         return;
@@ -542,20 +738,37 @@ function saveFieldChanges() {
     saveBtn.disabled = true;
     
     // Simulate API call
-    setTimeout(() => {
-        // Update field card in UI
-        updateFieldCard(fieldId, fieldData);
-        
-        // Reset button
-        saveBtn.textContent = originalText;
-        saveBtn.disabled = false;
-        
-        // Close modal
-        closeEditModal();
-        
-        // Show success message
-        showToast('Cập nhật sân thành công!');
-    }, 1500);
+    fetch(`/api/owner/fields/${fieldId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(fieldData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update field card in UI
+            updateFieldCard(fieldId, fieldData);
+            
+            // Reset button
+            saveBtn.textContent = originalText;
+            saveBtn.disabled = false;
+            
+            // Close modal
+            closeEditModal();
+            
+            // Show success message
+            showToast('Cập nhật sân thành công!');
+        } else {
+            showToast(data.message || 'Có lỗi khi cập nhật sân!', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Có lỗi xảy ra khi kết nối với server!', 'error');
+    });
 }
 
 function validateEditForm() {

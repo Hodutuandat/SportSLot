@@ -589,18 +589,87 @@ function handleFormSubmit(event) {
     submitBtn.innerHTML = '<span class="loading-spinner"></span>Đang tạo sân...';
     submitBtn.disabled = true;
     
-    // Simulate form submission
-    setTimeout(() => {
-        // Clear draft data
-        localStorage.removeItem('fieldDraft');
-        
-        // Show success modal
-        showSuccessModal();
-        
+    // Collect form data
+    const formData = new FormData(document.getElementById('addFieldForm'));
+    
+    // Prepare data for API
+    const fieldData = {
+        name: formData.get('fieldName'),
+        sport_type: formData.get('fieldType'),
+        description: formData.get('fieldDescription'),
+        capacity: parseInt(formData.get('capacity')) || null,
+        field_size: formData.get('fieldSize'),
+        address: formData.get('address'),
+        city: formData.get('city'),
+        district: formData.get('district'),
+        latitude: selectedLocation.lat,
+        longitude: selectedLocation.lng,
+        parking: formData.get('parking'),
+        transportation: formData.get('transportation'),
+        amenities: formData.getAll('amenities'),
+        rules: formData.get('rules'),
+        pricing: {
+            morning_weekday: parseInt(formData.get('morning_weekday')) || 0,
+            morning_weekend: parseInt(formData.get('morning_weekend')) || 0,
+            afternoon_weekday: parseInt(formData.get('afternoon_weekday')) || 0,
+            afternoon_weekend: parseInt(formData.get('afternoon_weekend')) || 0,
+            evening_weekday: parseInt(formData.get('evening_weekday')) || 0,
+            evening_weekend: parseInt(formData.get('evening_weekend')) || 0
+        },
+        weekday_hours: {
+            start: formData.get('weekday_start'),
+            end: formData.get('weekday_end')
+        },
+        weekend_hours: {
+            start: formData.get('weekend_start'),
+            end: formData.get('weekend_end')
+        },
+        deposit: parseInt(formData.get('deposit')) || 0,
+        cancellation: formData.get('cancellation')
+    };
+    
+    // Get JWT token from localStorage
+    const token = localStorage.getItem('jwt_token');
+    if (!token) {
+        showToast('Vui lòng đăng nhập lại!', 'error');
+        submitBtn.innerHTML = originalContent;
+        submitBtn.disabled = false;
+        return;
+    }
+    
+    // Submit to API
+    fetch('/api/owner/fields', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(fieldData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Clear draft data
+            localStorage.removeItem('fieldDraft');
+            
+            // Show success modal
+            showSuccessModal();
+            
+            // Store field ID for potential use
+            localStorage.setItem('last_created_field_id', data.field_id);
+        } else {
+            showToast(data.message || 'Có lỗi xảy ra khi tạo sân!', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Có lỗi xảy ra khi kết nối với server!', 'error');
+    })
+    .finally(() => {
         // Reset button
         submitBtn.innerHTML = originalContent;
         submitBtn.disabled = false;
-    }, 2000);
+    });
 }
 
 function showSuccessModal() {

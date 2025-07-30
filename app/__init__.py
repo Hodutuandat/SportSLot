@@ -1,11 +1,15 @@
 from flask import Flask
 from flask_login import LoginManager
+from flask_cors import CORS
 from app.extensions import mail, mongo
 from app.routes.common import common_bp
 from app.routes.auth import auth_bp
 from app.routes.customer import customer_bp
 from app.routes.owner import owner_bp
 from app.routes.admin import admin_bp
+from app.routes.api.auth import auth_api_bp
+from app.routes.api.customer import customer_api_bp
+from app.routes.api.owner import owner_api_bp
 from app.models.user import User
 from app.config import Config
 from bson import ObjectId
@@ -36,14 +40,21 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     
-    # Register blueprints
+    # Enable CORS for API endpoints
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    
+    # Register web blueprints
     app.register_blueprint(common_bp)
     app.register_blueprint(auth_bp)
-    app.register_blueprint(customer_bp)
-    app.register_blueprint(owner_bp)
-    app.register_blueprint(admin_bp)
+    app.register_blueprint(customer_bp, url_prefix='/customer')
+    app.register_blueprint(owner_bp, url_prefix='/owner')
+    app.register_blueprint(admin_bp, url_prefix='/admin')
     
-    # Initialize extensions
+    # Register API blueprints
+    app.register_blueprint(auth_api_bp, url_prefix='/api/auth')
+    app.register_blueprint(customer_api_bp, url_prefix='/api/customer')
+    app.register_blueprint(owner_api_bp, url_prefix='/api/owner')
+    
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
     login_manager.login_message = 'Vui lòng đăng nhập để truy cập trang này.'

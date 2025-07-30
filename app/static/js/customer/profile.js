@@ -51,9 +51,8 @@ function closeEditModal() {
 }
 
 function saveProfile() {
-    // Get form data
+    // Get form
     const form = document.getElementById('edit-profile-form');
-    const formData = new FormData(form);
     
     // Show loading state
     const saveBtn = document.querySelector('.btn-primary');
@@ -61,21 +60,8 @@ function saveProfile() {
     saveBtn.textContent = 'Đang lưu...';
     saveBtn.disabled = true;
     
-    // Simulate API call
-    setTimeout(() => {
-        // Update UI with new data
-        updateProfileDisplay(formData);
-        
-        // Show success notification
-        showNotification('Cập nhật thông tin thành công!', 'success');
-        
-        // Reset button
-        saveBtn.textContent = originalText;
-        saveBtn.disabled = false;
-        
-        // Close modal
-        closeEditModal();
-    }, 1500);
+    // Submit form
+    form.submit();
 }
 
 function updateProfileDisplay(formData) {

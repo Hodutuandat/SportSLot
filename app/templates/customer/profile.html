@@ -36,11 +36,11 @@
             <div class="profile-header">
                 <div class="profile-avatar">
                     <div class="avatar-circle">
-                        {{ user.username[0].upper() }}
+                        {{ (user.full_name or user.username)[0].upper() }}
                     </div>
                 </div>
                 <div class="profile-details">
-                    <h2 class="profile-name">{{ user.username }}</h2>
+                    <h2 class="profile-name">{{ user.full_name or user.username }}</h2>
                     <p class="profile-email">{{ user.email }}</p>
                     <div class="profile-meta">
                         <span class="member-type">
@@ -155,6 +155,13 @@
                 </div>
                 <div class="info-value">{{ user.gender or 'Chưa cập nhật' }}</div>
             </div>
+            <div class="info-item">
+                <div class="info-label">
+                    <i class="fas fa-user-edit"></i>
+                    Giới thiệu
+                </div>
+                <div class="info-value">{{ user.bio or 'Chưa cập nhật' }}</div>
+            </div>
         </div>
     </div>
 
@@ -249,7 +256,7 @@
             <span class="close" onclick="closeEditModal()">&times;</span>
         </div>
         <div class="modal-body">
-            <form id="edit-profile-form">
+            <form id="edit-profile-form" method="POST" action="{{ url_for('customer.update_profile') }}">
                 <div class="form-group">
                     <label for="full-name">Họ và tên</label>
                     <input type="text" id="full-name" name="full_name" value="{{ user.full_name or '' }}">
@@ -274,6 +281,10 @@
                         <option value="female" {{ 'selected' if user.gender == 'female' else '' }}>Nữ</option>
                         <option value="other" {{ 'selected' if user.gender == 'other' else '' }}>Khác</option>
                     </select>
+                </div>
+                <div class="form-group">
+                    <label for="bio">Giới thiệu</label>
+                    <textarea id="bio" name="bio" rows="3" placeholder="Viết một vài dòng giới thiệu về bản thân...">{{ user.bio or '' }}</textarea>
                 </div>
             </form>
         </div>
