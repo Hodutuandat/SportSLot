@@ -13,6 +13,9 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
+    <!-- Global Theme - Load First -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shared/theme.css') }}">
+    
     <!-- Stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/shared/main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/shared/public_navbar.css') }}">
@@ -25,6 +28,8 @@
             <link rel="stylesheet" href="{{ url_for('static', filename='css/shared/customer_navbar.css') }}">
         {% endif %}
     {% endif %}
+    <!-- Public Navbar Fix - Load last to override any conflicts -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shared/public_navbar_fix.css') }}">
     {% block extra_css %}{% endblock %}
 </head>
 <body>

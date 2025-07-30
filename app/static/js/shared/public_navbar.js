@@ -28,6 +28,9 @@ function initializePublicNavbar() {
             }
         }
     });
+    
+    // Prevent any transform effects on auth buttons
+    preventAuthButtonTransforms();
 }
 
 function toggleMobileMenu() {
@@ -40,26 +43,35 @@ function toggleMobileMenu() {
     }
 }
 
-// Prevent any transform effects on auth buttons
-document.addEventListener('DOMContentLoaded', function() {
-    const authButtons = document.querySelectorAll('.auth-btn, .mobile-auth-btn');
-    
+function preventAuthButtonTransforms() {
+    const authButtons = document.querySelectorAll('.public-navbar .auth-btn, .public-navbar .mobile-auth-btn');
+
+    function removeInlineStyles(el) {
+        el.style.removeProperty('transform');
+        el.style.removeProperty('width');
+        el.style.removeProperty('height');
+        el.style.removeProperty('box-shadow');
+        el.style.removeProperty('animation');
+    }
+
     authButtons.forEach(button => {
-        // Ensure buttons maintain their size during navigation
-        button.addEventListener('click', function(e) {
-            // Prevent any size changes during click
-            this.style.transform = 'none';
-            this.style.width = '100px';
-            this.style.height = this.classList.contains('mobile-auth-btn') ? '44px' : '40px';
+        // Xóa inline style khi click
+        button.addEventListener('click', function() {
+            removeInlineStyles(this);
         });
-        
-        // Prevent any hover transforms
-        button.addEventListener('mouseenter', function(e) {
-            this.style.transform = 'none';
+        // Xóa inline style khi hover
+        button.addEventListener('mouseenter', function() {
+            removeInlineStyles(this);
         });
-        
-        button.addEventListener('mouseleave', function(e) {
-            this.style.transform = 'none';
+        button.addEventListener('mouseleave', function() {
+            removeInlineStyles(this);
+        });
+        // Xóa inline style khi focus/blur
+        button.addEventListener('focus', function() {
+            removeInlineStyles(this);
+        });
+        button.addEventListener('blur', function() {
+            removeInlineStyles(this);
         });
     });
-}); 
+} 

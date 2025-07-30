@@ -1,10 +1,56 @@
+/* Global CSS Reset for Public Navbar Buttons */
+.public-navbar .auth-btn,
+.public-navbar .mobile-auth-btn {
+    transform: none !important;
+    width: 100px !important;
+    height: 40px !important;
+    box-shadow: none !important;
+    animation: none !important;
+    transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease !important;
+}
+
+.public-navbar .mobile-auth-btn {
+    height: 44px !important;
+}
+
+.public-navbar .auth-btn:hover,
+.public-navbar .auth-btn:focus,
+.public-navbar .auth-btn:active,
+.public-navbar .mobile-auth-btn:hover,
+.public-navbar .mobile-auth-btn:focus,
+.public-navbar .mobile-auth-btn:active {
+    transform: none !important;
+    box-shadow: none !important;
+    animation: none !important;
+}
+
+/* Override any conflicting styles from other navbar files */
+.public-navbar .navbar__login-btn,
+.public-navbar .navbar__register-btn,
+.public-navbar .navbar__profile-btn {
+    transform: none !important;
+    width: 100px !important;
+    height: 40px !important;
+    box-shadow: none !important;
+    animation: none !important;
+}
+
+.public-navbar .navbar__login-btn:hover,
+.public-navbar .navbar__register-btn:hover,
+.public-navbar .navbar__profile-btn:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    animation: none !important;
+}
+
+/* Footer Styles */
 .footer {
-    background: linear-gradient(135deg, #1F2937 0%, #111827 100%);
-    color: white;
+    background: var(--gradient-dark);
+    color: var(--text-white);
     padding-top: 36px;
     border-radius: 12px 12px 0 0;
     margin-top: 48px;
-    box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow-heavy);
     font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -26,7 +72,7 @@
 .footer__logo {
     font-size: 2rem;
     font-weight: 800;
-    color: white;
+    color: var(--text-white);
     text-decoration: none;
     letter-spacing: 1px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
@@ -35,7 +81,7 @@
 .footer__desc {
     margin-top: 10px;
     font-size: 1rem;
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--footer-link);
     line-height: 1.5;
 }
 
@@ -55,7 +101,7 @@
     font-size: 1.1rem;
     font-weight: 700;
     margin-bottom: 12px;
-    color: white;
+    color: var(--text-white);
 }
 
 .footer__col ul {
@@ -69,14 +115,14 @@
 }
 
 .footer__col ul li a {
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--footer-link);
     text-decoration: none;
     font-size: 1rem;
     transition: color 0.2s;
 }
 
 .footer__col ul li a:hover {
-    color: white;
+    color: var(--footer-link-hover);
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
 }
 
@@ -84,88 +130,64 @@
     text-align: center;
     padding: 18px 0 8px 0;
     font-size: 1rem;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--footer-link);
     border-top: 1px solid rgba(255, 255, 255, 0.2);
     margin-top: 12px;
 }
 
 .divider {
     border: none;
-    border-top: 1.5px solid #e0e0e0;
+    border-top: 1.5px solid var(--border-light);
     margin: 0 0 24px 0;
     width: 100%;
 }
+
 .divider--nav {
     margin-bottom: 0;
     margin-top: 0;
 }
+
 .divider--footer {
-    margin-top: 36px;
-    margin-bottom: 0;
+    border-top-color: rgba(255, 255, 255, 0.2);
 }
 
-@media (max-width: 900px) {
-    .footer__container {
-        flex-direction: column;
-        padding: 0 16px 16px 16px;
-    }
-    .footer__links {
-        flex-direction: column;
-        gap: 16px;
-    }
-    .footer__brand {
-        margin-bottom: 16px;
-    }
-}
-
-/* Main Content Layout */
-body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Inter', sans-serif;
-    line-height: 1.6;
-    color: #333;
-    background-color: #f8f9fa;
-}
-
-/* Main Content Area */
+/* Main Content */
 .main-content {
-    min-height: calc(100vh - 75px); /* Adjust based on navbar height */
-    padding-top: 0;
+    min-height: calc(100vh - 200px);
+    padding-top: 20px;
 }
 
-/* Owner/Customer Container Styles */
+/* Owner Dashboard Container */
 .owner-dashboard-container,
-.owner-fields-container,
-.owner-add-field-container,
-.owner-profile-container {
-    max-width: 1400px;
+.admin-dashboard-container {
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
-    background: #f8f9fa;
-    min-height: calc(100vh - 95px);
+    padding: 0 20px;
 }
 
-/* Main Header for all owner pages */
+/* Main Header */
 .main-header {
-    background: white;
-    border-radius: 12px;
-    padding: 20px 30px;
+    background: var(--bg-secondary);
+    padding: 30px 0;
     margin-bottom: 30px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    box-shadow: var(--shadow-light);
 }
 
 .header-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
 }
 
 .header-content h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
     margin: 0;
-    font-size: 2rem;
-    font-weight: 800;
-    color: #232a34;
 }
 
 .header-actions {
@@ -173,22 +195,31 @@ body {
     gap: 15px;
 }
 
-/* Responsive adjustments */
+/* Responsive Design */
+@media (max-width: 900px) {
+    .footer__container {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .footer__links {
+        justify-content: center;
+        margin-top: 20px;
+    }
+}
+
 @media (max-width: 768px) {
     .main-content {
-        min-height: calc(100vh - 60px);
+        padding-top: 15px;
     }
     
     .owner-dashboard-container,
-    .owner-fields-container,
-    .owner-add-field-container,
-    .owner-profile-container {
-        padding: 15px;
-        min-height: calc(100vh - 75px);
+    .admin-dashboard-container {
+        padding: 0 15px;
     }
     
     .main-header {
-        padding: 15px 20px;
+        padding: 20px 0;
         margin-bottom: 20px;
     }
     
@@ -199,6 +230,11 @@ body {
     }
     
     .header-content h1 {
-        font-size: 1.6rem;
+        font-size: 2rem;
+    }
+    
+    .header-actions {
+        flex-wrap: wrap;
+        justify-content: center;
     }
 } 

@@ -151,8 +151,10 @@
 
 .team-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 40px;
+    max-width: 1000px;
+    margin: 0 auto;
 }
 
 .team-member {
@@ -308,8 +310,9 @@
     }
     
     .team-grid {
-        grid-template-columns: 1fr;
-        gap: 30px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        max-width: none;
     }
     
     .contact-grid {
@@ -334,6 +337,11 @@
     .stats-grid,
     .contact-grid {
         grid-template-columns: 1fr;
+    }
+    
+    .team-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
     }
     
     .team-member {
