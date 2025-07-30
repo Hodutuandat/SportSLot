@@ -4,6 +4,7 @@
         <!-- Brand/Logo -->
         <div class="navbar-brand">
             <a href="{{ url_for('common.home') }}" class="brand-link">
+                <img src="{{ url_for('static', filename='images/SportSlot_Logo.png') }}" alt="SportSlot Logo" class="brand-logo">
                 <span class="logo-text">SportSlot</span>
             </a>
         </div>
@@ -84,6 +85,7 @@
         <div class="mobile-menu-content">
             <div class="mobile-menu-header">
                 <div class="mobile-brand">
+                    <img src="{{ url_for('static', filename='images/SportSlot_Logo.png') }}" alt="SportSlot Logo" class="brand-logo">
                     <span class="logo-text">SportSlot</span>
                 </div>
                 <button class="mobile-close-btn" onclick="toggleMobileMenu()">×</button>

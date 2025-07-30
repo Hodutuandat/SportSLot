@@ -30,6 +30,19 @@
 .brand-link {
     text-decoration: none;
     color: #1f2937;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.brand-logo {
+    height: 40px;
+    width: auto;
+    transition: transform 0.3s ease;
+}
+
+.brand-link:hover .brand-logo {
+    transform: scale(1.05);
 }
 
 .logo-text {
@@ -343,6 +356,14 @@
 .mobile-brand {
     font-weight: 900;
     font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mobile-brand .brand-logo {
+    height: 28px;
+    width: auto;
 }
 
 .mobile-close-btn {

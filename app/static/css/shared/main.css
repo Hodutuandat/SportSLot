@@ -76,6 +76,20 @@
     text-decoration: none;
     letter-spacing: 1px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.footer-logo-img {
+    height: 40px;
+    width: auto;
+    filter: brightness(0) invert(1);
+    transition: transform 0.3s ease;
+}
+
+.footer__logo:hover .footer-logo-img {
+    transform: scale(1.05);
 }
 
 .footer__desc {

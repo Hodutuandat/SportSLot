@@ -57,6 +57,17 @@
     text-decoration: none;
 }
 
+.brand-logo {
+    height: 40px;
+    width: auto;
+    margin-right: 8px;
+    transition: transform 0.3s ease;
+}
+
+.brand-link:hover .brand-logo {
+    transform: scale(1.05);
+}
+
 .brand-icon {
     font-size: 2rem;
     background: var(--gradient-primary);
@@ -365,6 +376,10 @@ html body .public-navbar .mobile-auth .mobile-auth-btn.register-btn:focus {
         gap: 8px;
     }
     
+    .brand-logo {
+        height: 32px;
+    }
+    
     .brand-icon {
         font-size: 1.6rem;
     }
@@ -392,6 +407,10 @@ html body .public-navbar .mobile-auth .mobile-auth-btn.register-btn:focus {
     .brand-link {
         font-size: 1.2rem;
         gap: 6px;
+    }
+    
+    .brand-logo {
+        height: 28px;
     }
     
     .brand-icon {

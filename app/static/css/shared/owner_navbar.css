@@ -29,15 +29,20 @@
 
 .owner-navbar .brand-link {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    gap: 8px;
     text-decoration: none;
     color: #1f2937;
 }
 
 .owner-navbar .brand-logo {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    height: 40px;
+    width: auto;
+    transition: transform 0.3s ease;
+}
+
+.owner-navbar .brand-link:hover .brand-logo {
+    transform: scale(1.05);
 }
 
 .owner-navbar .logo-icon {
@@ -1052,6 +1057,11 @@
     .owner-navbar .user-menu-dropdown {
         display: none;
     }
+    
+    .owner-navbar .brand-logo {
+        height: 32px;
+        width: auto;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1066,6 +1076,11 @@
     
     .owner-navbar .brand-subtitle {
         font-size: 0.75rem;
+    }
+    
+    .owner-navbar .brand-logo {
+        height: 28px;
+        width: auto;
     }
     
     .owner-navbar .mobile-menu-content {

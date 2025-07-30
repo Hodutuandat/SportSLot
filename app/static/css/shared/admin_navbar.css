@@ -28,6 +28,19 @@
     color: #1e3a8a;
     text-decoration: none;
     letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-brand-logo {
+    height: 32px;
+    width: auto;
+    transition: transform 0.3s ease;
+}
+
+.admin-brand-link:hover .admin-brand-logo {
+    transform: scale(1.05);
 }
 .admin-navbar-status {
     display: flex;
