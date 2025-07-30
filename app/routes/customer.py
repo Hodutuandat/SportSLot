@@ -1,5 +1,9 @@
 from flask import Blueprint, render_template, jsonify, request
 from flask_login import login_required, current_user
+from app.extensions import mongo
+from app.models.field import Field
+from app.models.booking import Booking
+from bson import ObjectId
 
 customer_bp = Blueprint('customer', __name__)
 
@@ -14,7 +18,33 @@ fields_data = [
 
 @customer_bp.route('/fields')
 def field_list():
-    return render_template('customer/field_list.html', fields=fields_data)
+    try:
+        # Get fields from MongoDB
+        fields_cursor = mongo.db.fields.find()
+        fields = []
+        for field_data in fields_cursor:
+            field = Field.from_dict(field_data)
+            # Convert to format expected by template
+            field_dict = {
+                "id": field.id,
+                "name": field.name,
+                "phone": "0901234567",  # Default phone
+                "address": field.location,
+                "image": field.images[0] if field.images else None,
+                "sport": field.field_type.title(),
+                "sport_type": field.field_type,
+                "price": field.price_per_slot,
+                "owner": "Chủ sân",  # Default owner
+                "type": f"Sân {field.field_type}",
+                "description": field.description
+            }
+            fields.append(field_dict)
+    except Exception as e:
+        print(f"Error loading fields: {e}")
+        # Fallback to mock data
+        fields = fields_data
+    
+    return render_template('customer/field_list.html', fields=fields)
 
 @customer_bp.route('/fields/<int:field_id>')
 @login_required

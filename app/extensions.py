@@ -1,2 +1,5 @@
 from flask_mail import Mail
-mail = Mail() 
+from flask_pymongo import PyMongo
+
+mail = Mail()
+mongo = PyMongo() 
