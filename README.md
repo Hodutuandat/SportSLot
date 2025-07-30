@@ -289,6 +289,63 @@ Hiện tại hệ thống sử dụng mock data. Để tích hợp database th�
 
 Dự án này được phân phối dưới giấy phép MIT. Xem file `LICENSE` để biết thêm chi tiết.
 
+## 👨‍💻 Thành viên & Phân công công việc
+
+### 1. [Hồ Du Tuấn Đạt_2374802010097](https://github.com/Hodutuandat) (Leader)
+- **Lên ý tưởng hệ thống:**
+  - Đề xuất mô hình hoạt động tổng thể của hệ thống đặt sân thể thao trực tuyến.
+  - Xây dựng các flow nghiệp vụ chính: đăng nhập, đặt sân, quản lý sân, quản trị hệ thống.
+  - Phân tích các vai trò (Customer, Owner, Admin) và xác định chức năng cho từng vai trò.
+- **Setup cấu trúc dự án:**
+  - Khởi tạo repository, thiết lập cấu trúc thư mục chuẩn cho Flask (app, routes, models, templates, static...).
+  - Tạo các blueprint cho từng module (auth, customer, owner, admin, common).
+  - Thiết lập các file cấu hình (`config.py`, `.env`), tích hợp Flask-Login, Flask-Mail.
+  - Xây dựng các mock data và flow mẫu cho phát triển nhanh.
+- **Cấu trúc lại toàn bộ front-end:**
+  - Chuẩn hóa lại các template HTML theo từng vai trò, sử dụng Jinja2 inheritance (`base.html`, `shared/navbar.html`, `footer.html`...).
+  - Thiết kế lại hệ thống CSS: tách riêng từng file cho từng module, xây dựng file theme.css dùng biến màu toàn cục.
+  - Đảm bảo responsive, tối ưu trải nghiệm người dùng trên desktop và mobile.
+  - Tích hợp logo, favicon, đồng bộ hóa giao diện theo màu chủ đạo trắng-xám-đen.
+  - Review, refactor và tối ưu code front-end cho các thành viên khác.
+
+---
+
+### 2. [Nguyễn Minh Chính_2275106050051](https://github.com/F4ol4n)
+- **Liên kết backend với MongoDB:**
+  - Nghiên cứu, lựa chọn thư viện phù hợp (PyMongo hoặc Flask-PyMongo) để kết nối Flask với MongoDB.
+  - Thiết lập cấu hình kết nối database trong `config.py` và `.env`.
+  - Thiết kế các schema cho các collection: users, fields, bookings, transactions, vouchers...
+  - Refactor các route backend để thao tác dữ liệu thực tế với MongoDB thay cho mock data (CRUD cho sân, booking, user...).
+  - Xây dựng các hàm truy vấn, filter, phân trang dữ liệu lớn.
+  - Đảm bảo bảo mật thông tin người dùng, mã hóa password, kiểm soát quyền truy cập.
+  - Viết tài liệu hướng dẫn cài đặt MongoDB local và deploy cloud (MongoDB Atlas).
+
+---
+
+### 3. [Nguyễn Thị Phương Nhung_2374802013554](https://github.com/NguyenThiPhuongNhung2005)
+- **Thiết kế giao diện Customer:**
+  - Phân tích nghiệp vụ và xây dựng wireframe cho các trang dành cho khách hàng: Trang chủ, Danh sách sân, Chi tiết sân, Đặt sân, Lịch sử đặt sân, Quản lý voucher, Giao dịch, Hồ sơ cá nhân.
+  - Thiết kế giao diện HTML/CSS cho từng trang, đảm bảo đồng bộ với theme chung.
+  - Sử dụng Bootstrap 5 và custom CSS để tối ưu trải nghiệm người dùng, hỗ trợ responsive.
+  - Tích hợp các component động: modal đặt sân, filter tìm kiếm, hiển thị lịch booking.
+  - Kết nối front-end với backend qua Flask template, truyền dữ liệu động từ server.
+  - Kiểm thử giao diện trên nhiều thiết bị, trình duyệt, tối ưu hiệu năng và accessibility.
+  - Viết hướng dẫn sử dụng giao diện cho khách hàng.
+
+---
+
+### 4. [Lê Quang Minh_2374802010310](https://github.com/leminh05)
+- **Thiết kế giao diện Owner:**
+  - Phân tích nghiệp vụ dành cho chủ sân: Dashboard, Quản lý sân, Thêm/sửa/xóa sân, Lịch đặt sân, Duyệt booking, Thống kê doanh thu, Thông báo, Giao dịch, Hồ sơ cá nhân.
+  - Thiết kế layout dashboard trực quan, hiển thị các chỉ số quan trọng (doanh thu, số booking, trạng thái sân...).
+  - Xây dựng các form nhập liệu, bảng dữ liệu, modal xác nhận, filter nâng cao cho quản lý sân và booking.
+  - Đảm bảo giao diện dễ sử dụng, thao tác nhanh, hỗ trợ responsive trên mobile/tablet.
+  - Tích hợp các thông báo realtime (nếu có), hiển thị trạng thái booking, cập nhật trạng thái sân.
+  - Kết nối dữ liệu động từ backend, kiểm thử các luồng thao tác của chủ sân.
+  - Viết tài liệu hướng dẫn sử dụng giao diện Owner.
+
+---
+
 ## Liên hệ
 
 - **Email**: support@sportslot.vn
