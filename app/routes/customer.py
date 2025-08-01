@@ -30,26 +30,26 @@ def field_list():
             # Convert to format expected by template
             field_dict = {
                 "id": field.id,
-                "name": field.name,
+                "name": field.name or '',
                 "phone": "0901234567",  # Default phone
-                "address": field.location,
+                "address": field.location or '',
                 "image": field.images[0] if field.images else None,
-                "sport": field.field_type.title(),
-                "sport_type": field.field_type,
-                "price": field.price_per_slot,
+                "sport": field.field_type.title() if field.field_type else '',
+                "sport_type": field.field_type or '',
+                "price": field.price_per_slot or 0,
                 "owner": "Chủ sân",  # Default owner
-                "type": f"Sân {field.field_type}",
-                "description": field.description
+                "type": f"Sân {field.field_type}" if field.field_type else 'Sân',
+                "description": field.description or ''
             }
             fields.append(field_dict)
         
         # Nếu không có fields trong MongoDB, sử dụng mock data
         if not fields:
-            print("No fields in MongoDB, using mock data")
             fields = fields_data
             
     except Exception as e:
-        print(f"Error loading fields: {e}")
+        import traceback
+        traceback.print_exc()
         # Fallback to mock data
         fields = fields_data
     
@@ -67,16 +67,17 @@ def field_detail(field_id):
                 # Convert to format expected by template
                 field_dict = {
                     "id": field.id,
-                    "name": field.name,
+                    "name": field.name or '',
                     "phone": "0901234567",  # Default phone
-                    "address": field.location,
+                    "address": field.location or '',
                     "image": field.images[0] if field.images else None,
-                    "sport": field.field_type.title(),
-                    "sport_type": field.field_type,
-                    "price": field.price_per_slot,
+                    "sport": field.field_type.title() if field.field_type else '',
+                    "sport_type": field.field_type or '',
+                    "price": field.price_per_slot or 0,
+                    "price_per_slot": field.price_per_slot or 0,  # Add this for consistency
                     "owner": "Chủ sân",  # Default owner
-                    "type": f"Sân {field.field_type}",
-                    "description": field.description
+                    "type": f"Sân {field.field_type}" if field.field_type else 'Sân',
+                    "description": field.description or ''
                 }
                 return render_template('customer/field_detail.html', field=field_dict)
         
@@ -87,7 +88,8 @@ def field_detail(field_id):
         return render_template('customer/field_detail.html', field=field)
         
     except Exception as e:
-        print(f"Error loading field detail: {e}")
+        import traceback
+        traceback.print_exc()
         # Fallback to mock data
         field = next((f for f in fields_data if str(f["id"]) == str(field_id)), None)
         if not field:
@@ -133,7 +135,6 @@ def booking_history(page=1):
         
         # Nếu không có bookings trong MongoDB, sử dụng mock data
         if not bookings:
-            print("No bookings in MongoDB, using mock data")
             # Mock data for booking history
             all_bookings_data = [
         {
@@ -286,7 +287,6 @@ def booking_history(page=1):
                              pagination=pagination)
                              
     except Exception as e:
-        print(f"Error loading booking history: {e}")
         # Fallback to mock data
         all_bookings_data = [
             {
@@ -394,12 +394,135 @@ def booking_detail(booking_id):
                 return render_template('customer/booking_detail.html', 
                                      user=current_user, booking=booking_detail)
         
+        # Fallback to mock data if not found in MongoDB
+        # Mock data for booking detail
+        mock_bookings = [
+            {
+                "id": 1,
+                "booking_code": "BK001",
+                "field_id": 1,
+                "field_name": "Sân Bóng Đá A",
+                "field_address": "Quận 1, TP.HCM",
+                "field_type": "Bóng đá",
+                "booking_date": "15/01/2024",
+                "start_time": "18:00",
+                "end_time": "20:00",
+                "duration": 2,
+                "total_price": 400000,
+                "payment_method": "Chuyển khoản",
+                "status": "completed",
+                "created_at": "15/01/2024 17:30"
+            },
+            {
+                "id": 2,
+                "booking_code": "BK002",
+                "field_id": 2,
+                "field_name": "Sân Bóng Đá B",
+                "field_address": "Quận 7, TP.HCM",
+                "field_type": "Bóng đá",
+                "booking_date": "20/01/2024",
+                "start_time": "19:00",
+                "end_time": "21:00",
+                "duration": 2,
+                "total_price": 360000,
+                "payment_method": "Tiền mặt",
+                "status": "confirmed",
+                "created_at": "20/01/2024 18:45"
+            },
+            {
+                "id": 3,
+                "booking_code": "BK003",
+                "field_id": 3,
+                "field_name": "Sân Bóng Chuyền 1",
+                "field_address": "Quận Bình Thạnh, TP.HCM",
+                "field_type": "Bóng chuyền",
+                "booking_date": "25/01/2024",
+                "start_time": "20:00",
+                "end_time": "22:00",
+                "duration": 2,
+                "total_price": 300000,
+                "payment_method": "Chuyển khoản",
+                "status": "pending",
+                "created_at": "25/01/2024 19:15"
+            },
+            {
+                "id": 4,
+                "booking_code": "BK004",
+                "field_id": 4,
+                "field_name": "Sân Bóng Rổ Central",
+                "field_address": "Quận 3, TP.HCM",
+                "field_type": "Bóng rổ",
+                "booking_date": "10/01/2024",
+                "start_time": "17:00",
+                "end_time": "19:00",
+                "duration": 2,
+                "total_price": 340000,
+                "payment_method": "Tiền mặt",
+                "status": "cancelled",
+                "created_at": "10/01/2024 16:20"
+            },
+            {
+                "id": 5,
+                "booking_code": "BK005",
+                "field_id": 5,
+                "field_name": "Sân Tennis Pro",
+                "field_address": "Quận 2, TP.HCM",
+                "field_type": "Tennis",
+                "booking_date": "30/01/2024",
+                "start_time": "16:00",
+                "end_time": "18:00",
+                "duration": 2,
+                "total_price": 500000,
+                "payment_method": "Chuyển khoản",
+                "status": "completed",
+                "created_at": "30/01/2024 15:30"
+            },
+            {
+                "id": 6,
+                "booking_code": "BK006",
+                "field_id": 6,
+                "field_name": "Sân Cầu Lông Vip",
+                "field_address": "Quận 10, TP.HCM",
+                "field_type": "Cầu lông",
+                "booking_date": "05/02/2024",
+                "start_time": "19:00",
+                "end_time": "21:00",
+                "duration": 2,
+                "total_price": 240000,
+                "payment_method": "Tiền mặt",
+                "status": "confirmed",
+                "created_at": "05/02/2024 18:00"
+            },
+            {
+                "id": 7,
+                "booking_code": "BK007",
+                "field_id": 1,
+                "field_name": "Sân Bóng Đá A",
+                "field_address": "Quận 1, TP.HCM",
+                "field_type": "Bóng đá",
+                "booking_date": "10/02/2024",
+                "start_time": "20:00",
+                "end_time": "22:00",
+                "duration": 2,
+                "total_price": 400000,
+                "payment_method": "Chuyển khoản",
+                "status": "pending",
+                "created_at": "10/02/2024 19:30"
+            }
+        ]
+        
+        # Tìm booking trong mock data
+        booking_detail = next((b for b in mock_bookings if str(b["id"]) == str(booking_id)), None)
+        
+        if booking_detail:
+            return render_template('customer/booking_detail.html', 
+                                 user=current_user, booking=booking_detail)
+        
         # Nếu không tìm thấy, redirect về booking history
         flash('Không tìm thấy thông tin đặt sân', 'error')
         return redirect(url_for('customer.booking_history'))
         
     except Exception as e:
-        print(f"Error loading booking detail: {e}")
         flash('Có lỗi xảy ra khi tải thông tin đặt sân', 'error')
         return redirect(url_for('customer.booking_history'))
 
@@ -413,26 +536,72 @@ def transaction_history():
 def write_review(booking_id):
     """Viết đánh giá cho booking"""
     try:
-        # Kiểm tra booking có tồn tại và thuộc về user hiện tại
-        if not ObjectId.is_valid(booking_id):
-            flash('Mã đặt sân không hợp lệ', 'error')
-            return redirect(url_for('customer.booking_history'))
+        booking = None
+        field_name = "Sân không xác định"
         
-        booking_data = mongo.db.bookings.find_one({
-            '_id': ObjectId(booking_id),
-            'user_id': ObjectId(current_user.id),
-            'status': 'completed'
-        })
+        # Tìm booking trong MongoDB
+        if ObjectId.is_valid(booking_id):
+            booking_data = mongo.db.bookings.find_one({
+                '_id': ObjectId(booking_id),
+                'user_id': ObjectId(current_user.id),
+                'status': 'completed'
+            })
+            
+            if booking_data:
+                booking = Booking.from_dict(booking_data)
+                
+                # Lấy thông tin field
+                field_data = mongo.db.fields.find_one({'_id': ObjectId(booking.field_id)})
+                field_name = field_data.get('name', 'Sân không xác định') if field_data else 'Sân không xác định'
         
-        if not booking_data:
-            flash('Không tìm thấy đặt sân hoặc chưa hoàn thành', 'error')
-            return redirect(url_for('customer.booking_history'))
-        
-        booking = Booking.from_dict(booking_data)
-        
-        # Lấy thông tin field
-        field_data = mongo.db.fields.find_one({'_id': ObjectId(booking.field_id)})
-        field_name = field_data.get('name', 'Sân không xác định') if field_data else 'Sân không xác định'
+        # Fallback to mock data if not found in MongoDB
+        if not booking:
+            # Mock data for completed bookings
+            mock_bookings = [
+                {
+                    "id": 1,
+                    "booking_code": "BK001",
+                    "field_id": 1,
+                    "field_name": "Sân Bóng Đá A",
+                    "field_address": "Quận 1, TP.HCM",
+                    "field_type": "Bóng đá",
+                    "booking_date": "15/01/2024",
+                    "start_time": "18:00",
+                    "end_time": "20:00",
+                    "duration": 2,
+                    "total_price": 400000,
+                    "payment_method": "Chuyển khoản",
+                    "status": "completed",
+                    "created_at": "15/01/2024 17:30"
+                },
+                {
+                    "id": 5,
+                    "booking_code": "BK005",
+                    "field_id": 5,
+                    "field_name": "Sân Tennis Pro",
+                    "field_address": "Quận 2, TP.HCM",
+                    "field_type": "Tennis",
+                    "booking_date": "30/01/2024",
+                    "start_time": "16:00",
+                    "end_time": "18:00",
+                    "duration": 2,
+                    "total_price": 500000,
+                    "payment_method": "Chuyển khoản",
+                    "status": "completed",
+                    "created_at": "30/01/2024 15:30"
+                }
+            ]
+            
+            # Tìm booking trong mock data
+            booking_detail = next((b for b in mock_bookings if str(b["id"]) == str(booking_id) and b["status"] == "completed"), None)
+            
+            if booking_detail:
+                # Tạo mock booking object
+                booking = type('MockBooking', (), booking_detail)()
+                field_name = booking_detail["field_name"]
+            else:
+                flash('Không tìm thấy đặt sân hoặc chưa hoàn thành', 'error')
+                return redirect(url_for('customer.booking_history'))
         
         if request.method == 'POST':
             # Xử lý form đánh giá
@@ -457,36 +626,40 @@ def write_review(booking_id):
                 return render_template('customer/write_review.html', 
                                      booking=booking, field_name=field_name)
             
-            # Lưu đánh giá vào database
-            review_data = {
-                'booking_id': ObjectId(booking_id),
-                'user_id': ObjectId(current_user.id),
-                'field_id': ObjectId(booking.field_id),
-                'rating': int(rating),
-                'comment': comment,
-                'created_at': datetime.now(timezone.utc)
-            }
-            
-            # Kiểm tra xem đã đánh giá chưa
-            existing_review = mongo.db.reviews.find_one({
-                'booking_id': ObjectId(booking_id)
-            })
-            
-            if existing_review:
-                # Cập nhật đánh giá
-                mongo.db.reviews.update_one(
-                    {'booking_id': ObjectId(booking_id)},
-                    {'$set': {
-                        'rating': int(rating),
-                        'comment': comment,
-                        'updated_at': datetime.now(timezone.utc)
-                    }}
-                )
-                flash('Cập nhật đánh giá thành công!', 'success')
+            # Lưu đánh giá vào database (chỉ nếu là MongoDB booking)
+            if ObjectId.is_valid(booking_id):
+                review_data = {
+                    'booking_id': ObjectId(booking_id),
+                    'user_id': ObjectId(current_user.id),
+                    'field_id': ObjectId(booking.field_id),
+                    'rating': int(rating),
+                    'comment': comment,
+                    'created_at': datetime.now(timezone.utc)
+                }
+                
+                # Kiểm tra xem đã đánh giá chưa
+                existing_review = mongo.db.reviews.find_one({
+                    'booking_id': ObjectId(booking_id)
+                })
+                
+                if existing_review:
+                    # Cập nhật đánh giá
+                    mongo.db.reviews.update_one(
+                        {'booking_id': ObjectId(booking_id)},
+                        {'$set': {
+                            'rating': int(rating),
+                            'comment': comment,
+                            'updated_at': datetime.now(timezone.utc)
+                        }}
+                    )
+                    flash('Cập nhật đánh giá thành công!', 'success')
+                else:
+                    # Tạo đánh giá mới
+                    mongo.db.reviews.insert_one(review_data)
+                    flash('Đánh giá thành công!', 'success')
             else:
-                # Tạo đánh giá mới
-                mongo.db.reviews.insert_one(review_data)
-                flash('Đánh giá thành công!', 'success')
+                # Mock data - chỉ hiển thị thông báo thành công
+                flash('Đánh giá thành công! (Mock data)', 'success')
             
             return redirect(url_for('customer.booking_history'))
         
@@ -495,7 +668,6 @@ def write_review(booking_id):
                              booking=booking, field_name=field_name)
         
     except Exception as e:
-        print(f"Error in write_review: {e}")
         flash('Có lỗi xảy ra khi xử lý đánh giá', 'error')
         return redirect(url_for('customer.booking_history'))
 
@@ -504,34 +676,39 @@ def write_review(booking_id):
 def cancel_booking(booking_id):
     """Hủy đặt sân"""
     try:
-        if not ObjectId.is_valid(booking_id):
-            return jsonify({'success': False, 'message': 'Mã đặt sân không hợp lệ'})
+        # Tìm booking trong MongoDB
+        if ObjectId.is_valid(booking_id):
+            booking_data = mongo.db.bookings.find_one({
+                '_id': ObjectId(booking_id),
+                'user_id': ObjectId(current_user.id),
+                'status': 'pending'
+            })
+            
+            if booking_data:
+                # Cập nhật trạng thái thành cancelled
+                result = mongo.db.bookings.update_one(
+                    {'_id': ObjectId(booking_id)},
+                    {'$set': {
+                        'status': 'cancelled',
+                        'cancelled_at': datetime.now(timezone.utc)
+                    }}
+                )
+                
+                if result.modified_count > 0:
+                    return jsonify({'success': True, 'message': 'Hủy đặt sân thành công'})
+                else:
+                    return jsonify({'success': False, 'message': 'Không thể hủy đặt sân'})
         
-        booking_data = mongo.db.bookings.find_one({
-            '_id': ObjectId(booking_id),
-            'user_id': ObjectId(current_user.id),
-            'status': 'pending'
-        })
+        # Fallback to mock data
+        # Mock data for pending bookings that can be cancelled
+        mock_pending_bookings = [3, 7]  # Booking IDs that are pending
         
-        if not booking_data:
+        if int(booking_id) in mock_pending_bookings:
+            return jsonify({'success': True, 'message': 'Hủy đặt sân thành công (Mock data)'})
+        else:
             return jsonify({'success': False, 'message': 'Không tìm thấy đặt sân hoặc không thể hủy'})
         
-        # Cập nhật trạng thái thành cancelled
-        result = mongo.db.bookings.update_one(
-            {'_id': ObjectId(booking_id)},
-            {'$set': {
-                'status': 'cancelled',
-                'cancelled_at': datetime.now(timezone.utc)
-            }}
-        )
-        
-        if result.modified_count > 0:
-            return jsonify({'success': True, 'message': 'Hủy đặt sân thành công'})
-        else:
-            return jsonify({'success': False, 'message': 'Không thể hủy đặt sân'})
-        
     except Exception as e:
-        print(f"Error cancelling booking: {e}")
         return jsonify({'success': False, 'message': 'Có lỗi xảy ra khi hủy đặt sân'})
 
 @customer_bp.route('/profile')
@@ -572,7 +749,6 @@ def profile():
                 'avatar': None
             }
     except Exception as e:
-        print(f"Error loading profile: {e}")
         # Fallback data
         profile_info = {
             'username': current_user.username,
@@ -613,7 +789,6 @@ def profile():
         active_vouchers = 3
         
     except Exception as e:
-        print(f"Error calculating stats: {e}")
         # Fallback stats
         total_bookings = 0
         total_points = 0
@@ -773,7 +948,6 @@ def update_profile():
         return redirect(url_for('customer.profile'))
         
     except Exception as e:
-        print(f"Error updating profile: {e}")
         flash('Có lỗi xảy ra khi cập nhật thông tin', 'error')
         return redirect(url_for('customer.profile'))
 

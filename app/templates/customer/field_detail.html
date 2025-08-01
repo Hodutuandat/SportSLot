@@ -9,23 +9,30 @@
 {% block content %}
 {% set booked_times = ['18:00', '19:00'] %} {# Giả lập các khung giờ đã được đặt #}
 <section class="field-detail-page">
-    <h1 class="field-detail-title">{{ field.name }}</h1>
-    <div class="field-detail-sport">Môn thể thao: {{ field.sport }}</div>
+    <h1 class="field-detail-title">{{ field.name if field.name else 'Tên sân đang cập nhật' }}</h1>
+    <div class="field-detail-sport">Môn thể thao: {{ field.sport if field.sport else 'Đang cập nhật' }}</div>
     <div class="field-detail-main">
         <div class="field-detail-imgbox">
-            <img src="{{ field.image or url_for('static', filename='images/field-placeholder.png') }}" alt="{{ field.name }}">
+            {% if field.image %}
+                <img src="{{ field.image }}" alt="{{ field.name if field.name else 'Hình ảnh sân' }}">
+            {% else %}
+                <div class="field-placeholder">
+                    <i class="fas fa-image"></i>
+                    <p>Không có hình ảnh</p>
+                </div>
+            {% endif %}
         </div>
         <div class="field-detail-info">
             <div class="field-detail-row">
-                <div><b>Địa chỉ:</b><br>{{ field.address }}</div>
-                <div><b>Giá sân:</b><br>{{ field.price }} VNĐ/giờ</div>
+                <div><b>Địa chỉ:</b><br>{{ field.address if field.address else 'Địa chỉ đang cập nhật' }}</div>
+                <div><b>Giá sân:</b><br>{{ "{:,.0f}".format(field.price) if field.price else 'Đang cập nhật' }} VNĐ/giờ</div>
             </div>
             <div class="field-detail-row">
-                <div><b>Chủ sân:</b><br>{{ field.owner }}</div>
-                <div><b>Kiểu sân:</b><br>{{ field.type }}</div>
+                <div><b>Chủ sân:</b><br>{{ field.owner if field.owner else 'Đang cập nhật' }}</div>
+                <div><b>Kiểu sân:</b><br>{{ field.type if field.type else 'Đang cập nhật' }}</div>
             </div>
             <div class="field-detail-desc">
-                <b>Mô tả:</b><br>{{ field.description }}
+                <b>Mô tả:</b><br>{{ field.description if field.description else 'Chưa có mô tả chi tiết' }}
             </div>
             <div class="field-detail-actions">
                 <a href="#" class="book-btn" id="openBookingBtn">Đặt Sân</a>

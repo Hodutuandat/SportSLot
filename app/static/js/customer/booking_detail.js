@@ -59,7 +59,7 @@ function confirmCancel() {
     confirmBtn.disabled = true;
     
     // Send cancel request
-    fetch(`/customer/booking-history/${bookingId}/cancel`, {
+    fetch(`/customer/booking/${bookingId}/cancel`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -99,7 +99,12 @@ function contactOwner() {
 
 // Rate booking function
 function rateBooking() {
-    showNotification('Tính năng đánh giá sẽ được cập nhật sớm!', 'info');
+    // Get booking ID from the page
+    const bookingId = document.querySelector('[data-booking-id]')?.getAttribute('data-booking-id') || 
+                     window.location.pathname.split('/').pop();
+    
+    // Redirect to review page
+    window.location.href = `/customer/booking/${bookingId}/review`;
 }
 
 // Book again function

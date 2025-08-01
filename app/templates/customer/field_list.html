@@ -45,7 +45,7 @@
     <!-- Statistics Bar -->
     <div class="field-stats">
         <div class="stat-item">
-            <span class="stat-number">{{ fields|length if fields else 0 }}</span>
+            <span class="stat-number">{{ fields|length if fields and fields|length > 0 else 0 }}</span>
             <span class="stat-label">Sân hiện có</span>
         </div>
         <div class="stat-item">
@@ -66,27 +66,29 @@
     <div class="field-list-cards" id="fieldCards">
         {% if fields %}
             {% for field in fields %}
-            <div class="field-card" data-sport="{{ field.sport_type|lower if field.sport_type else 'general' }}" data-location="{{ field.address|lower if field.address else '' }}">
+            <div class="field-card" data-sport="{{ field.sport_type|lower if field.sport_type else 'general' }}" data-location="{{ field.address|lower if field.address else '' }}" data-price="{{ field.price if field.price else 0 }}">
                 {% if field.image %}
-                    <img src="{{ field.image }}" alt="{{ field.name }}" loading="lazy">
+                    <img src="{{ field.image }}" alt="{{ field.name if field.name else 'Hình ảnh sân' }}" loading="lazy">
                 {% else %}
                     <div class="no-image"></div>
                 {% endif %}
                 
                 <div class="field-card-body">
-                    <h3>{{ field.name }}</h3>
+                    <h3>{{ field.name if field.name else 'Tên sân đang cập nhật' }}</h3>
                     <div class="field-info">
                         <span>{{ field.phone if field.phone else 'Đang cập nhật' }}</span>
                         <span>{{ field.address if field.address else 'Địa chỉ đang cập nhật' }}</span>
-                                                 {% if field.price %}
+                                                 {% if field.price and field.price > 0 %}
                          <span>💰 {{ "{:,.0f}".format(field.price) }}đ/giờ</span>
+                         {% else %}
+                         <span>💰 Đang cập nhật</span>
                          {% endif %}
                     </div>
-                    <a href="/fields/{{ field.id }}" class="field-detail-btn">Xem chi tiết</a>
+                    <a href="{{ url_for('customer.field_detail', field_id=field.id) }}" class="field-detail-btn">Xem chi tiết</a>
                 </div>
             </div>
             {% endfor %}
-        {% else %}
+        {% elif not fields or fields|length == 0 %}
             <!-- Empty State -->
             <div class="empty-state">
                 <div class="empty-state-icon">🏟️</div>
@@ -98,6 +100,8 @@
 
     <!-- Loading State (Hidden by default, shown during AJAX requests) -->
     <div class="loading-cards" id="loadingCards" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p>Đang tải danh sách sân...</p>
         <div class="loading-card"></div>
         <div class="loading-card"></div>
         <div class="loading-card"></div>

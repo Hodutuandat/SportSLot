@@ -11,14 +11,14 @@
             <div class="footer__col">
                 <h4>Về chúng tôi</h4>
                 <ul>
-                    <li><a href="/about">Giới thiệu</a></li>
+                    <li><a href="{{ url_for('common.about') }}">Giới thiệu</a></li>
                 </ul>
             </div>
             <div class="footer__col">
                 <h4>Dịch vụ</h4>
                 <ul>
-                    <li><a href="/fields">Đặt sân</a></li>
-                    <li><a href="/voucher">Ưu đãi</a></li>
+                    <li><a href="{{ url_for('customer.field_list') }}">Đặt sân</a></li>
+                    <li><a href="{{ url_for('common.voucher') }}">Ưu đãi</a></li>
                 </ul>
             </div>
             <div class="footer__col">
@@ -26,7 +26,7 @@
                 <ul>
                     <li><a href="mailto:support@sportslot.vn">Email: support@sportslot.vn</a></li>
                     <li><a href="tel:0123456789">Hotline: 0123 456 789</a></li>
-                    <li><a href="/contact">Liên hệ trực tuyến</a></li>
+                    <li><a href="{{ url_for('common.contact') }}">Liên hệ trực tuyến</a></li>
                 </ul>
             </div>
         </div>

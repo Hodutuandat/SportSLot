@@ -25,7 +25,7 @@
     </div>
 
     <!-- Booking Information Card -->
-    <div class="booking-card">
+    <div class="booking-card" data-booking-id="{{ booking.id }}" data-field-id="{{ booking.field_id }}">
         <div class="booking-header">
             <div class="booking-code">
                 <h2>{{ booking.booking_code }}</h2>
@@ -74,7 +74,7 @@
                         <i class="fas fa-futbol"></i>
                         Loại sân
                     </div>
-                    <div class="field-value">{{ booking.field_type.title() }}</div>
+                    <div class="field-value">{{ booking.field_type }}</div>
                 </div>
             </div>
         </div>

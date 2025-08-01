@@ -7,7 +7,7 @@ class Field:
                  longitude=None, parking=None, transportation=None, amenities=None, rules=None,
                  pricing=None, weekday_hours=None, weekend_hours=None, deposit=None, 
                  cancellation=None, owner_id=None, status='pending', images=None, 
-                 total_bookings=0, monthly_revenue=0, created_at=None, updated_at=None):
+                 total_bookings=0, monthly_revenue=0, created_at=None, updated_at=None, is_indoor=None, price_per_slot=None):
         self.id = id
         self.name = name
         self.sport_type = sport_type  # 'football', 'basketball', 'tennis', 'badminton', 'volleyball', 'futsal', 'ping-pong', 'other'
@@ -35,18 +35,23 @@ class Field:
         self.monthly_revenue = monthly_revenue
         self.created_at = created_at or datetime.now()
         self.updated_at = updated_at or datetime.now()
+        self.is_indoor = is_indoor
+        self._price_per_slot = price_per_slot
     
     @staticmethod
     def from_dict(data):
         """Create Field object from MongoDB document"""
+        # Handle both 'address' and 'location' fields for backward compatibility
+        address = data.get('address') or data.get('location')
+        
         return Field(
             id=str(data['_id']),
             name=data.get('name'),
-            sport_type=data.get('sport_type'),
+            sport_type=data.get('sport_type') or data.get('field_type'),  # Handle both field names
             description=data.get('description'),
             capacity=data.get('capacity'),
             field_size=data.get('field_size'),
-            address=data.get('address'),
+            address=address,
             district=data.get('district'),
             city=data.get('city'),
             latitude=data.get('latitude'),
@@ -66,7 +71,9 @@ class Field:
             total_bookings=data.get('total_bookings', 0),
             monthly_revenue=data.get('monthly_revenue', 0),
             created_at=data.get('created_at'),
-            updated_at=data.get('updated_at')
+            updated_at=data.get('updated_at'),
+            is_indoor=data.get('is_indoor'),
+            price_per_slot=data.get('price_per_slot')
         )
     
     def to_dict(self):
@@ -97,7 +104,9 @@ class Field:
             'total_bookings': self.total_bookings,
             'monthly_revenue': self.monthly_revenue,
             'created_at': self.created_at,
-            'updated_at': self.updated_at
+            'updated_at': self.updated_at,
+            'is_indoor': self.is_indoor,
+            'price_per_slot': self._price_per_slot
         }
     
     @staticmethod
@@ -158,4 +167,29 @@ class Field:
     
     def can_be_booked(self):
         """Check if field can be booked"""
-        return self.status == 'active' 
+        return self.status == 'active'
+    
+    @property
+    def location(self):
+        """Get location (alias for address)"""
+        return self.address or ''
+    
+    @property
+    def field_type(self):
+        """Get field_type (alias for sport_type)"""
+        return self.sport_type or ''
+    
+    @property
+    def price_per_slot(self):
+        """Get price_per_slot from pricing structure or direct field"""
+        # First check if there's a direct price_per_slot attribute
+        if hasattr(self, '_price_per_slot') and self._price_per_slot:
+            return self._price_per_slot
+        
+        # Then check pricing structure
+        if self.pricing:
+            # Return the first available price
+            for price in self.pricing.values():
+                if price and price > 0:
+                    return price
+        return 0 
