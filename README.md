@@ -3316,140 +3316,3129 @@ document.addEventListener('DOMContentLoaded', function() {
 - Optimized forms
 - Responsive charts
 
+## Chi tiết Back-end Implementation với Flask
+
+### 1. Kiến trúc Back-end
+
+#### 1.1 Cấu trúc ứng dụng Flask
+
+**Application Factory Pattern:**
+```python
+# app/__init__.py
+from flask import Flask
+from flask_login import LoginManager
+from flask_mail import Mail
+from .config import Config
+
+def create_app(config_class=Config):
+    app = Flask(__name__)
+    app.config.from_object(config_class)
+    
+    # Initialize extensions
+    login_manager = LoginManager()
+    login_manager.init_app(app)
+    login_manager.login_view = 'auth.login'
+    
+    mail = Mail()
+    mail.init_app(app)
+    
+    # Register blueprints
+    from .routes import auth, customer, owner, admin, common
+    app.register_blueprint(auth.bp)
+    app.register_blueprint(customer.bp)
+    app.register_blueprint(owner.bp)
+    app.register_blueprint(admin.bp)
+    app.register_blueprint(common.bp)
+    
+    return app
+```
+
+**Blueprint Structure:**
+```
+app/routes/
+├── __init__.py
+├── auth.py          # Authentication routes
+├── customer.py      # Customer-specific routes
+├── owner.py         # Owner-specific routes
+├── admin.py         # Admin-specific routes
+├── common.py        # Common/shared routes
+└── api/            # REST API endpoints
+    ├── auth.py
+    ├── customer.py
+    └── owner.py
+```
+
+#### 1.2 Configuration Management
+
+**Environment-based Configuration:**
+```python
+# app/config.py
+import os
+from datetime import timedelta
+
+class Config:
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
+    
+    # Database configuration
+    DATABASE_URL = os.environ.get('DATABASE_URL') or 'sqlite:///sportslot.db'
+    
+    # Email configuration
+    MAIL_SERVER = os.environ.get('MAIL_SERVER') or 'smtp.gmail.com'
+    MAIL_PORT = int(os.environ.get('MAIL_PORT') or 587)
+    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() in ['true', 'on', '1']
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER')
+    
+    # Session configuration
+    PERMANENT_SESSION_LIFETIME = timedelta(days=7)
+    
+    # File upload configuration
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
+    UPLOAD_FOLDER = 'app/static/uploads'
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+class DevelopmentConfig(Config):
+    DEBUG = True
+    TESTING = False
+
+class ProductionConfig(Config):
+    DEBUG = False
+    TESTING = False
+
+class TestingConfig(Config):
+    TESTING = True
+    WTF_CSRF_ENABLED = False
+```
+
+### 2. Authentication & Authorization
+
+#### 2.1 User Management System
+
+**User Model với Flask-Login:**
+```python
+# app/models/user.py
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
+
+class User(UserMixin):
+    def __init__(self, id, username, email, role, created_at=None):
+        self.id = id
+        self.username = username
+        self.email = email
+        self.role = role  # 'customer', 'owner', 'admin'
+        self.created_at = created_at or datetime.utcnow()
+        self.is_active = True
+        self.email_verified = False
+        
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+        
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+        
+    def get_id(self):
+        return str(self.id)
+        
+    def is_authenticated(self):
+        return True
+        
+    def is_anonymous(self):
+        return False
+```
+
+**Authentication Routes:**
+```python
+# app/routes/auth.py
+from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask_login import login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash
+from ..models.user import User
+
+bp = Blueprint('auth', __name__, url_prefix='/auth')
+
+@bp.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        role = request.form.get('role', 'customer')
+        
+        # Validate user credentials
+        user = validate_user(username, password, role)
+        
+        if user:
+            login_user(user, remember=True)
+            flash('Đăng nhập thành công!', 'success')
+            
+            # Redirect based on role
+            if user.role == 'customer':
+                return redirect(url_for('customer.home'))
+            elif user.role == 'owner':
+                return redirect(url_for('owner.dashboard'))
+            elif user.role == 'admin':
+                return redirect(url_for('admin.dashboard'))
+        else:
+            flash('Tên đăng nhập hoặc mật khẩu không đúng!', 'error')
+    
+    return render_template('auth/login.html')
+
+@bp.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        role = request.form.get('role', 'customer')
+        
+        # Validation
+        if password != confirm_password:
+            flash('Mật khẩu xác nhận không khớp!', 'error')
+            return render_template('auth/register.html')
+            
+        if len(password) < 6:
+            flash('Mật khẩu phải có ít nhất 6 ký tự!', 'error')
+            return render_template('auth/register.html')
+        
+        # Create new user
+        user = create_user(username, email, password, role)
+        
+        if user:
+            flash('Đăng ký thành công! Vui lòng đăng nhập.', 'success')
+            return redirect(url_for('auth.login'))
+        else:
+            flash('Tên đăng nhập hoặc email đã tồn tại!', 'error')
+    
+    return render_template('auth/register.html')
+
+@bp.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('Đã đăng xuất thành công!', 'success')
+    return redirect(url_for('common.home'))
+```
+
+#### 2.2 Role-based Access Control
+
+**Decorator cho Role Protection:**
+```python
+# app/utils/decorators.py
+from functools import wraps
+from flask import abort, flash, redirect, url_for
+from flask_login import current_user
+
+def role_required(role):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not current_user.is_authenticated:
+                return redirect(url_for('auth.login'))
+            
+            if current_user.role != role:
+                flash('Bạn không có quyền truy cập trang này!', 'error')
+                return redirect(url_for('common.home'))
+            
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+def admin_required(f):
+    return role_required('admin')(f)
+
+def owner_required(f):
+    return role_required('owner')(f)
+
+def customer_required(f):
+    return role_required('customer')(f)
+```
+
+### 3. Data Models & Business Logic
+
+#### 3.1 Field Management
+
+**Field Model:**
+```python
+# app/models/field.py
+from datetime import datetime, time
+from decimal import Decimal
+
+class Field:
+    def __init__(self, id, name, field_type, location, price_per_slot, 
+                 owner_id, description=None, image_url=None, is_active=True):
+        self.id = id
+        self.name = name
+        self.field_type = field_type  # 'football', 'basketball', 'tennis', etc.
+        self.location = location
+        self.price_per_slot = Decimal(price_per_slot)
+        self.owner_id = owner_id
+        self.description = description
+        self.image_url = image_url
+        self.is_active = is_active
+        self.created_at = datetime.utcnow()
+        self.rating = 0.0
+        self.review_count = 0
+        
+    def get_availability(self, date):
+        """Lấy lịch trống cho ngày cụ thể"""
+        # Mock implementation - trong thực tế sẽ query database
+        available_slots = []
+        start_time = time(6, 0)  # 6:00 AM
+        end_time = time(22, 0)   # 10:00 PM
+        
+        current_time = start_time
+        while current_time < end_time:
+            # Mock: 50% chance slot is available
+            if hash(f"{self.id}-{date}-{current_time}") % 2 == 0:
+                available_slots.append(current_time.strftime("%H:%M"))
+            current_time = time(current_time.hour + 2, current_time.minute)
+            
+        return available_slots
+    
+    def calculate_price(self, duration_hours, voucher_code=None):
+        """Tính giá thuê sân"""
+        base_price = self.price_per_slot * duration_hours
+        
+        if voucher_code:
+            discount = self.apply_voucher(voucher_code, base_price)
+            return base_price - discount
+        
+        return base_price
+    
+    def apply_voucher(self, voucher_code, amount):
+        """Áp dụng voucher giảm giá"""
+        # Mock implementation
+        vouchers = {
+            'WELCOME10': 0.1,  # 10% discount
+            'SPORT20': 0.2,    # 20% discount
+            'VIP30': 0.3       # 30% discount
+        }
+        
+        discount_rate = vouchers.get(voucher_code, 0)
+        return amount * discount_rate
+```
+
+#### 3.2 Booking System
+
+**Booking Model:**
+```python
+# app/models/booking.py
+from datetime import datetime, timedelta
+from decimal import Decimal
+
+class Booking:
+    def __init__(self, id, field_id, customer_id, booking_date, 
+                 start_time, duration_hours, total_amount, status='pending'):
+        self.id = id
+        self.field_id = field_id
+        self.customer_id = customer_id
+        self.booking_date = booking_date
+        self.start_time = start_time
+        self.duration_hours = duration_hours
+        self.total_amount = Decimal(total_amount)
+        self.status = status  # 'pending', 'approved', 'rejected', 'cancelled'
+        self.created_at = datetime.utcnow()
+        self.updated_at = datetime.utcnow()
+        self.voucher_code = None
+        self.discount_amount = Decimal('0')
+        
+    def get_end_time(self):
+        """Tính thời gian kết thúc"""
+        start_dt = datetime.combine(self.booking_date, self.start_time)
+        end_dt = start_dt + timedelta(hours=self.duration_hours)
+        return end_dt.time()
+    
+    def is_conflict(self, other_booking):
+        """Kiểm tra xung đột thời gian với booking khác"""
+        if self.field_id != other_booking.field_id:
+            return False
+            
+        if self.booking_date != other_booking.booking_date:
+            return False
+            
+        self_start = datetime.combine(self.booking_date, self.start_time)
+        self_end = self_start + timedelta(hours=self.duration_hours)
+        
+        other_start = datetime.combine(other_booking.booking_date, other_booking.start_time)
+        other_end = other_start + timedelta(hours=other_booking.duration_hours)
+        
+        return (self_start < other_end and self_end > other_start)
+    
+    def can_cancel(self):
+        """Kiểm tra có thể hủy booking không"""
+        booking_datetime = datetime.combine(self.booking_date, self.start_time)
+        now = datetime.now()
+        
+        # Có thể hủy trước 2 giờ
+        return (booking_datetime - now) > timedelta(hours=2)
+    
+    def calculate_refund(self):
+        """Tính tiền hoàn lại khi hủy"""
+        booking_datetime = datetime.combine(self.booking_date, self.start_time)
+        now = datetime.now()
+        time_diff = booking_datetime - now
+        
+        if time_diff > timedelta(hours=24):
+            return self.total_amount * Decimal('0.8')  # Hoàn 80%
+        elif time_diff > timedelta(hours=2):
+            return self.total_amount * Decimal('0.5')  # Hoàn 50%
+        else:
+            return Decimal('0')  # Không hoàn
+```
+
+#### 3.3 Payment Processing
+
+**Payment Model:**
+```python
+# app/models/payment.py
+from datetime import datetime
+from decimal import Decimal
+
+class Payment:
+    def __init__(self, id, booking_id, amount, payment_method, status='pending'):
+        self.id = id
+        self.booking_id = booking_id
+        self.amount = Decimal(amount)
+        self.payment_method = payment_method  # 'cash', 'bank_transfer', 'momo', 'vnpay'
+        self.status = status  # 'pending', 'completed', 'failed', 'refunded'
+        self.created_at = datetime.utcnow()
+        self.completed_at = None
+        self.transaction_id = None
+        self.gateway_response = None
+        
+    def process_payment(self):
+        """Xử lý thanh toán"""
+        # Mock payment processing
+        import random
+        success = random.choice([True, True, True, False])  # 75% success rate
+        
+        if success:
+            self.status = 'completed'
+            self.completed_at = datetime.utcnow()
+            self.transaction_id = f"TXN{self.id:06d}"
+            return True
+        else:
+            self.status = 'failed'
+            self.gateway_response = 'Payment failed'
+            return False
+    
+    def refund(self, amount=None):
+        """Hoàn tiền"""
+        refund_amount = amount or self.amount
+        self.status = 'refunded'
+        return {
+            'success': True,
+            'amount': refund_amount,
+            'transaction_id': f"REF{self.id:06d}"
+        }
+```
+
+### 4. API Endpoints
+
+#### 4.1 RESTful API Design
+
+**API Authentication:**
+```python
+# app/routes/api/auth.py
+from flask import Blueprint, request, jsonify
+from flask_login import login_user, logout_user, current_user
+from functools import wraps
+
+bp = Blueprint('api_auth', __name__, url_prefix='/api/auth')
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get('Authorization')
+        
+        if not token:
+            return jsonify({'message': 'Token is missing!'}), 401
+        
+        try:
+            # Verify token (implement JWT verification)
+            user = verify_token(token)
+            if not user:
+                return jsonify({'message': 'Token is invalid!'}), 401
+        except:
+            return jsonify({'message': 'Token is invalid!'}), 401
+        
+        return f(*args, **kwargs)
+    return decorated
+
+@bp.route('/login', methods=['POST'])
+def api_login():
+    data = request.get_json()
+    
+    username = data.get('username')
+    password = data.get('password')
+    role = data.get('role', 'customer')
+    
+    user = validate_user(username, password, role)
+    
+    if user:
+        login_user(user)
+        token = generate_token(user)
+        return jsonify({
+            'success': True,
+            'token': token,
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'role': user.role
+            }
+        })
+    else:
+        return jsonify({
+            'success': False,
+            'message': 'Invalid credentials'
+        }), 401
+```
+
+**Field API Endpoints:**
+```python
+# app/routes/api/customer.py
+from flask import Blueprint, request, jsonify
+from ..models.field import Field
+from ..models.booking import Booking
+
+bp = Blueprint('api_customer', __name__, url_prefix='/api/customer')
+
+@bp.route('/fields', methods=['GET'])
+def get_fields():
+    """Lấy danh sách sân thể thao"""
+    # Query parameters
+    field_type = request.args.get('type')
+    location = request.args.get('location')
+    date = request.args.get('date')
+    time = request.args.get('time')
+    
+    # Filter fields based on parameters
+    fields = filter_fields(field_type, location, date, time)
+    
+    return jsonify({
+        'success': True,
+        'fields': [field.to_dict() for field in fields]
+    })
+
+@bp.route('/fields/<int:field_id>', methods=['GET'])
+def get_field_detail(field_id):
+    """Lấy chi tiết sân thể thao"""
+    field = get_field_by_id(field_id)
+    
+    if not field:
+        return jsonify({
+            'success': False,
+            'message': 'Field not found'
+        }), 404
+    
+    # Get availability for next 7 days
+    availability = {}
+    from datetime import date, timedelta
+    for i in range(7):
+        check_date = date.today() + timedelta(days=i)
+        availability[check_date.isoformat()] = field.get_availability(check_date)
+    
+    return jsonify({
+        'success': True,
+        'field': field.to_dict(),
+        'availability': availability
+    })
+
+@bp.route('/bookings', methods=['POST'])
+@token_required
+def create_booking():
+    """Tạo booking mới"""
+    data = request.get_json()
+    
+    field_id = data.get('field_id')
+    booking_date = data.get('booking_date')
+    start_time = data.get('start_time')
+    duration_hours = data.get('duration_hours', 1)
+    voucher_code = data.get('voucher_code')
+    
+    # Validate booking
+    validation_result = validate_booking(
+        field_id, booking_date, start_time, duration_hours, current_user.id
+    )
+    
+    if not validation_result['valid']:
+        return jsonify({
+            'success': False,
+            'message': validation_result['message']
+        }), 400
+    
+    # Create booking
+    booking = create_booking_record(
+        field_id, current_user.id, booking_date, 
+        start_time, duration_hours, voucher_code
+    )
+    
+    return jsonify({
+        'success': True,
+        'booking': booking.to_dict()
+    })
+
+@bp.route('/bookings/<int:booking_id>', methods=['PUT'])
+@token_required
+def update_booking(booking_id):
+    """Cập nhật booking"""
+    booking = get_booking_by_id(booking_id)
+    
+    if not booking or booking.customer_id != current_user.id:
+        return jsonify({
+            'success': False,
+            'message': 'Booking not found'
+        }), 404
+    
+    data = request.get_json()
+    action = data.get('action')
+    
+    if action == 'cancel':
+        if not booking.can_cancel():
+            return jsonify({
+                'success': False,
+                'message': 'Cannot cancel booking less than 2 hours before start time'
+            }), 400
+        
+        booking.status = 'cancelled'
+        refund_amount = booking.calculate_refund()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Booking cancelled successfully',
+            'refund_amount': float(refund_amount)
+        })
+    
+    return jsonify({
+        'success': False,
+        'message': 'Invalid action'
+    }), 400
+```
+
+### 5. Business Logic Implementation
+
+#### 5.1 Booking Validation Logic
+
+```python
+# app/services/booking_service.py
+from datetime import datetime, timedelta
+from ..models.field import Field
+from ..models.booking import Booking
+
+class BookingService:
+    @staticmethod
+    def validate_booking(field_id, booking_date, start_time, duration_hours, customer_id):
+        """Validate booking request"""
+        errors = []
+        
+        # Check if field exists and is active
+        field = get_field_by_id(field_id)
+        if not field or not field.is_active:
+            errors.append("Sân thể thao không tồn tại hoặc đã bị vô hiệu hóa")
+        
+        # Check if booking date is in the future
+        booking_datetime = datetime.combine(booking_date, start_time)
+        if booking_datetime <= datetime.now():
+            errors.append("Thời gian đặt sân phải trong tương lai")
+        
+        # Check if booking is within allowed time range
+        if start_time < time(6, 0) or start_time > time(22, 0):
+            errors.append("Thời gian đặt sân phải từ 6:00 đến 22:00")
+        
+        # Check if duration is valid
+        if duration_hours < 1 or duration_hours > 4:
+            errors.append("Thời lượng đặt sân phải từ 1-4 giờ")
+        
+        # Check for time conflicts
+        if field:
+            conflicts = BookingService.check_time_conflicts(
+                field_id, booking_date, start_time, duration_hours
+            )
+            if conflicts:
+                errors.append("Thời gian đã được đặt trước")
+        
+        # Check customer booking limit
+        customer_bookings = get_customer_bookings_today(customer_id, booking_date)
+        if len(customer_bookings) >= 3:
+            errors.append("Bạn đã đạt giới hạn 3 booking mỗi ngày")
+        
+        return {
+            'valid': len(errors) == 0,
+            'errors': errors
+        }
+    
+    @staticmethod
+    def check_time_conflicts(field_id, booking_date, start_time, duration_hours):
+        """Kiểm tra xung đột thời gian"""
+        existing_bookings = get_bookings_by_field_date(field_id, booking_date)
+        
+        new_start = datetime.combine(booking_date, start_time)
+        new_end = new_start + timedelta(hours=duration_hours)
+        
+        for booking in existing_bookings:
+            if booking.status in ['pending', 'approved']:
+                booking_start = datetime.combine(booking_date, booking.start_time)
+                booking_end = booking_start + timedelta(hours=booking.duration_hours)
+                
+                if (new_start < booking_end and new_end > booking_start):
+                    return True
+        
+        return False
+    
+    @staticmethod
+    def calculate_booking_price(field, duration_hours, voucher_code=None):
+        """Tính giá booking"""
+        base_price = field.price_per_slot * duration_hours
+        
+        if voucher_code:
+            discount = BookingService.apply_voucher(voucher_code, base_price)
+            return base_price - discount
+        
+        return base_price
+    
+    @staticmethod
+    def apply_voucher(voucher_code, amount):
+        """Áp dụng voucher giảm giá"""
+        voucher = get_voucher_by_code(voucher_code)
+        
+        if not voucher or not voucher.is_valid():
+            return Decimal('0')
+        
+        if voucher.discount_type == 'percentage':
+            return amount * (voucher.discount_value / 100)
+        else:
+            return min(voucher.discount_value, amount)
+```
+
+#### 5.2 Notification System
+
+```python
+# app/services/notification_service.py
+from datetime import datetime
+from ..models.notification import Notification
+
+class NotificationService:
+    @staticmethod
+    def send_booking_confirmation(booking):
+        """Gửi thông báo xác nhận booking"""
+        notification = Notification(
+            user_id=booking.customer_id,
+            title="Xác nhận đặt sân",
+            message=f"Đặt sân của bạn cho {booking.booking_date} đã được xác nhận",
+            type="booking_confirmation",
+            data={'booking_id': booking.id}
+        )
+        
+        save_notification(notification)
+        send_email_notification(notification)
+    
+    @staticmethod
+    def send_booking_reminder(booking):
+        """Gửi thông báo nhắc nhở booking"""
+        notification = Notification(
+            user_id=booking.customer_id,
+            title="Nhắc nhở đặt sân",
+            message=f"Bạn có lịch đặt sân vào ngày mai lúc {booking.start_time}",
+            type="booking_reminder",
+            data={'booking_id': booking.id}
+        )
+        
+        save_notification(notification)
+        send_email_notification(notification)
+    
+    @staticmethod
+    def send_payment_confirmation(payment):
+        """Gửi thông báo xác nhận thanh toán"""
+        notification = Notification(
+            user_id=payment.booking.customer_id,
+            title="Xác nhận thanh toán",
+            message=f"Thanh toán {payment.amount:,.0f} VNĐ đã được xác nhận",
+            type="payment_confirmation",
+            data={'payment_id': payment.id}
+        )
+        
+        save_notification(notification)
+        send_email_notification(notification)
+    
+    @staticmethod
+    def send_system_notification(user_ids, title, message, notification_type="system"):
+        """Gửi thông báo hệ thống cho nhiều người dùng"""
+        notifications = []
+        
+        for user_id in user_ids:
+            notification = Notification(
+                user_id=user_id,
+                title=title,
+                message=message,
+                type=notification_type
+            )
+            notifications.append(notification)
+        
+        save_notifications_bulk(notifications)
+```
+
+### 6. Error Handling & Logging
+
+#### 6.1 Custom Error Handlers
+
+```python
+# app/utils/error_handlers.py
+from flask import render_template, jsonify
+from werkzeug.exceptions import HTTPException
+import logging
+
+def register_error_handlers(app):
+    @app.errorhandler(404)
+    def not_found_error(error):
+        if request.path.startswith('/api/'):
+            return jsonify({
+                'success': False,
+                'message': 'Resource not found'
+            }), 404
+        return render_template('shared/404.html'), 404
+    
+    @app.errorhandler(500)
+    def internal_error(error):
+        # Log the error
+        logging.error(f'Internal server error: {error}')
+        
+        if request.path.startswith('/api/'):
+            return jsonify({
+                'success': False,
+                'message': 'Internal server error'
+            }), 500
+        return render_template('shared/500.html'), 500
+    
+    @app.errorhandler(403)
+    def forbidden_error(error):
+        if request.path.startswith('/api/'):
+            return jsonify({
+                'success': False,
+                'message': 'Access forbidden'
+            }), 403
+        return render_template('shared/403.html'), 403
+```
+
+#### 6.2 Logging Configuration
+
+```python
+# app/utils/logging_config.py
+import logging
+from logging.handlers import RotatingFileHandler
+import os
+
+def setup_logging(app):
+    if not app.debug and not app.testing:
+        # Create logs directory if it doesn't exist
+        if not os.path.exists('logs'):
+            os.mkdir('logs')
+        
+        # File handler for general logs
+        file_handler = RotatingFileHandler(
+            'logs/sportslot.log', 
+            maxBytes=10240000, 
+            backupCount=10
+        )
+        file_handler.setFormatter(logging.Formatter(
+            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+        ))
+        file_handler.setLevel(logging.INFO)
+        app.logger.addHandler(file_handler)
+        
+        # File handler for error logs
+        error_handler = RotatingFileHandler(
+            'logs/error.log', 
+            maxBytes=10240000, 
+            backupCount=10
+        )
+        error_handler.setFormatter(logging.Formatter(
+            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+        ))
+        error_handler.setLevel(logging.ERROR)
+        app.logger.addHandler(error_handler)
+        
+        app.logger.setLevel(logging.INFO)
+        app.logger.info('SportSlot startup')
+```
+
+### 7. Security Implementation
+
+#### 7.1 CSRF Protection
+
+```python
+# app/utils/security.py
+from flask_wtf.csrf import CSRFProtect
+from flask import request, abort
+
+csrf = CSRFProtect()
+
+def init_csrf(app):
+    csrf.init_app(app)
+    
+    @app.before_request
+    def csrf_protect():
+        if request.method == "POST":
+            token = request.form.get('csrf_token')
+            if not token or not csrf.validate_token(token):
+                abort(400, description="CSRF token missing or invalid")
+
+def generate_csrf_token():
+    return csrf._get_token()
+```
+
+#### 7.2 Input Validation & Sanitization
+
+```python
+# app/utils/validation.py
+import re
+from werkzeug.security import safe_str_cmp
+
+class InputValidator:
+    @staticmethod
+    def validate_email(email):
+        """Validate email format"""
+        pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        return re.match(pattern, email) is not None
+    
+    @staticmethod
+    def validate_phone(phone):
+        """Validate Vietnamese phone number"""
+        pattern = r'^(0|\+84)[3|5|7|8|9][0-9]{8}$'
+        return re.match(pattern, phone) is not None
+    
+    @staticmethod
+    def validate_password(password):
+        """Validate password strength"""
+        if len(password) < 8:
+            return False, "Mật khẩu phải có ít nhất 8 ký tự"
+        
+        if not re.search(r'[A-Z]', password):
+            return False, "Mật khẩu phải có ít nhất 1 chữ hoa"
+        
+        if not re.search(r'[a-z]', password):
+            return False, "Mật khẩu phải có ít nhất 1 chữ thường"
+        
+        if not re.search(r'\d', password):
+            return False, "Mật khẩu phải có ít nhất 1 số"
+        
+        return True, "Mật khẩu hợp lệ"
+    
+    @staticmethod
+    def sanitize_input(text):
+        """Sanitize user input"""
+        # Remove potentially dangerous characters
+        dangerous_chars = ['<', '>', '"', "'", '&']
+        for char in dangerous_chars:
+            text = text.replace(char, '')
+        
+        # Limit length
+        if len(text) > 1000:
+            text = text[:1000]
+        
+        return text.strip()
+```
+
+### 8. Performance Optimization
+
+#### 8.1 Database Query Optimization
+
+```python
+# app/utils/db_optimization.py
+from functools import wraps
+import time
+
+def cache_result(ttl=300):  # 5 minutes default
+    """Cache decorator for expensive operations"""
+    def decorator(func):
+        cache = {}
+        
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            key = str(args) + str(sorted(kwargs.items()))
+            
+            if key in cache:
+                result, timestamp = cache[key]
+                if time.time() - timestamp < ttl:
+                    return result
+            
+            result = func(*args, **kwargs)
+            cache[key] = (result, time.time())
+            return result
+        
+        return wrapper
+    return decorator
+
+@cache_result(ttl=600)  # Cache for 10 minutes
+def get_popular_fields():
+    """Get popular fields with caching"""
+    # Expensive database query
+    return query_popular_fields()
+
+def optimize_booking_query(field_id, date):
+    """Optimized booking query with proper indexing"""
+    # Use database indexes for faster queries
+    return Booking.query.filter_by(
+        field_id=field_id,
+        booking_date=date
+    ).options(
+        joinedload(Booking.field),
+        joinedload(Booking.customer)
+    ).all()
+```
+
+#### 8.2 Background Task Processing
+
+```python
+# app/utils/background_tasks.py
+from celery import Celery
+from datetime import datetime, timedelta
+
+# Configure Celery
+celery = Celery('sportslot', broker='redis://localhost:6379/0')
+
+@celery.task
+def send_booking_reminders():
+    """Send booking reminders for tomorrow's bookings"""
+    tomorrow = datetime.now().date() + timedelta(days=1)
+    bookings = get_bookings_for_date(tomorrow)
+    
+    for booking in bookings:
+        send_reminder_email(booking)
+
+@celery.task
+def cleanup_expired_bookings():
+    """Clean up expired pending bookings"""
+    expired_bookings = get_expired_pending_bookings()
+    
+    for booking in expired_bookings:
+        booking.status = 'cancelled'
+        save_booking(booking)
+
+@celery.task
+def generate_daily_reports():
+    """Generate daily revenue and booking reports"""
+    yesterday = datetime.now().date() - timedelta(days=1)
+    
+    # Generate reports
+    revenue_report = generate_revenue_report(yesterday)
+    booking_report = generate_booking_report(yesterday)
+    
+    # Send reports to admins
+    send_reports_to_admins(revenue_report, booking_report)
+```
+
+### 9. Testing Implementation
+
+#### 9.1 Unit Tests
+
+```python
+# tests/test_models.py
+import unittest
+from app.models.booking import Booking
+from app.models.field import Field
+from datetime import datetime, time, date
+
+class TestBookingModel(unittest.TestCase):
+    def setUp(self):
+        self.field = Field(
+            id=1,
+            name="Sân Bóng Đá A",
+            field_type="football",
+            location="Quận 1, TP.HCM",
+            price_per_slot=200000
+        )
+        
+        self.booking = Booking(
+            id=1,
+            field_id=1,
+            customer_id=1,
+            booking_date=date(2024, 1, 15),
+            start_time=time(18, 0),
+            duration_hours=2,
+            total_amount=400000
+        )
+    
+    def test_booking_end_time_calculation(self):
+        """Test end time calculation"""
+        end_time = self.booking.get_end_time()
+        expected_time = time(20, 0)
+        self.assertEqual(end_time, expected_time)
+    
+    def test_booking_conflict_detection(self):
+        """Test booking conflict detection"""
+        other_booking = Booking(
+            id=2,
+            field_id=1,
+            customer_id=2,
+            booking_date=date(2024, 1, 15),
+            start_time=time(19, 0),
+            duration_hours=2,
+            total_amount=400000
+        )
+        
+        self.assertTrue(self.booking.is_conflict(other_booking))
+    
+    def test_booking_cancellation_eligibility(self):
+        """Test booking cancellation eligibility"""
+        # Booking is in the future, should be cancellable
+        self.assertTrue(self.booking.can_cancel())
+        
+        # Modify booking to be in the past
+        self.booking.booking_date = date(2024, 1, 1)
+        self.assertFalse(self.booking.can_cancel())
+
+class TestFieldModel(unittest.TestCase):
+    def setUp(self):
+        self.field = Field(
+            id=1,
+            name="Sân Tennis Pro",
+            field_type="tennis",
+            location="Quận 2, TP.HCM",
+            price_per_slot=300000
+        )
+    
+    def test_price_calculation(self):
+        """Test price calculation with voucher"""
+        price = self.field.calculate_price(2, "WELCOME10")
+        expected_price = 300000 * 2 * 0.9  # 10% discount
+        self.assertEqual(price, expected_price)
+    
+    def test_availability_generation(self):
+        """Test availability generation"""
+        availability = self.field.get_availability(date(2024, 1, 15))
+        self.assertIsInstance(availability, list)
+        self.assertTrue(len(availability) > 0)
+```
+
+#### 9.2 Integration Tests
+
+```python
+# tests/test_api.py
+import unittest
+from app import create_app
+from app.models.user import User
+
+class TestAPIEndpoints(unittest.TestCase):
+    def setUp(self):
+        self.app = create_app('testing')
+        self.client = self.app.test_client()
+        self.app_context = self.app.app_context()
+        self.app_context.push()
+    
+    def tearDown(self):
+        self.app_context.pop()
+    
+    def test_get_fields_api(self):
+        """Test GET /api/customer/fields endpoint"""
+        response = self.client.get('/api/customer/fields')
+        data = response.get_json()
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertIn('fields', data)
+    
+    def test_create_booking_api(self):
+        """Test POST /api/customer/bookings endpoint"""
+        booking_data = {
+            'field_id': 1,
+            'booking_date': '2024-01-15',
+            'start_time': '18:00',
+            'duration_hours': 2
+        }
+        
+        response = self.client.post(
+            '/api/customer/bookings',
+            json=booking_data,
+            headers={'Authorization': 'Bearer test_token'}
+        )
+        
+        data = response.get_json()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data['success'])
+    
+    def test_invalid_booking_api(self):
+        """Test booking with invalid data"""
+        booking_data = {
+            'field_id': 999,  # Non-existent field
+            'booking_date': '2024-01-15',
+            'start_time': '18:00',
+            'duration_hours': 2
+        }
+        
+        response = self.client.post(
+            '/api/customer/bookings',
+            json=booking_data,
+            headers={'Authorization': 'Bearer test_token'}
+        )
+        
+        data = response.get_json()
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(data['success'])
+```
+
+### 10. Deployment & Production Configuration
+
+#### 10.1 Production WSGI Configuration
+
+```python
+# wsgi.py
+from app import create_app
+from app.config import ProductionConfig
+
+app = create_app(ProductionConfig)
+
+if __name__ == "__main__":
+    app.run()
+```
+
+#### 10.2 Docker Configuration
+
+```dockerfile
+# Dockerfile
+FROM python:3.9-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements and install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY . .
+
+# Create non-root user
+RUN useradd -m -u 1000 sportslot && chown -R sportslot:sportslot /app
+USER sportslot
+
+# Expose port
+EXPOSE 5000
+
+# Run application
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "wsgi:app"]
+```
+
+#### 10.3 Environment Configuration
+
+```bash
+# .env.production
+FLASK_ENV=production
+SECRET_KEY=your-super-secret-production-key-here
+DATABASE_URL=postgresql://user:password@localhost/sportslot_prod
+MAIL_SERVER=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USE_TLS=True
+MAIL_USERNAME=your-email@gmail.com
+MAIL_PASSWORD=your-app-password
+REDIS_URL=redis://localhost:6379/0
+```
+
 ## Triển khai
 
 ### Development
-```bash
-python run.py
-```
-
-### Production
-```bash
-# Sử dụng Gunicorn
-pip install gunicorn
-gunicorn -w 4 -b 0.0.0.0:5000 run:app
-
-# Hoặc sử dụng uWSGI
-pip install uwsgi
-uwsgi --socket 0.0.0.0:5000 --protocol=http -w run:app
-```
-
-## Cấu hình
-
-### Email Configuration
-Để sử dụng tính năng gửi email, cần cấu hình trong `app/config.py`:
-```python
-MAIL_SERVER = 'smtp.gmail.com'
-MAIL_PORT = 587
-MAIL_USE_TLS = True
-MAIL_USERNAME = 'your_gmail@gmail.com'
-MAIL_PASSWORD = 'your_app_password'
-MAIL_DEFAULT_SENDER = 'your_gmail@gmail.com'
-```
-
-### Database Configuration
-Hiện tại hệ thống sử dụng mock data. Để tích hợp database thực:
-1. Cài đặt database driver (SQLAlchemy, PyMongo)
-2. Cấu hình connection string
-3. Tạo models và migrations
-
-## Troubleshooting
-
-### Lỗi thường gặp:
-
-1. **ModuleNotFoundError**: Cài đặt lại dependencies
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-2. **Port already in use**: Thay đổi port
-   ```bash
-   python run.py --port 5001
-   ```
-
-3. **Email không gửi được**: Kiểm tra cấu hình SMTP
-   - Đảm bảo đã bật "Less secure app access" hoặc sử dụng App Password
-   - Kiểm tra firewall và antivirus
-
-## Đóng góp
-
-1. Fork dự án
-2. Tạo feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Tạo Pull Request
-
-## License
-
-Dự án này được phân phối dưới giấy phép MIT. Xem file `LICENSE` để biết thêm chi tiết.
-
-## 👨‍💻 Thành viên & Phân công công việc
-
-### 1. [Hồ Du Tuấn Đạt_2374802010097](https://github.com/Hodutuandat) (Leader)
-- **Lên ý tưởng hệ thống:**
-  - Đề xuất mô hình hoạt động tổng thể của hệ thống đặt sân thể thao trực tuyến.
-  - Xây dựng các flow nghiệp vụ chính: đăng nhập, đặt sân, quản lý sân, quản trị hệ thống.
-  - Phân tích các vai trò (Customer, Owner, Admin) và xác định chức năng cho từng vai trò.
-- **Setup cấu trúc dự án:**
-  - Khởi tạo repository, thiết lập cấu trúc thư mục chuẩn cho Flask (app, routes, models, templates, static...).
-  - Tạo các blueprint cho từng module (auth, customer, owner, admin, common).
-  - Thiết lập các file cấu hình (`config.py`, `.env`), tích hợp Flask-Login, Flask-Mail.
-  - Xây dựng các mock data và flow mẫu cho phát triển nhanh.
-- **Cấu trúc lại toàn bộ front-end:**
-  - Chuẩn hóa lại các template HTML theo từng vai trò, sử dụng Jinja2 inheritance (`base.html`, `shared/navbar.html`, `footer.html`...).
-  - Thiết kế lại hệ thống CSS: tách riêng từng file cho từng module, xây dựng file theme.css dùng biến màu toàn cục.
-  - Đảm bảo responsive, tối ưu trải nghiệm người dùng trên desktop và mobile.
-  - Tích hợp logo, favicon, đồng bộ hóa giao diện theo màu chủ đạo trắng-xám-đen.
-  - Review, refactor và tối ưu code front-end cho các thành viên khác.
-
----
-
-### 2. [Nguyễn Minh Chính_2275106050051](https://github.com/F4ol4n)
-- **Liên kết backend với MongoDB:**
-  - Nghiên cứu, lựa chọn thư viện phù hợp (PyMongo hoặc Flask-PyMongo) để kết nối Flask với MongoDB.
-  - Thiết lập cấu hình kết nối database trong `config.py` và `.env`.
-  - Thiết kế các schema cho các collection: users, fields, bookings, transactions, vouchers...
-  - Refactor các route backend để thao tác dữ liệu thực tế với MongoDB thay cho mock data (CRUD cho sân, booking, user...).
-  - Xây dựng các hàm truy vấn, filter, phân trang dữ liệu lớn.
-  - Đảm bảo bảo mật thông tin người dùng, mã hóa password, kiểm soát quyền truy cập.
-  - Viết tài liệu hướng dẫn cài đặt MongoDB local và deploy cloud (MongoDB Atlas).
-
----
-
-### 3. [Nguyễn Thị Phương Nhung_2374802013554](https://github.com/NguyenThiPhuongNhung2005)
-- **Thiết kế giao diện Customer:**
-  - Phân tích nghiệp vụ và xây dựng wireframe cho các trang dành cho khách hàng: Trang chủ, Danh sách sân, Chi tiết sân, Đặt sân, Lịch sử đặt sân, Quản lý voucher, Giao dịch, Hồ sơ cá nhân.
-  - Thiết kế giao diện HTML/CSS cho từng trang, đảm bảo đồng bộ với theme chung.
-  - Sử dụng Bootstrap 5 và custom CSS để tối ưu trải nghiệm người dùng, hỗ trợ responsive.
-  - Tích hợp các component động: modal đặt sân, filter tìm kiếm, hiển thị lịch booking.
-  - Kết nối front-end với backend qua Flask template, truyền dữ liệu động từ server.
-  - Kiểm thử giao diện trên nhiều thiết bị, trình duyệt, tối ưu hiệu năng và accessibility.
-  - Viết hướng dẫn sử dụng giao diện cho khách hàng.
-
----
-
-### 4. [Lê Quang Minh_2374802010310](https://github.com/leminh05)
-- **Thiết kế giao diện Owner:**
-  - Phân tích nghiệp vụ dành cho chủ sân: Dashboard, Quản lý sân, Thêm/sửa/xóa sân, Lịch đặt sân, Duyệt booking, Thống kê doanh thu, Thông báo, Giao dịch, Hồ sơ cá nhân.
-  - Thiết kế layout dashboard trực quan, hiển thị các chỉ số quan trọng (doanh thu, số booking, trạng thái sân...).
-  - Xây dựng các form nhập liệu, bảng dữ liệu, modal xác nhận, filter nâng cao cho quản lý sân và booking.
-  - Đảm bảo giao diện dễ sử dụng, thao tác nhanh, hỗ trợ responsive trên mobile/tablet.
-  - Tích hợp các thông báo realtime (nếu có), hiển thị trạng thái booking, cập nhật trạng thái sân.
-  - Kết nối dữ liệu động từ backend, kiểm thử các luồng thao tác của chủ sân.
-  - Viết tài liệu hướng dẫn sử dụng giao diện Owner.
-
----
-
-## Liên hệ
-
-- **Email**: support@sportslot.vn
-- **Website**: https://sportslot.vn
-- **Hotline**: 1900-xxxx
-
----
-
-**SportSlot** - Hệ thống đặt sân thể thao thông minh, kết nối người chơi với sân thể thao chất lượng!
-
-
-
----- test
+```# #   C h i   t i �t   B a c k - e n d   I m p l e m e n t a t i o n   v �i   F l a s k 
+ 
+ 
+ 
+ # # #   1 .   K i �n   t r � c   B a c k - e n d 
+ 
+ 
+ 
+ # # # #   1 . 1   C �u   t r � c   �n g   d �n g   F l a s k 
+ 
+ # #   C h i   t i � � � t   B a c k - e n d   I m p l e m e n t a t i o n   v � � : i   F l a s k 
+ 
+ 
+ 
+ # # #   1 .   K i � � � n   t r � � c   B a c k - e n d 
+ 
+ 
+ 
+ # # # #   1 . 1   C � � � u   t r � � c   � � � n g   d � � � n g   F l a s k 
+ 
+ 
+ 
+ * * A p p l i c a t i o n   F a c t o r y   P a t t e r n : * * 
+ 
+ ` ` ` p y t h o n 
+ 
+ #   a p p / _ _ i n i t _ _ . p y 
+ 
+ f r o m   f l a s k   i m p o r t   F l a s k 
+ 
+ f r o m   f l a s k _ l o g i n   i m p o r t   L o g i n M a n a g e r 
+ 
+ f r o m   f l a s k _ m a i l   i m p o r t   M a i l 
+ 
+ f r o m   . c o n f i g   i m p o r t   C o n f i g 
+ 
+ 
+ 
+ d e f   c r e a t e _ a p p ( c o n f i g _ c l a s s = C o n f i g ) : 
+ 
+         a p p   =   F l a s k ( _ _ n a m e _ _ ) 
+ 
+         a p p . c o n f i g . f r o m _ o b j e c t ( c o n f i g _ c l a s s ) 
+ 
+         
+ 
+         #   I n i t i a l i z e   e x t e n s i o n s 
+ 
+         l o g i n _ m a n a g e r   =   L o g i n M a n a g e r ( ) 
+ 
+         l o g i n _ m a n a g e r . i n i t _ a p p ( a p p ) 
+ 
+         l o g i n _ m a n a g e r . l o g i n _ v i e w   =   ' a u t h . l o g i n ' 
+ 
+         
+ 
+         m a i l   =   M a i l ( ) 
+ 
+         m a i l . i n i t _ a p p ( a p p ) 
+ 
+         
+ 
+         #   R e g i s t e r   b l u e p r i n t s 
+ 
+         f r o m   . r o u t e s   i m p o r t   a u t h ,   c u s t o m e r ,   o w n e r ,   a d m i n ,   c o m m o n 
+ 
+         a p p . r e g i s t e r _ b l u e p r i n t ( a u t h . b p ) 
+ 
+         a p p . r e g i s t e r _ b l u e p r i n t ( c u s t o m e r . b p ) 
+ 
+         a p p . r e g i s t e r _ b l u e p r i n t ( o w n e r . b p ) 
+ 
+         a p p . r e g i s t e r _ b l u e p r i n t ( a d m i n . b p ) 
+ 
+         a p p . r e g i s t e r _ b l u e p r i n t ( c o m m o n . b p ) 
+ 
+         
+ 
+         r e t u r n   a p p 
+ 
+ ` ` ` 
+ 
+ 
+ 
+ * * B l u e p r i n t   S t r u c t u r e : * * 
+ 
+ ` ` ` 
+ 
+ a p p / r o u t e s / 
+ 
+ �  S�  � �  �   _ _ i n i t _ _ . p y 
+ 
+ �  S�  � �  �   a u t h . p y                     #   A u t h e n t i c a t i o n   r o u t e s 
+ 
+ �  S�  � �  �   c u s t o m e r . p y             #   C u s t o m e r - s p e c i f i c   r o u t e s 
+ 
+ �  S�  � �  �   o w n e r . p y                   #   O w n e r - s p e c i f i c   r o u t e s 
+ 
+ �  S�  � �  �   a d m i n . p y                   #   A d m i n - s p e c i f i c   r o u t e s 
+ 
+ �  S�  � �  �   c o m m o n . p y                 #   C o m m o n / s h a r e d   r o u t e s 
+ 
+ �   �  � �  �   a p i /                         #   R E S T   A P I   e n d p o i n t s 
+ 
+         �  S�  � �  �   a u t h . p y 
+ 
+         �  S�  � �  �   c u s t o m e r . p y 
+ 
+         �   �  � �  �   o w n e r . p y 
+ 
+ ` ` ` 
+ 
+ 
+ 
+ # # # #   1 . 2   C o n f i g u r a t i o n   M a n a g e m e n t 
+ 
+ 
+ 
+ * * E n v i r o n m e n t - b a s e d   C o n f i g u r a t i o n : * * 
+ 
+ ` ` ` p y t h o n 
+ 
+ #   a p p / c o n f i g . p y 
+ 
+ i m p o r t   o s 
+ 
+ f r o m   d a t e t i m e   i m p o r t   t i m e d e l t a 
+ 
+ 
+ 
+ c l a s s   C o n f i g : 
+ 
+         S E C R E T _ K E Y   =   o s . e n v i r o n . g e t ( ' S E C R E T _ K E Y ' )   o r   ' d e v - s e c r e t - k e y - c h a n g e - i n - p r o d u c t i o n ' 
+ 
+         
+ 
+         #   D a t a b a s e   c o n f i g u r a t i o n 
+ 
+         D A T A B A S E _ U R L   =   o s . e n v i r o n . g e t ( ' D A T A B A S E _ U R L ' )   o r   ' s q l i t e : / / / s p o r t s l o t . d b ' 
+ 
+         
+ 
+         #   E m a i l   c o n f i g u r a t i o n 
+ 
+         M A I L _ S E R V E R   =   o s . e n v i r o n . g e t ( ' M A I L _ S E R V E R ' )   o r   ' s m t p . g m a i l . c o m ' 
+ 
+         M A I L _ P O R T   =   i n t ( o s . e n v i r o n . g e t ( ' M A I L _ P O R T ' )   o r   5 8 7 ) 
+ 
+         M A I L _ U S E _ T L S   =   o s . e n v i r o n . g e t ( ' M A I L _ U S E _ T L S ' ,   ' t r u e ' ) . l o w e r ( )   i n   [ ' t r u e ' ,   ' o n ' ,   ' 1 ' ] 
+ 
+         M A I L _ U S E R N A M E   =   o s . e n v i r o n . g e t ( ' M A I L _ U S E R N A M E ' ) 
+ 
+         M A I L _ P A S S W O R D   =   o s . e n v i r o n . g e t ( ' M A I L _ P A S S W O R D ' ) 
+ 
+         M A I L _ D E F A U L T _ S E N D E R   =   o s . e n v i r o n . g e t ( ' M A I L _ D E F A U L T _ S E N D E R ' ) 
+ 
+         
+ 
+         #   S e s s i o n   c o n f i g u r a t i o n 
+ 
+         P E R M A N E N T _ S E S S I O N _ L I F E T I M E   =   t i m e d e l t a ( d a y s = 7 ) 
+ 
+         
+ 
+         #   F i l e   u p l o a d   c o n f i g u r a t i o n 
+ 
+         M A X _ C O N T E N T _ L E N G T H   =   1 6   *   1 0 2 4   *   1 0 2 4     #   1 6 M B   m a x   f i l e   s i z e 
+ 
+         U P L O A D _ F O L D E R   =   ' a p p / s t a t i c / u p l o a d s ' 
+ 
+         A L L O W E D _ E X T E N S I O N S   =   { ' p n g ' ,   ' j p g ' ,   ' j p e g ' ,   ' g i f ' } 
+ 
+ 
+ 
+ c l a s s   D e v e l o p m e n t C o n f i g ( C o n f i g ) : 
+ 
+         D E B U G   =   T r u e 
+ 
+         T E S T I N G   =   F a l s e 
+ 
+ 
+ 
+ c l a s s   P r o d u c t i o n C o n f i g ( C o n f i g ) : 
+ 
+         D E B U G   =   F a l s e 
+ 
+         T E S T I N G   =   F a l s e 
+ 
+ 
+ 
+ c l a s s   T e s t i n g C o n f i g ( C o n f i g ) : 
+ 
+         T E S T I N G   =   T r u e 
+ 
+         W T F _ C S R F _ E N A B L E D   =   F a l s e 
+ 
+ ` ` ` 
+ 
+ 
+ 
+ # # #   2 .   A u t h e n t i c a t i o n   &   A u t h o r i z a t i o n 
+ 
+ 
+ 
+ # # # #   2 . 1   U s e r   M a n a g e m e n t   S y s t e m 
+ 
+ 
+ 
+ * * U s e r   M o d e l   v � � : i   F l a s k - L o g i n : * * 
+ 
+ ` ` ` p y t h o n 
+ 
+ #   a p p / m o d e l s / u s e r . p y 
+ 
+ f r o m   f l a s k _ l o g i n   i m p o r t   U s e r M i x i n 
+ 
+ f r o m   w e r k z e u g . s e c u r i t y   i m p o r t   g e n e r a t e _ p a s s w o r d _ h a s h ,   c h e c k _ p a s s w o r d _ h a s h 
+ 
+ f r o m   d a t e t i m e   i m p o r t   d a t e t i m e 
+ 
+ 
+ 
+ c l a s s   U s e r ( U s e r M i x i n ) : 
+ 
+         d e f   _ _ i n i t _ _ ( s e l f ,   i d ,   u s e r n a m e ,   e m a i l ,   r o l e ,   c r e a t e d _ a t = N o n e ) : 
+ 
+                 s e l f . i d   =   i d 
+ 
+                 s e l f . u s e r n a m e   =   u s e r n a m e 
+ 
+                 s e l f . e m a i l   =   e m a i l 
+ 
+                 s e l f . r o l e   =   r o l e     #   ' c u s t o m e r ' ,   ' o w n e r ' ,   ' a d m i n ' 
+ 
+                 s e l f . c r e a t e d _ a t   =   c r e a t e d _ a t   o r   d a t e t i m e . u t c n o w ( ) 
+ 
+                 s e l f . i s _ a c t i v e   =   T r u e 
+ 
+                 s e l f . e m a i l _ v e r i f i e d   =   F a l s e 
+ 
+                 
+ 
+         d e f   s e t _ p a s s w o r d ( s e l f ,   p a s s w o r d ) : 
+ 
+                 s e l f . p a s s w o r d _ h a s h   =   g e n e r a t e _ p a s s w o r d _ h a s h ( p a s s w o r d ) 
+ 
+                 
+ 
+         d e f   c h e c k _ p a s s w o r d ( s e l f ,   p a s s w o r d ) : 
+ 
+                 r e t u r n   c h e c k _ p a s s w o r d _ h a s h ( s e l f . p a s s w o r d _ h a s h ,   p a s s w o r d ) 
+ 
+                 
+ 
+         d e f   g e t _ i d ( s e l f ) : 
+ 
+                 r e t u r n   s t r ( s e l f . i d ) 
+ 
+                 
+ 
+         d e f   i s _ a u t h e n t i c a t e d ( s e l f ) : 
+ 
+                 r e t u r n   T r u e 
+ 
+                 
+ 
+         d e f   i s _ a n o n y m o u s ( s e l f ) : 
+ 
+                 r e t u r n   F a l s e 
+ 
+ ` ` ` 
+ 
+ 
+ 
+ * * A u t h e n t i c a t i o n   R o u t e s : * * 
+ 
+ ` ` ` p y t h o n 
+ 
+ #   a p p / r o u t e s / a u t h . p y 
+ 
+ f r o m   f l a s k   i m p o r t   B l u e p r i n t ,   r e n d e r _ t e m p l a t e ,   r e q u e s t ,   f l a s h ,   r e d i r e c t ,   u r l _ f o r 
+ 
+ f r o m   f l a s k _ l o g i n   i m p o r t   l o g i n _ u s e r ,   l o g o u t _ u s e r ,   l o g i n _ r e q u i r e d ,   c u r r e n t _ u s e r 
+ 
+ f r o m   w e r k z e u g . s e c u r i t y   i m p o r t   g e n e r a t e _ p a s s w o r d _ h a s h 
+ 
+ f r o m   . . m o d e l s . u s e r   i m p o r t   U s e r 
+ 
+ 
+ 
+ b p   =   B l u e p r i n t ( ' a u t h ' ,   _ _ n a m e _ _ ,   u r l _ p r e f i x = ' / a u t h ' ) 
+ 
+ 
+ 
+ @ b p . r o u t e ( ' / l o g i n ' ,   m e t h o d s = [ ' G E T ' ,   ' P O S T ' ] ) 
+ 
+ d e f   l o g i n ( ) : 
+ 
+         i f   r e q u e s t . m e t h o d   = =   ' P O S T ' : 
+ 
+                 u s e r n a m e   =   r e q u e s t . f o r m . g e t ( ' u s e r n a m e ' ) 
+ 
+                 p a s s w o r d   =   r e q u e s t . f o r m . g e t ( ' p a s s w o r d ' ) 
+ 
+                 r o l e   =   r e q u e s t . f o r m . g e t ( ' r o l e ' ,   ' c u s t o m e r ' ) 
+ 
+                 
+ 
+                 #   V a l i d a t e   u s e r   c r e d e n t i a l s 
+ 
+                 u s e r   =   v a l i d a t e _ u s e r ( u s e r n a m e ,   p a s s w o r d ,   r o l e ) 
+ 
+                 
+ 
+                 i f   u s e r : 
+ 
+                         l o g i n _ u s e r ( u s e r ,   r e m e m b e r = T r u e ) 
+ 
+                         f l a s h ( ' � � � �n g   n h � � � p   t h � � n h   c � � n g ! ' ,   ' s u c c e s s ' ) 
+ 
+                         
+ 
+                         #   R e d i r e c t   b a s e d   o n   r o l e 
+ 
+                         i f   u s e r . r o l e   = =   ' c u s t o m e r ' : 
+ 
+                                 r e t u r n   r e d i r e c t ( u r l _ f o r ( ' c u s t o m e r . h o m e ' ) ) 
+ 
+                         e l i f   u s e r . r o l e   = =   ' o w n e r ' : 
+ 
+                                 r e t u r n   r e d i r e c t ( u r l _ f o r ( ' o w n e r . d a s h b o a r d ' ) ) 
+ 
+                         e l i f   u s e r . r o l e   = =   ' a d m i n ' : 
+ 
+                                 r e t u r n   r e d i r e c t ( u r l _ f o r ( ' a d m i n . d a s h b o a r d ' ) ) 
+ 
+                 e l s e : 
+ 
+                         f l a s h ( ' T � � n   �  � �n g   n h � � � p   h o � � � c   m � � � t   k h � � � u   k h � � n g   �  � � n g ! ' ,   ' e r r o r ' ) 
+ 
+         
+ 
+         r e t u r n   r e n d e r _ t e m p l a t e ( ' a u t h / l o g i n . h t m l ' ) 
+ 
+ 
+ 
+ @ b p . r o u t e ( ' / r e g i s t e r ' ,   m e t h o d s = [ ' G E T ' ,   ' P O S T ' ] ) 
+ 
+ d e f   r e g i s t e r ( ) : 
+ 
+         i f   r e q u e s t . m e t h o d   = =   ' P O S T ' : 
+ 
+                 u s e r n a m e   =   r e q u e s t . f o r m . g e t ( ' u s e r n a m e ' ) 
+ 
+                 e m a i l   =   r e q u e s t . f o r m . g e t ( ' e m a i l ' ) 
+ 
+                 p a s s w o r d   =   r e q u e s t . f o r m . g e t ( ' p a s s w o r d ' ) 
+ 
+                 c o n f i r m _ p a s s w o r d   =   r e q u e s t . f o r m . g e t ( ' c o n f i r m _ p a s s w o r d ' ) 
+ 
+                 r o l e   =   r e q u e s t . f o r m . g e t ( ' r o l e ' ,   ' c u s t o m e r ' ) 
+ 
+                 
+ 
+                 #   V a l i d a t i o n 
+ 
+                 i f   p a s s w o r d   ! =   c o n f i r m _ p a s s w o r d : 
+ 
+                         f l a s h ( ' M � � � t   k h � � � u   x � � c   n h � � � n   k h � � n g   k h � � : p ! ' ,   ' e r r o r ' ) 
+ 
+                         r e t u r n   r e n d e r _ t e m p l a t e ( ' a u t h / r e g i s t e r . h t m l ' ) 
+ 
+                         
+ 
+                 i f   l e n ( p a s s w o r d )   <   6 : 
+ 
+                         f l a s h ( ' M � � � t   k h � � � u   p h � � � i   c � �   � � t   n h � � � t   6   k � �   t � � � ! ' ,   ' e r r o r ' ) 
+ 
+                         r e t u r n   r e n d e r _ t e m p l a t e ( ' a u t h / r e g i s t e r . h t m l ' ) 
+ 
+                 
+ 
+                 #   C r e a t e   n e w   u s e r 
+ 
+                 u s e r   =   c r e a t e _ u s e r ( u s e r n a m e ,   e m a i l ,   p a s s w o r d ,   r o l e ) 
+ 
+                 
+ 
+                 i f   u s e r : 
+ 
+                         f l a s h ( ' � � � �n g   k � �   t h � � n h   c � � n g !   V u i   l � � n g   �  � �n g   n h � � � p . ' ,   ' s u c c e s s ' ) 
+ 
+                         r e t u r n   r e d i r e c t ( u r l _ f o r ( ' a u t h . l o g i n ' ) ) 
+ 
+                 e l s e : 
+ 
+                         f l a s h ( ' T � � n   �  � �n g   n h � � � p   h o � � � c   e m a i l   �  � �   t � �  n   t � � � i ! ' ,   ' e r r o r ' ) 
+ 
+         
+ 
+         r e t u r n   r e n d e r _ t e m p l a t e ( ' a u t h / r e g i s t e r . h t m l ' ) 
+ 
+ 
+ 
+ @ b p . r o u t e ( ' / l o g o u t ' ) 
+ 
+ @ l o g i n _ r e q u i r e d 
+ 
+ d e f   l o g o u t ( ) : 
+ 
+         l o g o u t _ u s e r ( ) 
+ 
+         f l a s h ( ' � � � �   �  � �n g   x u � � � t   t h � � n h   c � � n g ! ' ,   ' s u c c e s s ' ) 
+ 
+         r e t u r n   r e d i r e c t ( u r l _ f o r ( ' c o m m o n . h o m e ' ) ) 
+ 
+ ` ` ` 
+ 
+ 
+ 
+ # # # #   2 . 2   R o l e - b a s e d   A c c e s s   C o n t r o l 
+ 
+ 
+ 
+ * * D e c o r a t o r   c h o   R o l e   P r o t e c t i o n : * * 
+ 
+ ` ` ` p y t h o n 
+ 
+ #   a p p / u t i l s / d e c o r a t o r s . p y 
+ 
+ f r o m   f u n c t o o l s   i m p o r t   w r a p s 
+ 
+ f r o m   f l a s k   i m p o r t   a b o r t ,   f l a s h ,   r e d i r e c t ,   u r l _ f o r 
+ 
+ f r o m   f l a s k _ l o g i n   i m p o r t   c u r r e n t _ u s e r 
+ 
+ 
+ 
+ d e f   r o l e _ r e q u i r e d ( r o l e ) : 
+ 
+         d e f   d e c o r a t o r ( f ) : 
+ 
+                 @ w r a p s ( f ) 
+ 
+                 d e f   d e c o r a t e d _ f u n c t i o n ( * a r g s ,   * * k w a r g s ) : 
+ 
+                         i f   n o t   c u r r e n t _ u s e r . i s _ a u t h e n t i c a t e d : 
+ 
+                                 r e t u r n   r e d i r e c t ( u r l _ f o r ( ' a u t h . l o g i n ' ) ) 
+ 
+                         
+ 
+                         i f   c u r r e n t _ u s e r . r o l e   ! =   r o l e : 
+ 
+                                 f l a s h ( ' B � � � n   k h � � n g   c � �   q u y � � � n   t r u y   c � � � p   t r a n g   n � � y ! ' ,   ' e r r o r ' ) 
+ 
+                                 r e t u r n   r e d i r e c t ( u r l _ f o r ( ' c o m m o n . h o m e ' ) ) 
+ 
+                         
+ 
+                         r e t u r n   f ( * a r g s ,   * * k w a r g s ) 
+ 
+                 r e t u r n   d e c o r a t e d _ f u n c t i o n 
+ 
+         r e t u r n   d e c o r a t o r 
+ 
+ 
+ 
+ d e f   a d m i n _ r e q u i r e d ( f ) : 
+ 
+         r e t u r n   r o l e _ r e q u i r e d ( ' a d m i n ' ) ( f ) 
+ 
+ 
+ 
+ d e f   o w n e r _ r e q u i r e d ( f ) : 
+ 
+         r e t u r n   r o l e _ r e q u i r e d ( ' o w n e r ' ) ( f ) 
+ 
+ 
+ 
+ d e f   c u s t o m e r _ r e q u i r e d ( f ) : 
+ 
+         r e t u r n   r o l e _ r e q u i r e d ( ' c u s t o m e r ' ) ( f ) 
+ 
+ ` ` ` 
+ 
+ 
+ 
+ # # #   3 .   D a t a   M o d e l s   &   B u s i n e s s   L o g i c 
+ 
+ 
+ 
+ # # # #   3 . 1   F i e l d   M a n a g e m e n t 
+ 
+ 
+ 
+ * * F i e l d   M o d e l : * * 
+ 
+ ` ` ` p y t h o n 
+ 
+ #   a p p / m o d e l s / f i e l d . p y 
+ 
+ f r o m   d a t e t i m e   i m p o r t   d a t e t i m e ,   t i m e 
+ 
+ f r o m   d e c i m a l   i m p o r t   D e c i m a l 
+ 
+ 
+ 
+ c l a s s   F i e l d : 
+ 
+         d e f   _ _ i n i t _ _ ( s e l f ,   i d ,   n a m e ,   f i e l d _ t y p e ,   l o c a t i o n ,   p r i c e _ p e r _ s l o t ,   
+ 
+                                   o w n e r _ i d ,   d e s c r i p t i o n = N o n e ,   i m a g e _ u r l = N o n e ,   i s _ a c t i v e = T r u e ) : 
+ 
+                 s e l f . i d   =   i d 
+ 
+                 s e l f . n a m e   =   n a m e 
+ 
+                 s e l f . f i e l d _ t y p e   =   f i e l d _ t y p e     #   ' f o o t b a l l ' ,   ' b a s k e t b a l l ' ,   ' t e n n i s ' ,   e t c . 
+ 
+                 s e l f . l o c a t i o n   =   l o c a t i o n 
+ 
+                 s e l f . p r i c e _ p e r _ s l o t   =   D e c i m a l ( p r i c e _ p e r _ s l o t ) 
+ 
+                 s e l f . o w n e r _ i d   =   o w n e r _ i d 
+ 
+                 s e l f . d e s c r i p t i o n   =   d e s c r i p t i o n 
+ 
+                 s e l f . i m a g e _ u r l   =   i m a g e _ u r l 
+ 
+                 s e l f . i s _ a c t i v e   =   i s _ a c t i v e 
+ 
+                 s e l f . c r e a t e d _ a t   =   d a t e t i m e . u t c n o w ( ) 
+ 
+                 s e l f . r a t i n g   =   0 . 0 
+ 
+                 s e l f . r e v i e w _ c o u n t   =   0 
+ 
+                 
+ 
+         d e f   g e t _ a v a i l a b i l i t y ( s e l f ,   d a t e ) : 
+ 
+                 " " " L � � � y   l � � 9 c h   t r � �  n g   c h o   n g � � y   c � � �   t h � � �" " " 
+ 
+                 #   M o c k   i m p l e m e n t a t i o n   -   t r o n g   t h � � � c   t � � �   s � � �   q u e r y   d a t a b a s e 
+ 
+                 a v a i l a b l e _ s l o t s   =   [ ] 
+ 
+                 s t a r t _ t i m e   =   t i m e ( 6 ,   0 )     #   6 : 0 0   A M 
+ 
+                 e n d _ t i m e   =   t i m e ( 2 2 ,   0 )       #   1 0 : 0 0   P M 
+ 
+                 
+ 
+                 c u r r e n t _ t i m e   =   s t a r t _ t i m e 
+ 
+                 w h i l e   c u r r e n t _ t i m e   <   e n d _ t i m e : 
+ 
+                         #   M o c k :   5 0 %   c h a n c e   s l o t   i s   a v a i l a b l e 
+ 
+                         i f   h a s h ( f " { s e l f . i d } - { d a t e } - { c u r r e n t _ t i m e } " )   %   2   = =   0 : 
+ 
+                                 a v a i l a b l e _ s l o t s . a p p e n d ( c u r r e n t _ t i m e . s t r f t i m e ( " % H : % M " ) ) 
+ 
+                         c u r r e n t _ t i m e   =   t i m e ( c u r r e n t _ t i m e . h o u r   +   2 ,   c u r r e n t _ t i m e . m i n u t e ) 
+ 
+                         
+ 
+                 r e t u r n   a v a i l a b l e _ s l o t s 
+ 
+         
+ 
+         d e f   c a l c u l a t e _ p r i c e ( s e l f ,   d u r a t i o n _ h o u r s ,   v o u c h e r _ c o d e = N o n e ) : 
+ 
+                 " " " T � � n h   g i � �   t h u � �   s � � n " " " 
+ 
+                 b a s e _ p r i c e   =   s e l f . p r i c e _ p e r _ s l o t   *   d u r a t i o n _ h o u r s 
+ 
+                 
+ 
+                 i f   v o u c h e r _ c o d e : 
+ 
+                         d i s c o u n t   =   s e l f . a p p l y _ v o u c h e r ( v o u c h e r _ c o d e ,   b a s e _ p r i c e ) 
+ 
+                         r e t u r n   b a s e _ p r i c e   -   d i s c o u n t 
+ 
+                 
+ 
+                 r e t u r n   b a s e _ p r i c e 
+ 
+         
+ 
+         d e f   a p p l y _ v o u c h e r ( s e l f ,   v o u c h e r _ c o d e ,   a m o u n t ) : 
+ 
+                 " " " � � p   d � � � n g   v o u c h e r   g i � � � m   g i � � " " " 
+ 
+                 #   M o c k   i m p l e m e n t a t i o n 
+ 
+                 v o u c h e r s   =   { 
+ 
+                         ' W E L C O M E 1 0 ' :   0 . 1 ,     #   1 0 %   d i s c o u n t 
+ 
+                         ' S P O R T 2 0 ' :   0 . 2 ,         #   2 0 %   d i s c o u n t 
+ 
+                         ' V I P 3 0 ' :   0 . 3               #   3 0 %   d i s c o u n t 
+ 
+                 } 
+ 
+                 
+ 
+                 d i s c o u n t _ r a t e   =   v o u c h e r s . g e t ( v o u c h e r _ c o d e ,   0 ) 
+ 
+                 r e t u r n   a m o u n t   *   d i s c o u n t _ r a t e 
+ 
+ ` ` ` 
+ 
+ 
+ 
+ # # # #   3 . 2   B o o k i n g   S y s t e m 
+ 
+ 
+ 
+ * * B o o k i n g   M o d e l : * * 
+ 
+ ` ` ` p y t h o n 
+ 
+ #   a p p / m o d e l s / b o o k i n g . p y 
+ 
+ f r o m   d a t e t i m e   i m p o r t   d a t e t i m e ,   t i m e d e l t a 
+ 
+ f r o m   d e c i m a l   i m p o r t   D e c i m a l 
+ 
+ 
+ 
+ c l a s s   B o o k i n g : 
+ 
+         d e f   _ _ i n i t _ _ ( s e l f ,   i d ,   f i e l d _ i d ,   c u s t o m e r _ i d ,   b o o k i n g _ d a t e ,   
+ 
+                                   s t a r t _ t i m e ,   d u r a t i o n _ h o u r s ,   t o t a l _ a m o u n t ,   s t a t u s = ' p e n d i n g ' ) : 
+ 
+                 s e l f . i d   =   i d 
+ 
+                 s e l f . f i e l d _ i d   =   f i e l d _ i d 
+ 
+                 s e l f . c u s t o m e r _ i d   =   c u s t o m e r _ i d 
+ 
+                 s e l f . b o o k i n g _ d a t e   =   b o o k i n g _ d a t e 
+ 
+                 s e l f . s t a r t _ t i m e   =   s t a r t _ t i m e 
+ 
+                 s e l f . d u r a t i o n _ h o u r s   =   d u r a t i o n _ h o u r s 
+ 
+                 s e l f . t o t a l _ a m o u n t   =   D e c i m a l ( t o t a l _ a m o u n t ) 
+ 
+                 s e l f . s t a t u s   =   s t a t u s     #   ' p e n d i n g ' ,   ' a p p r o v e d ' ,   ' r e j e c t e d ' ,   ' c a n c e l l e d ' 
+ 
+                 s e l f . c r e a t e d _ a t   =   d a t e t i m e . u t c n o w ( ) 
+ 
+                 s e l f . u p d a t e d _ a t   =   d a t e t i m e . u t c n o w ( ) 
+ 
+                 s e l f . v o u c h e r _ c o d e   =   N o n e 
+ 
+                 s e l f . d i s c o u n t _ a m o u n t   =   D e c i m a l ( ' 0 ' ) 
+ 
+                 
+ 
+         d e f   g e t _ e n d _ t i m e ( s e l f ) : 
+ 
+                 " " " T � � n h   t h � � � i   g i a n   k � � � t   t h � � c " " " 
+ 
+                 s t a r t _ d t   =   d a t e t i m e . c o m b i n e ( s e l f . b o o k i n g _ d a t e ,   s e l f . s t a r t _ t i m e ) 
+ 
+                 e n d _ d t   =   s t a r t _ d t   +   t i m e d e l t a ( h o u r s = s e l f . d u r a t i o n _ h o u r s ) 
+ 
+                 r e t u r n   e n d _ d t . t i m e ( ) 
+ 
+         
+ 
+         d e f   i s _ c o n f l i c t ( s e l f ,   o t h e r _ b o o k i n g ) : 
+ 
+                 " " " K i � � �m   t r a   x u n g   �  � � "!t   t h � � � i   g i a n   v � � : i   b o o k i n g   k h � � c " " " 
+ 
+                 i f   s e l f . f i e l d _ i d   ! =   o t h e r _ b o o k i n g . f i e l d _ i d : 
+ 
+                         r e t u r n   F a l s e 
+ 
+                         
+ 
+                 i f   s e l f . b o o k i n g _ d a t e   ! =   o t h e r _ b o o k i n g . b o o k i n g _ d a t e : 
+ 
+                         r e t u r n   F a l s e 
+ 
+                         
+ 
+                 s e l f _ s t a r t   =   d a t e t i m e . c o m b i n e ( s e l f . b o o k i n g _ d a t e ,   s e l f . s t a r t _ t i m e ) 
+ 
+                 s e l f _ e n d   =   s e l f _ s t a r t   +   t i m e d e l t a ( h o u r s = s e l f . d u r a t i o n _ h o u r s ) 
+ 
+                 
+ 
+                 o t h e r _ s t a r t   =   d a t e t i m e . c o m b i n e ( o t h e r _ b o o k i n g . b o o k i n g _ d a t e ,   o t h e r _ b o o k i n g . s t a r t _ t i m e ) 
+ 
+                 o t h e r _ e n d   =   o t h e r _ s t a r t   +   t i m e d e l t a ( h o u r s = o t h e r _ b o o k i n g . d u r a t i o n _ h o u r s ) 
+ 
+                 
+ 
+                 r e t u r n   ( s e l f _ s t a r t   <   o t h e r _ e n d   a n d   s e l f _ e n d   >   o t h e r _ s t a r t ) 
+ 
+         
+ 
+         d e f   c a n _ c a n c e l ( s e l f ) : 
+ 
+                 " " " K i � � �m   t r a   c � �   t h � � �  h � � � y   b o o k i n g   k h � � n g " " " 
+ 
+                 b o o k i n g _ d a t e t i m e   =   d a t e t i m e . c o m b i n e ( s e l f . b o o k i n g _ d a t e ,   s e l f . s t a r t _ t i m e ) 
+ 
+                 n o w   =   d a t e t i m e . n o w ( ) 
+ 
+                 
+ 
+                 #   C � �   t h � � �  h � � � y   t r � � � � : c   2   g i � � � 
+ 
+                 r e t u r n   ( b o o k i n g _ d a t e t i m e   -   n o w )   >   t i m e d e l t a ( h o u r s = 2 ) 
+ 
+         
+ 
+         d e f   c a l c u l a t e _ r e f u n d ( s e l f ) : 
+ 
+                 " " " T � � n h   t i � � � n   h o � � n   l � � � i   k h i   h � � � y " " " 
+ 
+                 b o o k i n g _ d a t e t i m e   =   d a t e t i m e . c o m b i n e ( s e l f . b o o k i n g _ d a t e ,   s e l f . s t a r t _ t i m e ) 
+ 
+                 n o w   =   d a t e t i m e . n o w ( ) 
+ 
+                 t i m e _ d i f f   =   b o o k i n g _ d a t e t i m e   -   n o w 
+ 
+                 
+ 
+                 i f   t i m e _ d i f f   >   t i m e d e l t a ( h o u r s = 2 4 ) : 
+ 
+                         r e t u r n   s e l f . t o t a l _ a m o u n t   *   D e c i m a l ( ' 0 . 8 ' )     #   H o � � n   8 0 % 
+ 
+                 e l i f   t i m e _ d i f f   >   t i m e d e l t a ( h o u r s = 2 ) : 
+ 
+                         r e t u r n   s e l f . t o t a l _ a m o u n t   *   D e c i m a l ( ' 0 . 5 ' )     #   H o � � n   5 0 % 
+ 
+                 e l s e : 
+ 
+                         r e t u r n   D e c i m a l ( ' 0 ' )     #   K h � � n g   h o � � n 
+ 
+ ` ` ` 
+ 
+ 
+ 
+ # # #   4 .   A P I   E n d p o i n t s 
+ 
+ 
+ 
+ # # # #   4 . 1   R E S T f u l   A P I   D e s i g n 
+ 
+ 
+ 
+ * * A P I   A u t h e n t i c a t i o n : * * 
+ 
+ ` ` ` p y t h o n 
+ 
+ #   a p p / r o u t e s / a p i / a u t h . p y 
+ 
+ f r o m   f l a s k   i m p o r t   B l u e p r i n t ,   r e q u e s t ,   j s o n i f y 
+ 
+ f r o m   f l a s k _ l o g i n   i m p o r t   l o g i n _ u s e r ,   l o g o u t _ u s e r ,   c u r r e n t _ u s e r 
+ 
+ f r o m   f u n c t o o l s   i m p o r t   w r a p s 
+ 
+ 
+ 
+ b p   =   B l u e p r i n t ( ' a p i _ a u t h ' ,   _ _ n a m e _ _ ,   u r l _ p r e f i x = ' / a p i / a u t h ' ) 
+ 
+ 
+ 
+ d e f   t o k e n _ r e q u i r e d ( f ) : 
+ 
+         @ w r a p s ( f ) 
+ 
+         d e f   d e c o r a t e d ( * a r g s ,   * * k w a r g s ) : 
+ 
+                 t o k e n   =   r e q u e s t . h e a d e r s . g e t ( ' A u t h o r i z a t i o n ' ) 
+ 
+                 
+ 
+                 i f   n o t   t o k e n : 
+ 
+                         r e t u r n   j s o n i f y ( { ' m e s s a g e ' :   ' T o k e n   i s   m i s s i n g ! ' } ) ,   4 0 1 
+ 
+                 
+ 
+                 t r y : 
+ 
+                         #   V e r i f y   t o k e n   ( i m p l e m e n t   J W T   v e r i f i c a t i o n ) 
+ 
+                         u s e r   =   v e r i f y _ t o k e n ( t o k e n ) 
+ 
+                         i f   n o t   u s e r : 
+ 
+                                 r e t u r n   j s o n i f y ( { ' m e s s a g e ' :   ' T o k e n   i s   i n v a l i d ! ' } ) ,   4 0 1 
+ 
+                 e x c e p t : 
+ 
+                         r e t u r n   j s o n i f y ( { ' m e s s a g e ' :   ' T o k e n   i s   i n v a l i d ! ' } ) ,   4 0 1 
+ 
+                 
+ 
+                 r e t u r n   f ( * a r g s ,   * * k w a r g s ) 
+ 
+         r e t u r n   d e c o r a t e d 
+ 
+ 
+ 
+ @ b p . r o u t e ( ' / l o g i n ' ,   m e t h o d s = [ ' P O S T ' ] ) 
+ 
+ d e f   a p i _ l o g i n ( ) : 
+ 
+         d a t a   =   r e q u e s t . g e t _ j s o n ( ) 
+ 
+         
+ 
+         u s e r n a m e   =   d a t a . g e t ( ' u s e r n a m e ' ) 
+ 
+         p a s s w o r d   =   d a t a . g e t ( ' p a s s w o r d ' ) 
+ 
+         r o l e   =   d a t a . g e t ( ' r o l e ' ,   ' c u s t o m e r ' ) 
+ 
+         
+ 
+         u s e r   =   v a l i d a t e _ u s e r ( u s e r n a m e ,   p a s s w o r d ,   r o l e ) 
+ 
+         
+ 
+         i f   u s e r : 
+ 
+                 l o g i n _ u s e r ( u s e r ) 
+ 
+                 t o k e n   =   g e n e r a t e _ t o k e n ( u s e r ) 
+ 
+                 r e t u r n   j s o n i f y ( { 
+ 
+                         ' s u c c e s s ' :   T r u e , 
+ 
+                         ' t o k e n ' :   t o k e n , 
+ 
+                         ' u s e r ' :   { 
+ 
+                                 ' i d ' :   u s e r . i d , 
+ 
+                                 ' u s e r n a m e ' :   u s e r . u s e r n a m e , 
+ 
+                                 ' r o l e ' :   u s e r . r o l e 
+ 
+                         } 
+ 
+                 } ) 
+ 
+         e l s e : 
+ 
+                 r e t u r n   j s o n i f y ( { 
+ 
+                         ' s u c c e s s ' :   F a l s e , 
+ 
+                         ' m e s s a g e ' :   ' I n v a l i d   c r e d e n t i a l s ' 
+ 
+                 } ) ,   4 0 1 
+ 
+ ` ` ` 
+ 
+ 
+ 
+ * * F i e l d   A P I   E n d p o i n t s : * * 
+ 
+ ` ` ` p y t h o n 
+ 
+ #   a p p / r o u t e s / a p i / c u s t o m e r . p y 
+ 
+ f r o m   f l a s k   i m p o r t   B l u e p r i n t ,   r e q u e s t ,   j s o n i f y 
+ 
+ f r o m   . . m o d e l s . f i e l d   i m p o r t   F i e l d 
+ 
+ f r o m   . . m o d e l s . b o o k i n g   i m p o r t   B o o k i n g 
+ 
+ 
+ 
+ b p   =   B l u e p r i n t ( ' a p i _ c u s t o m e r ' ,   _ _ n a m e _ _ ,   u r l _ p r e f i x = ' / a p i / c u s t o m e r ' ) 
+ 
+ 
+ 
+ @ b p . r o u t e ( ' / f i e l d s ' ,   m e t h o d s = [ ' G E T ' ] ) 
+ 
+ d e f   g e t _ f i e l d s ( ) : 
+ 
+         " " " L � � � y   d a n h   s � � c h   s � � n   t h � � �  t h a o " " " 
+ 
+         #   Q u e r y   p a r a m e t e r s 
+ 
+         f i e l d _ t y p e   =   r e q u e s t . a r g s . g e t ( ' t y p e ' ) 
+ 
+         l o c a t i o n   =   r e q u e s t . a r g s . g e t ( ' l o c a t i o n ' ) 
+ 
+         d a t e   =   r e q u e s t . a r g s . g e t ( ' d a t e ' ) 
+ 
+         t i m e   =   r e q u e s t . a r g s . g e t ( ' t i m e ' ) 
+ 
+         
+ 
+         #   F i l t e r   f i e l d s   b a s e d   o n   p a r a m e t e r s 
+ 
+         f i e l d s   =   f i l t e r _ f i e l d s ( f i e l d _ t y p e ,   l o c a t i o n ,   d a t e ,   t i m e ) 
+ 
+         
+ 
+         r e t u r n   j s o n i f y ( { 
+ 
+                 ' s u c c e s s ' :   T r u e , 
+ 
+                 ' f i e l d s ' :   [ f i e l d . t o _ d i c t ( )   f o r   f i e l d   i n   f i e l d s ] 
+ 
+         } ) 
+ 
+ 
+ 
+ @ b p . r o u t e ( ' / f i e l d s / < i n t : f i e l d _ i d > ' ,   m e t h o d s = [ ' G E T ' ] ) 
+ 
+ d e f   g e t _ f i e l d _ d e t a i l ( f i e l d _ i d ) : 
+ 
+         " " " L � � � y   c h i   t i � � � t   s � � n   t h � � �  t h a o " " " 
+ 
+         f i e l d   =   g e t _ f i e l d _ b y _ i d ( f i e l d _ i d ) 
+ 
+         
+ 
+         i f   n o t   f i e l d : 
+ 
+                 r e t u r n   j s o n i f y ( { 
+ 
+                         ' s u c c e s s ' :   F a l s e , 
+ 
+                         ' m e s s a g e ' :   ' F i e l d   n o t   f o u n d ' 
+ 
+                 } ) ,   4 0 4 
+ 
+         
+ 
+         #   G e t   a v a i l a b i l i t y   f o r   n e x t   7   d a y s 
+ 
+         a v a i l a b i l i t y   =   { } 
+ 
+         f r o m   d a t e t i m e   i m p o r t   d a t e ,   t i m e d e l t a 
+ 
+         f o r   i   i n   r a n g e ( 7 ) : 
+ 
+                 c h e c k _ d a t e   =   d a t e . t o d a y ( )   +   t i m e d e l t a ( d a y s = i ) 
+ 
+                 a v a i l a b i l i t y [ c h e c k _ d a t e . i s o f o r m a t ( ) ]   =   f i e l d . g e t _ a v a i l a b i l i t y ( c h e c k _ d a t e ) 
+ 
+         
+ 
+         r e t u r n   j s o n i f y ( { 
+ 
+                 ' s u c c e s s ' :   T r u e , 
+ 
+                 ' f i e l d ' :   f i e l d . t o _ d i c t ( ) , 
+ 
+                 ' a v a i l a b i l i t y ' :   a v a i l a b i l i t y 
+ 
+         } ) 
+ 
+ 
+ 
+ @ b p . r o u t e ( ' / b o o k i n g s ' ,   m e t h o d s = [ ' P O S T ' ] ) 
+ 
+ @ t o k e n _ r e q u i r e d 
+ 
+ d e f   c r e a t e _ b o o k i n g ( ) : 
+ 
+         " " " T � � � o   b o o k i n g   m � � : i " " " 
+ 
+         d a t a   =   r e q u e s t . g e t _ j s o n ( ) 
+ 
+         
+ 
+         f i e l d _ i d   =   d a t a . g e t ( ' f i e l d _ i d ' ) 
+ 
+         b o o k i n g _ d a t e   =   d a t a . g e t ( ' b o o k i n g _ d a t e ' ) 
+ 
+         s t a r t _ t i m e   =   d a t a . g e t ( ' s t a r t _ t i m e ' ) 
+ 
+         d u r a t i o n _ h o u r s   =   d a t a . g e t ( ' d u r a t i o n _ h o u r s ' ,   1 ) 
+ 
+         v o u c h e r _ c o d e   =   d a t a . g e t ( ' v o u c h e r _ c o d e ' ) 
+ 
+         
+ 
+         #   V a l i d a t e   b o o k i n g 
+ 
+         v a l i d a t i o n _ r e s u l t   =   v a l i d a t e _ b o o k i n g ( 
+ 
+                 f i e l d _ i d ,   b o o k i n g _ d a t e ,   s t a r t _ t i m e ,   d u r a t i o n _ h o u r s ,   c u r r e n t _ u s e r . i d 
+ 
+         ) 
+ 
+         
+ 
+         i f   n o t   v a l i d a t i o n _ r e s u l t [ ' v a l i d ' ] : 
+ 
+                 r e t u r n   j s o n i f y ( { 
+ 
+                         ' s u c c e s s ' :   F a l s e , 
+ 
+                         ' m e s s a g e ' :   v a l i d a t i o n _ r e s u l t [ ' m e s s a g e ' ] 
+ 
+                 } ) ,   4 0 0 
+ 
+         
+ 
+         #   C r e a t e   b o o k i n g 
+ 
+         b o o k i n g   =   c r e a t e _ b o o k i n g _ r e c o r d ( 
+ 
+                 f i e l d _ i d ,   c u r r e n t _ u s e r . i d ,   b o o k i n g _ d a t e ,   
+ 
+                 s t a r t _ t i m e ,   d u r a t i o n _ h o u r s ,   v o u c h e r _ c o d e 
+ 
+         ) 
+ 
+         
+ 
+         r e t u r n   j s o n i f y ( { 
+ 
+                 ' s u c c e s s ' :   T r u e , 
+ 
+                 ' b o o k i n g ' :   b o o k i n g . t o _ d i c t ( ) 
+ 
+         } ) 
+ 
+ 
+ 
+ @ b p . r o u t e ( ' / b o o k i n g s / < i n t : b o o k i n g _ i d > ' ,   m e t h o d s = [ ' P U T ' ] ) 
+ 
+ @ t o k e n _ r e q u i r e d 
+ 
+ d e f   u p d a t e _ b o o k i n g ( b o o k i n g _ i d ) : 
+ 
+         " " " C � � � p   n h � � � t   b o o k i n g " " " 
+ 
+         b o o k i n g   =   g e t _ b o o k i n g _ b y _ i d ( b o o k i n g _ i d ) 
+ 
+         
+ 
+         i f   n o t   b o o k i n g   o r   b o o k i n g . c u s t o m e r _ i d   ! =   c u r r e n t _ u s e r . i d : 
+ 
+                 r e t u r n   j s o n i f y ( { 
+ 
+                         ' s u c c e s s ' :   F a l s e , 
+ 
+                         ' m e s s a g e ' :   ' B o o k i n g   n o t   f o u n d ' 
+ 
+                 } ) ,   4 0 4 
+ 
+         
+ 
+         d a t a   =   r e q u e s t . g e t _ j s o n ( ) 
+ 
+         a c t i o n   =   d a t a . g e t ( ' a c t i o n ' ) 
+ 
+         
+ 
+         i f   a c t i o n   = =   ' c a n c e l ' : 
+ 
+                 i f   n o t   b o o k i n g . c a n _ c a n c e l ( ) : 
+ 
+                         r e t u r n   j s o n i f y ( { 
+ 
+                                 ' s u c c e s s ' :   F a l s e , 
+ 
+                                 ' m e s s a g e ' :   ' C a n n o t   c a n c e l   b o o k i n g   l e s s   t h a n   2   h o u r s   b e f o r e   s t a r t   t i m e ' 
+ 
+                         } ) ,   4 0 0 
+ 
+                 
+ 
+                 b o o k i n g . s t a t u s   =   ' c a n c e l l e d ' 
+ 
+                 r e f u n d _ a m o u n t   =   b o o k i n g . c a l c u l a t e _ r e f u n d ( ) 
+ 
+                 
+ 
+                 r e t u r n   j s o n i f y ( { 
+ 
+                         ' s u c c e s s ' :   T r u e , 
+ 
+                         ' m e s s a g e ' :   ' B o o k i n g   c a n c e l l e d   s u c c e s s f u l l y ' , 
+ 
+                         ' r e f u n d _ a m o u n t ' :   f l o a t ( r e f u n d _ a m o u n t ) 
+ 
+                 } ) 
+ 
+         
+ 
+         r e t u r n   j s o n i f y ( { 
+ 
+                 ' s u c c e s s ' :   F a l s e , 
+ 
+                 ' m e s s a g e ' :   ' I n v a l i d   a c t i o n ' 
+ 
+         } ) ,   4 0 0 
+ 
+ ` ` ` 
+ 
+ 
+ 
+ # # #   5 .   B u s i n e s s   L o g i c   I m p l e m e n t a t i o n 
+ 
+ 
+ 
+ # # # #   5 . 1   B o o k i n g   V a l i d a t i o n   L o g i c 
+ 
+ 
+ 
+ ` ` ` p y t h o n 
+ 
+ #   a p p / s e r v i c e s / b o o k i n g _ s e r v i c e . p y 
+ 
+ f r o m   d a t e t i m e   i m p o r t   d a t e t i m e ,   t i m e d e l t a 
+ 
+ f r o m   . . m o d e l s . f i e l d   i m p o r t   F i e l d 
+ 
+ f r o m   . . m o d e l s . b o o k i n g   i m p o r t   B o o k i n g 
+ 
+ 
+ 
+ c l a s s   B o o k i n g S e r v i c e : 
+ 
+         @ s t a t i c m e t h o d 
+ 
+         d e f   v a l i d a t e _ b o o k i n g ( f i e l d _ i d ,   b o o k i n g _ d a t e ,   s t a r t _ t i m e ,   d u r a t i o n _ h o u r s ,   c u s t o m e r _ i d ) : 
+ 
+                 " " " V a l i d a t e   b o o k i n g   r e q u e s t " " " 
+ 
+                 e r r o r s   =   [ ] 
+ 
+                 
+ 
+                 #   C h e c k   i f   f i e l d   e x i s t s   a n d   i s   a c t i v e 
+ 
+                 f i e l d   =   g e t _ f i e l d _ b y _ i d ( f i e l d _ i d ) 
+ 
+                 i f   n o t   f i e l d   o r   n o t   f i e l d . i s _ a c t i v e : 
+ 
+                         e r r o r s . a p p e n d ( " S � � n   t h � � �  t h a o   k h � � n g   t � �  n   t � � � i   h o � � � c   �  � �   b � � 9   v � �   h i � � ! u   h � � a " ) 
+ 
+                 
+ 
+                 #   C h e c k   i f   b o o k i n g   d a t e   i s   i n   t h e   f u t u r e 
+ 
+                 b o o k i n g _ d a t e t i m e   =   d a t e t i m e . c o m b i n e ( b o o k i n g _ d a t e ,   s t a r t _ t i m e ) 
+ 
+                 i f   b o o k i n g _ d a t e t i m e   < =   d a t e t i m e . n o w ( ) : 
+ 
+                         e r r o r s . a p p e n d ( " T h � � � i   g i a n   �  � � � t   s � � n   p h � � � i   t r o n g   t � � � � n g   l a i " ) 
+ 
+                 
+ 
+                 #   C h e c k   i f   b o o k i n g   i s   w i t h i n   a l l o w e d   t i m e   r a n g e 
+ 
+                 i f   s t a r t _ t i m e   <   t i m e ( 6 ,   0 )   o r   s t a r t _ t i m e   >   t i m e ( 2 2 ,   0 ) : 
+ 
+                         e r r o r s . a p p e n d ( " T h � � � i   g i a n   �  � � � t   s � � n   p h � � � i   t � � �   6 : 0 0   �  � � � n   2 2 : 0 0 " ) 
+ 
+                 
+ 
+                 #   C h e c k   i f   d u r a t i o n   i s   v a l i d 
+ 
+                 i f   d u r a t i o n _ h o u r s   <   1   o r   d u r a t i o n _ h o u r s   >   4 : 
+ 
+                         e r r o r s . a p p e n d ( " T h � � � i   l � � � � � n g   �  � � � t   s � � n   p h � � � i   t � � �   1 - 4   g i � � � " ) 
+ 
+                 
+ 
+                 #   C h e c k   f o r   t i m e   c o n f l i c t s 
+ 
+                 i f   f i e l d : 
+ 
+                         c o n f l i c t s   =   B o o k i n g S e r v i c e . c h e c k _ t i m e _ c o n f l i c t s ( 
+ 
+                                 f i e l d _ i d ,   b o o k i n g _ d a t e ,   s t a r t _ t i m e ,   d u r a t i o n _ h o u r s 
+ 
+                         ) 
+ 
+                         i f   c o n f l i c t s : 
+ 
+                                 e r r o r s . a p p e n d ( " T h � � � i   g i a n   �  � �   �  � � � � � c   �  � � � t   t r � � � � : c " ) 
+ 
+                 
+ 
+                 #   C h e c k   c u s t o m e r   b o o k i n g   l i m i t 
+ 
+                 c u s t o m e r _ b o o k i n g s   =   g e t _ c u s t o m e r _ b o o k i n g s _ t o d a y ( c u s t o m e r _ i d ,   b o o k i n g _ d a t e ) 
+ 
+                 i f   l e n ( c u s t o m e r _ b o o k i n g s )   > =   3 : 
+ 
+                         e r r o r s . a p p e n d ( " B � � � n   �  � �   �  � � � t   g i � � : i   h � � � n   3   b o o k i n g   m � �  i   n g � � y " ) 
+ 
+                 
+ 
+                 r e t u r n   { 
+ 
+                         ' v a l i d ' :   l e n ( e r r o r s )   = =   0 , 
+ 
+                         ' e r r o r s ' :   e r r o r s 
+ 
+                 } 
+ 
+         
+ 
+         @ s t a t i c m e t h o d 
+ 
+         d e f   c h e c k _ t i m e _ c o n f l i c t s ( f i e l d _ i d ,   b o o k i n g _ d a t e ,   s t a r t _ t i m e ,   d u r a t i o n _ h o u r s ) : 
+ 
+                 " " " K i � � �m   t r a   x u n g   �  � � "!t   t h � � � i   g i a n " " " 
+ 
+                 e x i s t i n g _ b o o k i n g s   =   g e t _ b o o k i n g s _ b y _ f i e l d _ d a t e ( f i e l d _ i d ,   b o o k i n g _ d a t e ) 
+ 
+                 
+ 
+                 n e w _ s t a r t   =   d a t e t i m e . c o m b i n e ( b o o k i n g _ d a t e ,   s t a r t _ t i m e ) 
+ 
+                 n e w _ e n d   =   n e w _ s t a r t   +   t i m e d e l t a ( h o u r s = d u r a t i o n _ h o u r s ) 
+ 
+                 
+ 
+                 f o r   b o o k i n g   i n   e x i s t i n g _ b o o k i n g s : 
+ 
+                         i f   b o o k i n g . s t a t u s   i n   [ ' p e n d i n g ' ,   ' a p p r o v e d ' ] : 
+ 
+                                 b o o k i n g _ s t a r t   =   d a t e t i m e . c o m b i n e ( b o o k i n g _ d a t e ,   b o o k i n g . s t a r t _ t i m e ) 
+ 
+                                 b o o k i n g _ e n d   =   b o o k i n g _ s t a r t   +   t i m e d e l t a ( h o u r s = b o o k i n g . d u r a t i o n _ h o u r s ) 
+ 
+                                 
+ 
+                                 i f   ( n e w _ s t a r t   <   b o o k i n g _ e n d   a n d   n e w _ e n d   >   b o o k i n g _ s t a r t ) : 
+ 
+                                         r e t u r n   T r u e 
+ 
+                 
+ 
+                 r e t u r n   F a l s e 
+ 
+         
+ 
+         @ s t a t i c m e t h o d 
+ 
+         d e f   c a l c u l a t e _ b o o k i n g _ p r i c e ( f i e l d ,   d u r a t i o n _ h o u r s ,   v o u c h e r _ c o d e = N o n e ) : 
+ 
+                 " " " T � � n h   g i � �   b o o k i n g " " " 
+ 
+                 b a s e _ p r i c e   =   f i e l d . p r i c e _ p e r _ s l o t   *   d u r a t i o n _ h o u r s 
+ 
+                 
+ 
+                 i f   v o u c h e r _ c o d e : 
+ 
+                         d i s c o u n t   =   B o o k i n g S e r v i c e . a p p l y _ v o u c h e r ( v o u c h e r _ c o d e ,   b a s e _ p r i c e ) 
+ 
+                         r e t u r n   b a s e _ p r i c e   -   d i s c o u n t 
+ 
+                 
+ 
+                 r e t u r n   b a s e _ p r i c e 
+ 
+         
+ 
+         @ s t a t i c m e t h o d 
+ 
+         d e f   a p p l y _ v o u c h e r ( v o u c h e r _ c o d e ,   a m o u n t ) : 
+ 
+                 " " " � � p   d � � � n g   v o u c h e r   g i � � � m   g i � � " " " 
+ 
+                 v o u c h e r   =   g e t _ v o u c h e r _ b y _ c o d e ( v o u c h e r _ c o d e ) 
+ 
+                 
+ 
+                 i f   n o t   v o u c h e r   o r   n o t   v o u c h e r . i s _ v a l i d ( ) : 
+ 
+                         r e t u r n   D e c i m a l ( ' 0 ' ) 
+ 
+                 
+ 
+                 i f   v o u c h e r . d i s c o u n t _ t y p e   = =   ' p e r c e n t a g e ' : 
+ 
+                         r e t u r n   a m o u n t   *   ( v o u c h e r . d i s c o u n t _ v a l u e   /   1 0 0 ) 
+ 
+                 e l s e : 
+ 
+                         r e t u r n   m i n ( v o u c h e r . d i s c o u n t _ v a l u e ,   a m o u n t ) 
+ 
+ ` ` ` 
+ 
+ 
+ 
+ # # #   6 .   S e c u r i t y   I m p l e m e n t a t i o n 
+ 
+ 
+ 
+ # # # #   6 . 1   C S R F   P r o t e c t i o n 
+ 
+ 
+ 
+ ` ` ` p y t h o n 
+ 
+ #   a p p / u t i l s / s e c u r i t y . p y 
+ 
+ f r o m   f l a s k _ w t f . c s r f   i m p o r t   C S R F P r o t e c t 
+ 
+ f r o m   f l a s k   i m p o r t   r e q u e s t ,   a b o r t 
+ 
+ 
+ 
+ c s r f   =   C S R F P r o t e c t ( ) 
+ 
+ 
+ 
+ d e f   i n i t _ c s r f ( a p p ) : 
+ 
+         c s r f . i n i t _ a p p ( a p p ) 
+ 
+         
+ 
+         @ a p p . b e f o r e _ r e q u e s t 
+ 
+         d e f   c s r f _ p r o t e c t ( ) : 
+ 
+                 i f   r e q u e s t . m e t h o d   = =   " P O S T " : 
+ 
+                         t o k e n   =   r e q u e s t . f o r m . g e t ( ' c s r f _ t o k e n ' ) 
+ 
+                         i f   n o t   t o k e n   o r   n o t   c s r f . v a l i d a t e _ t o k e n ( t o k e n ) : 
+ 
+                                 a b o r t ( 4 0 0 ,   d e s c r i p t i o n = " C S R F   t o k e n   m i s s i n g   o r   i n v a l i d " ) 
+ 
+ 
+ 
+ d e f   g e n e r a t e _ c s r f _ t o k e n ( ) : 
+ 
+         r e t u r n   c s r f . _ g e t _ t o k e n ( ) 
+ 
+ ` ` ` 
+ 
+ 
+ 
+ # # # #   6 . 2   I n p u t   V a l i d a t i o n   &   S a n i t i z a t i o n 
+ 
+ 
+ 
+ ` ` ` p y t h o n 
+ 
+ #   a p p / u t i l s / v a l i d a t i o n . p y 
+ 
+ i m p o r t   r e 
+ 
+ f r o m   w e r k z e u g . s e c u r i t y   i m p o r t   s a f e _ s t r _ c m p 
+ 
+ 
+ 
+ c l a s s   I n p u t V a l i d a t o r : 
+ 
+         @ s t a t i c m e t h o d 
+ 
+         d e f   v a l i d a t e _ e m a i l ( e m a i l ) : 
+ 
+                 " " " V a l i d a t e   e m a i l   f o r m a t " " " 
+ 
+                 p a t t e r n   =   r ' ^ [ a - z A - Z 0 - 9 . _ % + - ] + @ [ a - z A - Z 0 - 9 . - ] + \ . [ a - z A - Z ] { 2 , } $ ' 
+ 
+                 r e t u r n   r e . m a t c h ( p a t t e r n ,   e m a i l )   i s   n o t   N o n e 
+ 
+         
+ 
+         @ s t a t i c m e t h o d 
+ 
+         d e f   v a l i d a t e _ p h o n e ( p h o n e ) : 
+ 
+                 " " " V a l i d a t e   V i e t n a m e s e   p h o n e   n u m b e r " " " 
+ 
+                 p a t t e r n   =   r ' ^ ( 0 | \ + 8 4 ) [ 3 | 5 | 7 | 8 | 9 ] [ 0 - 9 ] { 8 } $ ' 
+ 
+                 r e t u r n   r e . m a t c h ( p a t t e r n ,   p h o n e )   i s   n o t   N o n e 
+ 
+         
+ 
+         @ s t a t i c m e t h o d 
+ 
+         d e f   v a l i d a t e _ p a s s w o r d ( p a s s w o r d ) : 
+ 
+                 " " " V a l i d a t e   p a s s w o r d   s t r e n g t h " " " 
+ 
+                 i f   l e n ( p a s s w o r d )   <   8 : 
+ 
+                         r e t u r n   F a l s e ,   " M � � � t   k h � � � u   p h � � � i   c � �   � � t   n h � � � t   8   k � �   t � � � " 
+ 
+                 
+ 
+                 i f   n o t   r e . s e a r c h ( r ' [ A - Z ] ' ,   p a s s w o r d ) : 
+ 
+                         r e t u r n   F a l s e ,   " M � � � t   k h � � � u   p h � � � i   c � �   � � t   n h � � � t   1   c h � � �   h o a " 
+ 
+                 
+ 
+                 i f   n o t   r e . s e a r c h ( r ' [ a - z ] ' ,   p a s s w o r d ) : 
+ 
+                         r e t u r n   F a l s e ,   " M � � � t   k h � � � u   p h � � � i   c � �   � � t   n h � � � t   1   c h � � �   t h � � � � � n g " 
+ 
+                 
+ 
+                 i f   n o t   r e . s e a r c h ( r ' \ d ' ,   p a s s w o r d ) : 
+ 
+                         r e t u r n   F a l s e ,   " M � � � t   k h � � � u   p h � � � i   c � �   � � t   n h � � � t   1   s � �  " 
+ 
+                 
+ 
+                 r e t u r n   T r u e ,   " M � � � t   k h � � � u   h � � � p   l � � ! " 
+ 
+         
+ 
+         @ s t a t i c m e t h o d 
+ 
+         d e f   s a n i t i z e _ i n p u t ( t e x t ) : 
+ 
+                 " " " S a n i t i z e   u s e r   i n p u t " " " 
+ 
+                 #   R e m o v e   p o t e n t i a l l y   d a n g e r o u s   c h a r a c t e r s 
+ 
+                 d a n g e r o u s _ c h a r s   =   [ ' < ' ,   ' > ' ,   ' " ' ,   " ' " ,   ' & ' ] 
+ 
+                 f o r   c h a r   i n   d a n g e r o u s _ c h a r s : 
+ 
+                         t e x t   =   t e x t . r e p l a c e ( c h a r ,   ' ' ) 
+ 
+                 
+ 
+                 #   L i m i t   l e n g t h 
+ 
+                 i f   l e n ( t e x t )   >   1 0 0 0 : 
+ 
+                         t e x t   =   t e x t [ : 1 0 0 0 ] 
+ 
+                 
+ 
+                 r e t u r n   t e x t . s t r i p ( ) 
+ 
+ ` ` ` 
+ 
+ 
+ 
+ # # #   7 .   T e s t i n g   I m p l e m e n t a t i o n 
+ 
+ 
+ 
+ # # # #   7 . 1   U n i t   T e s t s 
+ 
+ 
+ 
+ ` ` ` p y t h o n 
+ 
+ #   t e s t s / t e s t _ m o d e l s . p y 
+ 
+ i m p o r t   u n i t t e s t 
+ 
+ f r o m   a p p . m o d e l s . b o o k i n g   i m p o r t   B o o k i n g 
+ 
+ f r o m   a p p . m o d e l s . f i e l d   i m p o r t   F i e l d 
+ 
+ f r o m   d a t e t i m e   i m p o r t   d a t e t i m e ,   t i m e ,   d a t e 
+ 
+ 
+ 
+ c l a s s   T e s t B o o k i n g M o d e l ( u n i t t e s t . T e s t C a s e ) : 
+ 
+         d e f   s e t U p ( s e l f ) : 
+ 
+                 s e l f . f i e l d   =   F i e l d ( 
+ 
+                         i d = 1 , 
+ 
+                         n a m e = " S � � n   B � � n g   � � � �   A " , 
+ 
+                         f i e l d _ t y p e = " f o o t b a l l " , 
+ 
+                         l o c a t i o n = " Q u � � � n   1 ,   T P . H C M " , 
+ 
+                         p r i c e _ p e r _ s l o t = 2 0 0 0 0 0 
+ 
+                 ) 
+ 
+                 
+ 
+                 s e l f . b o o k i n g   =   B o o k i n g ( 
+ 
+                         i d = 1 , 
+ 
+                         f i e l d _ i d = 1 , 
+ 
+                         c u s t o m e r _ i d = 1 , 
+ 
+                         b o o k i n g _ d a t e = d a t e ( 2 0 2 4 ,   1 ,   1 5 ) , 
+ 
+                         s t a r t _ t i m e = t i m e ( 1 8 ,   0 ) , 
+ 
+                         d u r a t i o n _ h o u r s = 2 , 
+ 
+                         t o t a l _ a m o u n t = 4 0 0 0 0 0 
+ 
+                 ) 
+ 
+         
+ 
+         d e f   t e s t _ b o o k i n g _ e n d _ t i m e _ c a l c u l a t i o n ( s e l f ) : 
+ 
+                 " " " T e s t   e n d   t i m e   c a l c u l a t i o n " " " 
+ 
+                 e n d _ t i m e   =   s e l f . b o o k i n g . g e t _ e n d _ t i m e ( ) 
+ 
+                 e x p e c t e d _ t i m e   =   t i m e ( 2 0 ,   0 ) 
+ 
+                 s e l f . a s s e r t E q u a l ( e n d _ t i m e ,   e x p e c t e d _ t i m e ) 
+ 
+         
+ 
+         d e f   t e s t _ b o o k i n g _ c o n f l i c t _ d e t e c t i o n ( s e l f ) : 
+ 
+                 " " " T e s t   b o o k i n g   c o n f l i c t   d e t e c t i o n " " " 
+ 
+                 o t h e r _ b o o k i n g   =   B o o k i n g ( 
+ 
+                         i d = 2 , 
+ 
+                         f i e l d _ i d = 1 , 
+ 
+                         c u s t o m e r _ i d = 2 , 
+ 
+                         b o o k i n g _ d a t e = d a t e ( 2 0 2 4 ,   1 ,   1 5 ) , 
+ 
+                         s t a r t _ t i m e = t i m e ( 1 9 ,   0 ) , 
+ 
+                         d u r a t i o n _ h o u r s = 2 , 
+ 
+                         t o t a l _ a m o u n t = 4 0 0 0 0 0 
+ 
+                 ) 
+ 
+                 
+ 
+                 s e l f . a s s e r t T r u e ( s e l f . b o o k i n g . i s _ c o n f l i c t ( o t h e r _ b o o k i n g ) ) 
+ 
+         
+ 
+         d e f   t e s t _ b o o k i n g _ c a n c e l l a t i o n _ e l i g i b i l i t y ( s e l f ) : 
+ 
+                 " " " T e s t   b o o k i n g   c a n c e l l a t i o n   e l i g i b i l i t y " " " 
+ 
+                 #   B o o k i n g   i s   i n   t h e   f u t u r e ,   s h o u l d   b e   c a n c e l l a b l e 
+ 
+                 s e l f . a s s e r t T r u e ( s e l f . b o o k i n g . c a n _ c a n c e l ( ) ) 
+ 
+                 
+ 
+                 #   M o d i f y   b o o k i n g   t o   b e   i n   t h e   p a s t 
+ 
+                 s e l f . b o o k i n g . b o o k i n g _ d a t e   =   d a t e ( 2 0 2 4 ,   1 ,   1 ) 
+ 
+                 s e l f . a s s e r t F a l s e ( s e l f . b o o k i n g . c a n _ c a n c e l ( ) ) 
+ 
+ 
+ 
+ c l a s s   T e s t F i e l d M o d e l ( u n i t t e s t . T e s t C a s e ) : 
+ 
+         d e f   s e t U p ( s e l f ) : 
+ 
+                 s e l f . f i e l d   =   F i e l d ( 
+ 
+                         i d = 1 , 
+ 
+                         n a m e = " S � � n   T e n n i s   P r o " , 
+ 
+                         f i e l d _ t y p e = " t e n n i s " , 
+ 
+                         l o c a t i o n = " Q u � � � n   2 ,   T P . H C M " , 
+ 
+                         p r i c e _ p e r _ s l o t = 3 0 0 0 0 0 
+ 
+                 ) 
+ 
+         
+ 
+         d e f   t e s t _ p r i c e _ c a l c u l a t i o n ( s e l f ) : 
+ 
+                 " " " T e s t   p r i c e   c a l c u l a t i o n   w i t h   v o u c h e r " " " 
+ 
+                 p r i c e   =   s e l f . f i e l d . c a l c u l a t e _ p r i c e ( 2 ,   " W E L C O M E 1 0 " ) 
+ 
+                 e x p e c t e d _ p r i c e   =   3 0 0 0 0 0   *   2   *   0 . 9     #   1 0 %   d i s c o u n t 
+ 
+                 s e l f . a s s e r t E q u a l ( p r i c e ,   e x p e c t e d _ p r i c e ) 
+ 
+         
+ 
+         d e f   t e s t _ a v a i l a b i l i t y _ g e n e r a t i o n ( s e l f ) : 
+ 
+                 " " " T e s t   a v a i l a b i l i t y   g e n e r a t i o n " " " 
+ 
+                 a v a i l a b i l i t y   =   s e l f . f i e l d . g e t _ a v a i l a b i l i t y ( d a t e ( 2 0 2 4 ,   1 ,   1 5 ) ) 
+ 
+                 s e l f . a s s e r t I s I n s t a n c e ( a v a i l a b i l i t y ,   l i s t ) 
+ 
+                 s e l f . a s s e r t T r u e ( l e n ( a v a i l a b i l i t y )   >   0 ) 
+ 
+ ` ` ` 
+ 
+ 
+ 
+ # # #   8 .   D e p l o y m e n t   &   P r o d u c t i o n   C o n f i g u r a t i o n 
+ 
+ 
+ 
+ # # # #   8 . 1   P r o d u c t i o n   W S G I   C o n f i g u r a t i o n 
+ 
+ 
+ 
+ ` ` ` p y t h o n 
+ 
+ #   w s g i . p y 
+ 
+ f r o m   a p p   i m p o r t   c r e a t e _ a p p 
+ 
+ f r o m   a p p . c o n f i g   i m p o r t   P r o d u c t i o n C o n f i g 
+ 
+ 
+ 
+ a p p   =   c r e a t e _ a p p ( P r o d u c t i o n C o n f i g ) 
+ 
+ 
+ 
+ i f   _ _ n a m e _ _   = =   " _ _ m a i n _ _ " : 
+ 
+         a p p . r u n ( ) 
+ 
+ ` ` ` 
+ 
+ 
+ 
+ # # # #   8 . 2   D o c k e r   C o n f i g u r a t i o n 
+ 
+ 
+ 
+ ` ` ` d o c k e r f i l e 
+ 
+ #   D o c k e r f i l e 
+ 
+ F R O M   p y t h o n : 3 . 9 - s l i m 
+ 
+ 
+ 
+ #   S e t   w o r k i n g   d i r e c t o r y 
+ 
+ W O R K D I R   / a p p 
+ 
+ 
+ 
+ #   I n s t a l l   s y s t e m   d e p e n d e n c i e s 
+ 
+ R U N   a p t - g e t   u p d a t e   & &   a p t - g e t   i n s t a l l   - y   \ 
+ 
+         g c c   \ 
+ 
+         & &   r m   - r f   / v a r / l i b / a p t / l i s t s / * 
+ 
+ 
+ 
+ #   C o p y   r e q u i r e m e n t s   a n d   i n s t a l l   P y t h o n   d e p e n d e n c i e s 
+ 
+ C O P Y   r e q u i r e m e n t s . t x t   . 
+ 
+ R U N   p i p   i n s t a l l   - - n o - c a c h e - d i r   - r   r e q u i r e m e n t s . t x t 
+ 
+ 
+ 
+ #   C o p y   a p p l i c a t i o n   c o d e 
+ 
+ C O P Y   .   . 
+ 
+ 
+ 
+ #   C r e a t e   n o n - r o o t   u s e r 
+ 
+ R U N   u s e r a d d   - m   - u   1 0 0 0   s p o r t s l o t   & &   c h o w n   - R   s p o r t s l o t : s p o r t s l o t   / a p p 
+ 
+ U S E R   s p o r t s l o t 
+ 
+ 
+ 
+ #   E x p o s e   p o r t 
+ 
+ E X P O S E   5 0 0 0 
+ 
+ 
+ 
+ #   R u n   a p p l i c a t i o n 
+ 
+ C M D   [ " g u n i c o r n " ,   " - - b i n d " ,   " 0 . 0 . 0 . 0 : 5 0 0 0 " ,   " - - w o r k e r s " ,   " 4 " ,   " w s g i : a p p " ] 
+ 
+ ` ` ` 
+ 
+ 
+ 
+ # # # #   8 . 3   E n v i r o n m e n t   C o n f i g u r a t i o n 
+ 
+ 
+ 
+ ` ` ` b a s h 
+ 
+ #   . e n v . p r o d u c t i o n 
+ 
+ F L A S K _ E N V = p r o d u c t i o n 
+ 
+ S E C R E T _ K E Y = y o u r - s u p e r - s e c r e t - p r o d u c t i o n - k e y - h e r e 
+ 
+ D A T A B A S E _ U R L = p o s t g r e s q l : / / u s e r : p a s s w o r d @ l o c a l h o s t / s p o r t s l o t _ p r o d 
+ 
+ M A I L _ S E R V E R = s m t p . g m a i l . c o m 
+ 
+ M A I L _ P O R T = 5 8 7 
+ 
+ M A I L _ U S E _ T L S = T r u e 
+ 
+ M A I L _ U S E R N A M E = y o u r - e m a i l @ g m a i l . c o m 
+ 
+ M A I L _ P A S S W O R D = y o u r - a p p - p a s s w o r d 
+ 
+ R E D I S _ U R L = r e d i s : / / l o c a l h o s t : 6 3 7 9 / 0 
+ 
+ ` ` ` 
+ 
+ 
+ 
+ # #   T � � m   t � � � t   B a c k - e n d   I m p l e m e n t a t i o n 
+ 
+ 
+ 
+ # # #   C � � c   t � � n h   n � �n g   c h � � n h   �  � �   t r i � � �n   k h a i : 
+ 
+ 
+ 
+ 1 .   * * K i � � � n   t r � � c   F l a s k   A p p l i c a t i o n   F a c t o r y   P a t t e r n * *   -   T � � � o   � � � n g   d � � � n g   l i n h   h o � � � t   v � � : i   c � � � u   h � � n h   t h e o   m � � i   t r � � � � � n g 
+ 
+ 2 .   * * A u t h e n t i c a t i o n   &   A u t h o r i z a t i o n * *   -   H � � !   t h � �  n g   �  � �n g   n h � � � p   v � � : i   F l a s k - L o g i n   v � �   r o l e - b a s e d   a c c e s s   c o n t r o l 
+ 
+ 3 .   * * D a t a   M o d e l s * *   -   C � � c   m o d e l   c h o   U s e r ,   F i e l d ,   B o o k i n g ,   P a y m e n t   v � � : i   b u s i n e s s   l o g i c   �  � � � y   �  � � � 
+ 
+ 4 .   * * R E S T f u l   A P I * *   -   A P I   e n d p o i n t s   c h o   c u s t o m e r ,   o w n e r   v � � : i   a u t h e n t i c a t i o n   v � �   v a l i d a t i o n 
+ 
+ 5 .   * * B u s i n e s s   L o g i c * *   -   B o o k i n g   v a l i d a t i o n ,   p a y m e n t   p r o c e s s i n g ,   n o t i f i c a t i o n   s y s t e m 
+ 
+ 6 .   * * S e c u r i t y * *   -   C S R F   p r o t e c t i o n ,   i n p u t   v a l i d a t i o n ,   p a s s w o r d   h a s h i n g 
+ 
+ 7 .   * * E r r o r   H a n d l i n g   &   L o g g i n g * *   -   C u s t o m   e r r o r   h a n d l e r s   v � �   l o g g i n g   c o n f i g u r a t i o n 
+ 
+ 8 .   * * P e r f o r m a n c e   O p t i m i z a t i o n * *   -   C a c h i n g ,   d a t a b a s e   q u e r y   o p t i m i z a t i o n ,   b a c k g r o u n d   t a s k s 
+ 
+ 9 .   * * T e s t i n g * *   -   U n i t   t e s t s   v � �   i n t e g r a t i o n   t e s t s   c h o   m o d e l s   v � �   A P I   e n d p o i n t s 
+ 
+ 1 0 .   * * D e p l o y m e n t * *   -   P r o d u c t i o n   c o n f i g u r a t i o n   v � � : i   D o c k e r   v � �   e n v i r o n m e n t   s e t u p 
+ 
+ 
+ 
+ # # #   C � � n g   n g h � � !   s � � �   d � � � n g : 
+ 
+ 
+ 
+ -   * * F l a s k * *   -   W e b   f r a m e w o r k   c h � � n h 
+ 
+ -   * * F l a s k - L o g i n * *   -   U s e r   s e s s i o n   m a n a g e m e n t 
+ 
+ -   * * F l a s k - M a i l * *   -   E m a i l   f u n c t i o n a l i t y 
+ 
+ -   * * W e r k z e u g * *   -   S e c u r i t y   u t i l i t i e s 
+ 
+ -   * * C e l e r y * *   -   B a c k g r o u n d   t a s k   p r o c e s s i n g 
+ 
+ -   * * S Q L A l c h e m y * *   -   D a t a b a s e   O R M   ( c h o   p r o d u c t i o n ) 
+ 
+ -   * * J W T * *   -   T o k e n - b a s e d   a u t h e n t i c a t i o n   c h o   A P I 
+ 
+ -   * * R e d i s * *   -   C a c h i n g   v � �   m e s s a g e   b r o k e r 
+ 
+ -   * * G u n i c o r n * *   -   W S G I   s e r v e r   c h o   p r o d u c t i o n 
+ 
+ -   * * D o c k e r * *   -   C o n t a i n e r i z a t i o n 
+ 
+ 
+ 
+ # # #   M � �   h � � n h   d � � �   l i � � ! u : 
+ 
+ 
+ 
+ 1 .   * * U s e r   M o d e l * *   -   Q u � � � n   l � �   n g � � � � � i   d � � n g   v � � : i   r o l e s   ( c u s t o m e r ,   o w n e r ,   a d m i n ) 
+ 
+ 2 .   * * F i e l d   M o d e l * *   -   Q u � � � n   l � �   s � � n   t h � � �  t h a o   v � � : i   a v a i l a b i l i t y   v � �   p r i c i n g 
+ 
+ 3 .   * * B o o k i n g   M o d e l * *   -   Q u � � � n   l � �   �  � � � t   s � � n   v � � : i   c o n f l i c t   d e t e c t i o n   v � �   c a n c e l l a t i o n   l o g i c 
+ 
+ 4 .   * * P a y m e n t   M o d e l * *   -   X � � �   l � �   t h a n h   t o � � n   v � � : i   m u l t i p l e   p a y m e n t   m e t h o d s 
+ 
+ 5 .   * * N o t i f i c a t i o n   M o d e l * *   -   H � � !   t h � �  n g   t h � � n g   b � � o   r e a l - t i m e 
+ 
+ 
+ 
+ # # #   A P I   E n d p o i n t s : 
+ 
+ 
+ 
+ 1 .   * * A u t h e n t i c a t i o n   A P I * *   -   L o g i n ,   r e g i s t e r ,   t o k e n   m a n a g e m e n t 
+ 
+ 2 .   * * C u s t o m e r   A P I * *   -   F i e l d   l i s t i n g ,   b o o k i n g   m a n a g e m e n t ,   p a y m e n t   p r o c e s s i n g 
+ 
+ 3 .   * * O w n e r   A P I * *   -   F i e l d   m a n a g e m e n t ,   b o o k i n g   a p p r o v a l ,   r e v e n u e   t r a c k i n g 
+ 
+ 4 .   * * A d m i n   A P I * *   -   U s e r   m a n a g e m e n t ,   s y s t e m   m o n i t o r i n g ,   r e p o r t i n g 
+ 
+ 
+ 
+ # # #   S e c u r i t y   F e a t u r e s : 
+ 
+ 
+ 
+ 1 .   * * P a s s w o r d   H a s h i n g * *   -   B c r y p t   h a s h i n g   c h o   m � � � t   k h � � � u 
+ 
+ 2 .   * * C S R F   P r o t e c t i o n * *   -   C r o s s - s i t e   r e q u e s t   f o r g e r y   p r o t e c t i o n 
+ 
+ 3 .   * * I n p u t   V a l i d a t i o n * *   -   S a n i t i z a t i o n   v � �   v a l i d a t i o n   c h o   u s e r   i n p u t 
+ 
+ 4 .   * * R o l e - b a s e d   A c c e s s * *   -   A u t h o r i z a t i o n   t h e o   v a i   t r � �   n g � � � � � i   d � � n g 
+ 
+ 5 .   * * S e s s i o n   M a n a g e m e n t * *   -   S e c u r e   s e s s i o n   h a n d l i n g 
+ 
+ 
+ 
+ # # #   P e r f o r m a n c e   F e a t u r e s : 
+ 
+ 
+ 
+ 1 .   * * C a c h i n g * *   -   R e d i s   c a c h i n g   c h o   e x p e n s i v e   o p e r a t i o n s 
+ 
+ 2 .   * * D a t a b a s e   O p t i m i z a t i o n * *   -   Q u e r y   o p t i m i z a t i o n   v � � : i   p r o p e r   i n d e x i n g 
+ 
+ 3 .   * * B a c k g r o u n d   T a s k s * *   -   C e l e r y   c h o   n o n - b l o c k i n g   o p e r a t i o n s 
+ 
+ 4 .   * * C o n n e c t i o n   P o o l i n g * *   -   D a t a b a s e   c o n n e c t i o n   m a n a g e m e n t 
+ 
+ 5 .   * * L o a d   B a l a n c i n g * *   -   M u l t i p l e   w o r k e r   p r o c e s s e s   v � � : i   G u n i c o r n 
+ 
+ 
+ 
+ # # #   T e s t i n g   S t r a t e g y : 
+ 
+ 
+ 
+ 1 .   * * U n i t   T e s t s * *   -   T e s t i n g   i n d i v i d u a l   m o d e l s   v � �   b u s i n e s s   l o g i c 
+ 
+ 2 .   * * I n t e g r a t i o n   T e s t s * *   -   T e s t i n g   A P I   e n d p o i n t s   v � �   d a t a b a s e   o p e r a t i o n s 
+ 
+ 3 .   * * M o c k   T e s t i n g * *   -   M o c k   e x t e r n a l   s e r v i c e s   v � �   d e p e n d e n c i e s 
+ 
+ 4 .   * * P e r f o r m a n c e   T e s t i n g * *   -   L o a d   t e s t i n g   c h o   c r i t i c a l   e n d p o i n t s 
+ 
+ 
+ 
+ # # #   D e p l o y m e n t   S t r a t e g y : 
+ 
+ 
+ 
+ 1 .   * * E n v i r o n m e n t   C o n f i g u r a t i o n * *   -   S e p a r a t e   c o n f i g s   c h o   d e v e l o p m e n t ,   t e s t i n g ,   p r o d u c t i o n 
+ 
+ 2 .   * * C o n t a i n e r i z a t i o n * *   -   D o c k e r   c h o   c o n s i s t e n t   d e p l o y m e n t 
+ 
+ 3 .   * * P r o c e s s   M a n a g e m e n t * *   -   G u n i c o r n   v � � : i   m u l t i p l e   w o r k e r s 
+ 
+ 4 .   * * M o n i t o r i n g * *   -   L o g g i n g   v � �   e r r o r   t r a c k i n g 
+ 
+ 5 .   * * B a c k u p   S t r a t e g y * *   -   D a t a b a s e   b a c k u p   v � �   r e c o v e r y   p r o c e d u r e s   
+ 
+ 
